@@ -1,4 +1,6 @@
 * implement missing combinators
+  * LitC (literal char)
+  * Lit (literal symbol)
   * Eot (assert end of string)
 * TODO can we replace ParserEnd parts with an enforced Eot??!!! lmao maybe
   * hmmm idk. I think the ParserEnd separation just makes it safer, like we

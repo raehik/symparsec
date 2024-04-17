@@ -4,6 +4,14 @@ Type level string (`Symbol`) parser combinators.
 This library is effectively made possible by `UnconsSymbol :: Symbol -> Maybe
 (Char, Symbol)` introduced in GHC 9.2. A big thank you to all GHC developers!!!
 
+## Examples
+```haskell
+ghci> import Data.Type.Symbol.Parser
+ghci> :k! RunParser (Drop 3 :*>: Isolate 2 NatDec :<*>: (Drop 3 :*>: NatHex)) "___10___FF"
+...
+= Right '( '(10, 255), "")
+```
+
 ## Design
 [defun-core-hackage]: https://hackage.haskell.org/package/defun-core
 
