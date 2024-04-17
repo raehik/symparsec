@@ -1,4 +1,4 @@
 ## Unreleased
 Initial release.
 
-  * new home for my type-level symbol parsing
+  * full-blown type level string (`Symbol`) parsing via combinators

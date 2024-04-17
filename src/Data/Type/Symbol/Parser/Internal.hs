@@ -5,15 +5,14 @@ module Data.Type.Symbol.Parser.Internal where
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type (@@) )
 
-type Parser s r = Char -> s -> Result s r
+type ParserCh s r = Char -> s -> Result s r
+type ParserEnd s r = s -> Either ErrorMessage r
 data Result s r = Cont s | Done r | Err ErrorMessage
 
-type ParserEnd s r = s -> Either ErrorMessage r
-
-type ParserSym s r = Char ~> s ~> Result s r
+type ParserChSym s r = Char ~> s ~> Result s r
 type ParserEndSym s r = s ~> Either ErrorMessage r
 
-type ParserSym' s r = (ParserSym s r, ParserEndSym s r, s)
+type Parser s r = (ParserChSym s r, ParserEndSym s r, s)
 
 type family RunParser p sym where
     RunParser '(pCh, pEnd, s) sym =

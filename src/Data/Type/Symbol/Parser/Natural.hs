@@ -7,48 +7,48 @@ import GHC.TypeLits
 import DeFun.Core ( type (~>), type App, type (@@) )
 import Data.Type.Char.Digits
 
-type PNatBin = PNatBase  2 ParseBinaryDigitSym
-type PNatOct = PNatBase  8 ParseOctalDigitSym
-type PNatDec = PNatBase 10 ParseDecimalDigitSym
-type PNatHex = PNatBase 16 ParseHexDigitSym
-
-type PNatBase
-    :: Natural -> (Char ~> Maybe Natural) -> ParserSym' Natural Natural
-type PNatBase base parseDigit =
-    '(NatBaseSym base parseDigit, NatBaseEndSym, 0)
+type NatBin = NatBase  2 ParseBinaryDigitSym
+type NatOct = NatBase  8 ParseOctalDigitSym
+type NatDec = NatBase 10 ParseDecimalDigitSym
+type NatHex = NatBase 16 ParseHexDigitSym
 
 type NatBase
+    :: Natural -> (Char ~> Maybe Natural) -> Parser Natural Natural
+type NatBase base parseDigit =
+    '(NatBaseChSym base parseDigit, NatBaseEndSym, 0)
+
+type NatBaseCh
     :: Natural
     -> (Char ~> Maybe Natural)
-    -> Parser Natural Natural
-type family NatBase base parseDigit ch n where
-    NatBase base parseDigit ch n =
-        NatBase' base n (parseDigit @@ ch)
+    -> ParserCh Natural Natural
+type family NatBaseCh base parseDigit ch n where
+    NatBaseCh base parseDigit ch n =
+        NatBaseCh' base n (parseDigit @@ ch)
 
-type family NatBase' base n mDigit where
-    NatBase' base n 'Nothing      =
+type family NatBaseCh' base n mDigit where
+    NatBaseCh' base n 'Nothing      =
         'Err ('Text "not a base " :<>: 'ShowType base :<>: 'Text " digit")
-    NatBase' base n ('Just digit) = 'Cont (n * base + digit)
+    NatBaseCh' base n ('Just digit) = 'Cont (n * base + digit)
 
---type NatBaseEnd :: ParserEnd Natural Natural
+type NatBaseEnd :: ParserEnd Natural Natural
 type NatBaseEnd n = 'Right n
 
-type NatBaseSym
+type NatBaseChSym
     :: Natural
     -> (Char ~> Maybe Natural)
-    -> ParserSym Natural Natural
-data NatBaseSym base parseDigit f
-type instance App (NatBaseSym base parseDigit) f =
-    NatBaseSym1 base parseDigit f
+    -> ParserChSym Natural Natural
+data NatBaseChSym base parseDigit f
+type instance App (NatBaseChSym base parseDigit) f =
+    NatBaseChSym1 base parseDigit f
 
-type NatBaseSym1
+type NatBaseChSym1
     :: Natural
     -> (Char ~> Maybe Natural)
     -> Char -> Natural
     ~> Result Natural Natural
-data NatBaseSym1 base parseDigit ch n
-type instance App (NatBaseSym1 base parseDigit ch) n =
-    NatBase base parseDigit ch n
+data NatBaseChSym1 base parseDigit ch n
+type instance App (NatBaseChSym1 base parseDigit ch) n =
+    NatBaseCh base parseDigit ch n
 
 type NatBaseEndSym :: ParserEndSym Natural Natural
 data NatBaseEndSym n

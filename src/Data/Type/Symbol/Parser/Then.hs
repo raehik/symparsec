@@ -6,23 +6,23 @@ import Data.Type.Symbol.Parser.Internal
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type (@@), type App )
 
-type PThen
-    :: ParserSym' sl rl
-    -> ParserSym' sr rr
-    -> ParserSym' (Either sl (rl, sr)) (rl, rr)
-type family PThen pl pr where
-    PThen '(plCh, plEnd, sl) '(prCh, prEnd, sr) =
-        '(ThenSym plCh prCh sr, ThenEndSym prEnd, 'Left sl)
-
 type Then
-    :: ParserSym sl rl
-    -> ParserSym sr rr
-    -> sr
+    :: Parser sl rl
+    -> Parser sr rr
     -> Parser (Either sl (rl, sr)) (rl, rr)
-type family Then plCh prCh sr ch s where
-    Then plCh prCh sr ch ('Left  sl) =
+type family Then pl pr where
+    Then '(plCh, plEnd, sl) '(prCh, prEnd, sr) =
+        '(ThenChSym plCh prCh sr, ThenEndSym prEnd, 'Left sl)
+
+type ThenCh
+    :: ParserChSym sl rl
+    -> ParserChSym sr rr
+    -> sr
+    -> ParserCh (Either sl (rl, sr)) (rl, rr)
+type family ThenCh plCh prCh sr ch s where
+    ThenCh plCh prCh sr ch ('Left  sl) =
         ThenL sr (plCh @@ ch @@ sl)
-    Then plCh prCh _  ch ('Right '(rl, sr)) =
+    ThenCh plCh prCh _  ch ('Right '(rl, sr)) =
         ThenR rl (prCh @@ ch @@ sr)
 
 type family ThenL sr resl where
@@ -44,21 +44,21 @@ type family ThenEnd' rl s where
     ThenEnd' rl ('Left  er) = 'Left  ('Text "then: right end error" :$$: er)
     ThenEnd' rl ('Right rr) = 'Right '(rl, rr)
 
-type ThenSym
-    :: ParserSym sl rl
-    -> ParserSym sr rr
+type ThenChSym
+    :: ParserChSym sl rl
+    -> ParserChSym sr rr
     -> sr
-    -> ParserSym (Either sl (rl, sr)) (rl, rr)
-data ThenSym plCh prCh sr f
-type instance App (ThenSym plCh prCh sr) f = ThenSym1 plCh prCh sr f
+    -> ParserChSym (Either sl (rl, sr)) (rl, rr)
+data ThenChSym plCh prCh sr f
+type instance App (ThenChSym plCh prCh sr) f = ThenChSym1 plCh prCh sr f
 
-type ThenSym1
-    :: ParserSym sl rl
-    -> ParserSym sr rr
+type ThenChSym1
+    :: ParserChSym sl rl
+    -> ParserChSym sr rr
     -> sr
     -> Char -> Either sl (rl, sr) ~> Result (Either sl (rl, sr)) (rl, rr)
-data ThenSym1 plCh prCh sr ch s
-type instance App (ThenSym1 plCh prCh sr ch) s = Then plCh prCh sr ch s
+data ThenChSym1 plCh prCh sr ch s
+type instance App (ThenChSym1 plCh prCh sr ch) s = ThenCh plCh prCh sr ch s
 
 type ThenEndSym
     :: ParserEndSym sr rr

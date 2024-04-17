@@ -23,11 +23,14 @@ library
       Data.Type.Char.Digits
       Data.Type.Symbol
       Data.Type.Symbol.Natural
+      Data.Type.Symbol.Parser
       Data.Type.Symbol.Parser.Drop
       Data.Type.Symbol.Parser.Internal
       Data.Type.Symbol.Parser.Isolate
       Data.Type.Symbol.Parser.Natural
       Data.Type.Symbol.Parser.Then
+      Data.Type.Symbol.Parser.Then.VoidLeft
+      Data.Type.Symbol.Parser.Then.VoidRight
   other-modules:
       Paths_symbol_parser
   hs-source-dirs:
