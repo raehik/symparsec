@@ -27,6 +27,7 @@ library
       Data.Type.Symbol.Parser.Internal
       Data.Type.Symbol.Parser.Isolate
       Data.Type.Symbol.Parser.Natural
+      Data.Type.Symbol.Parser.Then
   other-modules:
       Paths_symbol_parser
   hs-source-dirs:
