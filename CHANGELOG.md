@@ -1,4 +1,5 @@
-## Unreleased
+## 0.1.0 (2024-04-17)
 Initial release.
 
-  * full-blown type level string (`Symbol`) parsing via combinators
+  * basic combinators: `Drop`, `Isolate`, `NatHex` (etc.), sequencing
+  * acceptable error messages

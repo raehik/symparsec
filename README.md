@@ -1,5 +1,5 @@
 # symbol-parser
-Type level string (`Symbol`) parser combinators.
+Type level string (`Symbol`) parser combinators with nice error messages.
 
 This library is effectively made possible by `UnconsSymbol :: Symbol -> Maybe
 (Char, Symbol)` introduced in GHC 9.2. A big thank you to all GHC developers!!!

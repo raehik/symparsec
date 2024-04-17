@@ -5,10 +5,12 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           symbol-parser
-version:        0.0.0
-synopsis:       Parsing for type-level symbols
+version:        0.1.0
+synopsis:       Type level string parser combinators
 description:    Please see README.md.
 category:       Types, Data
+homepage:       https://github.com/raehik/symbol-parser#readme
+bug-reports:    https://github.com/raehik/symbol-parser/issues
 author:         Ben Orchard
 maintainer:     Ben Orchard <thefirstmuffinman@gmail.com>
 license:        MIT
@@ -17,6 +19,10 @@ build-type:     Simple
 extra-source-files:
     README.md
     CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/raehik/symbol-parser
 
 library
   exposed-modules:
