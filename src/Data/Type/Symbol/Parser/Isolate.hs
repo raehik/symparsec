@@ -1,12 +1,13 @@
 {-# LANGUAGE UndecidableInstances #-}
 
+-- TODO improve errors (I was lazy)
+
 module Data.Type.Symbol.Parser.Isolate where
 
 import Data.Type.Symbol.Parser.Internal
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type (@@), type App )
 
--- TODO have to pass init state here too awkwardly :/
 type PIsolate
     :: Natural -> ParserSym' s r -> ParserSym' (Natural, s) r
 type family PIsolate n p where
