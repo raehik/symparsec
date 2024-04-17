@@ -1,0 +1,8 @@
+# Cabal general
+/dist-newstyle/
+
+# Stack general
+/.stack-work/
+
+# personal
+/tmp/

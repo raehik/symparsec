@@ -1,0 +1,62 @@
+name: symbol-parser
+version: 0.0.0
+synopsis: Parsing for type-level symbols
+description: Please see README.md.
+extra-source-files:
+- README.md
+- CHANGELOG.md
+category: Types, Data
+license: MIT
+license-file: LICENSE
+#tested-with:
+#- GHC==9.8
+#- GHC==9.6
+#- GHC==9.4
+
+#github: raehik/type-level-bytestrings
+maintainer: Ben Orchard <thefirstmuffinman@gmail.com>
+author: Ben Orchard
+
+# raehik's extensions (GHC 9.2; last updated: 2022-10-09)
+language: GHC2021
+default-extensions:
+# syntax that should be default
+- LambdaCase
+- NoStarIsType
+
+## deriving-related
+- DerivingVia # implies DerivingStrategies
+- DeriveAnyClass
+
+# features that should be default
+- GADTs
+- RoleAnnotations
+
+# other features
+- DefaultSignatures
+- TypeFamilies
+- DataKinds
+
+# other syntax
+- MagicHash
+
+# useful extensions to know about, but which should be specified on-demand
+#
+# UndecidableInstances:
+#   required for type class wizardry
+#   generally only enable if you were expecting to & compilation fails without
+# AllowAmbiguousTypes:
+#   often goes hand in hand with TypeApplications-heavy code
+#   enabling on demand brings attention to the sort of functions to expect
+# StarIsType:
+#   may need to enable if you're working with old code that uses `Int :: *`
+
+ghc-options:
+- -Wall
+
+dependencies:
+- base >= 4.14 && < 5
+- defun-core ^>= 0.1
+
+library:
+  source-dirs: src

@@ -1,0 +1,46 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.2.
+--
+-- see: https://github.com/sol/hpack
+
+name:           symbol-parser
+version:        0.0.0
+synopsis:       Parsing for type-level symbols
+description:    Please see README.md.
+category:       Types, Data
+author:         Ben Orchard
+maintainer:     Ben Orchard <thefirstmuffinman@gmail.com>
+license:        MIT
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    CHANGELOG.md
+
+library
+  exposed-modules:
+      Data.Type.Char.Digits
+      Data.Type.Symbol
+      Data.Type.Symbol.Natural
+      Data.Type.Symbol.Parser
+  other-modules:
+      Paths_symbol_parser
+  hs-source-dirs:
+      src
+  default-extensions:
+      LambdaCase
+      NoStarIsType
+      DerivingVia
+      DeriveAnyClass
+      GADTs
+      RoleAnnotations
+      DefaultSignatures
+      TypeFamilies
+      DataKinds
+      MagicHash
+  ghc-options: -Wall
+  build-depends:
+      base >=4.14 && <5
+    , defun-core ==0.1.*
+  default-language: GHC2021
