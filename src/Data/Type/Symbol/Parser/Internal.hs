@@ -22,86 +22,47 @@ TODO 2024-04-17T03:28:26+0100
     Void type to ignore empty return types.
 -}
 
-module Data.Type.Symbol.Parser where
+module Data.Type.Symbol.Parser.Internal where
 
 import GHC.TypeLits
-import DeFun.Core ( type (~>), type (@@), type App )
-import Data.Type.Symbol ( type Length )
-import Data.Type.Symbol.Natural
-import Data.Type.Bool ( type If )
-import Data.Type.Equality ( type (==) )
+import DeFun.Core ( type (~>), type (@@) )
 
 data Result s r = Cont s | Done r | Err ErrorMessage
 
-type CharParser s r = Char -> s -> Result s r
-type CharParserEnd s r = s -> Either ErrorMessage r
+type Parser s r = Char -> s -> Result s r
+type ParserEnd s r = s -> Either ErrorMessage r
 
-type Drop :: CharParser Natural ()
-type family Drop ch s where
-    -- | TODO Sorry. My parser design is wonky. This is the easiest solution.
-    Drop _ 1 = 'Done '()
-    Drop _ n = 'Cont (n-1)
+type ParserSym s r = Char ~> s ~> Result s r
+type ParserEndSym s r = s ~> Either ErrorMessage r
 
-type DropEnd :: CharParserEnd Natural ()
-type family DropEnd s where
-    DropEnd 0 = 'Right '()
-    DropEnd n = 'Left
-      ( 'Text "tried to drop "
-        :<>: 'ShowType n :<>: 'Text " chars from empty symbol")
+type ParserSym' s r = (ParserSym s r, ParserEndSym s r, s)
 
-type PDrop :: Natural -> CharParserSym' Natural ()
-type PDrop n =
-    -- TODO This is what's keeping us from starting state with s instead of
-    -- Result s r, which would simplify things. I don't like it. Surely there's
-    -- a better way to implement Drop.
-    '(DropSym, DropEndSym, If (n == 0) ('Done '()) ('Cont n))
+type family RunParser p sym where
+    RunParser '(pCh, pEnd, s) sym =
+        RunParser' pCh pEnd 0 s (UnconsSymbol sym)
 
-type family RunCharParser p sym where
-    RunCharParser '(pCh, pEnd, pInit) sym =
-        RunCharParserInit pCh pEnd 0 pInit sym
+-- TODO maybe take an mch? Nothing at start, Just otherwise
+type family RunParser' pCh pEnd idx s msym where
+    RunParser' pCh pEnd idx s 'Nothing =
+        RunParserEnd idx (pEnd @@ s)
+    RunParser' pCh pEnd idx s ('Just '(ch, sym)) =
+        RunParser'' pCh pEnd idx ch (pCh @@ ch @@ s) sym
 
-type family RunCharParserInit pCh pEnd idx res sym where
-    RunCharParserInit pCh pEnd idx ('Err  e) sym =
-        'Left ( 'Text "parse error at index " :<>: 'ShowType idx :$$: e)
-    RunCharParserInit pCh pEnd idx ('Done r) sym = 'Right '(r, sym)
-    RunCharParserInit pCh pEnd idx ('Cont s) sym =
-        RunCharParser' pCh pEnd idx s (UnconsSymbol sym)
+type family RunParserEnd idx end where
+    RunParserEnd idx ('Left  e) = 'Left e
+    RunParserEnd idx ('Right r) = 'Right '(r, "")
 
-type family RunCharParser' pCh pEnd idx s sym where
-    RunCharParser' pCh pEnd idx s 'Nothing =
-        RunCharParser'End idx (pEnd @@ s)
-    RunCharParser' pCh pEnd idx s ('Just '(ch, sym)) =
-        RunCharParser'' pCh pEnd idx ch (pCh @@ ch @@ s) sym
+type family RunParser'' pCh pEnd idx ch res sym where
+    RunParser'' pCh pEnd idx ch ('Err  e) sym = 'Left e -- TODO annotate error
+    RunParser'' pCh pEnd idx ch ('Done r) sym = 'Right '(r, sym)
+    RunParser'' pCh pEnd idx ch ('Cont s) sym =
+        RunParser' pCh pEnd (idx+1) s (UnconsSymbol sym)
 
-type family RunCharParser'' pCh pEnd idx prevCh res sym where
-    RunCharParser'' pCh pEnd idx prevCh ('Err  e) sym =
-        'Left ( 'Text "parse error at index " :<>: 'ShowType idx
-                :<>: 'Text " char " :<>: 'ShowType prevCh :$$: e)
-    RunCharParser'' pCh pEnd idx prevCh ('Done r) sym =
-        'Right '(r, sym)
-    RunCharParser'' pCh pEnd idx prevCh ('Cont s) sym =
-        RunCharParser' pCh pEnd (idx+1) s (UnconsSymbol sym)
+-- TODO could do this if more parsers end up storing state which they emit
+-- precisely (NatBase does this)
+--type ParserEndEmit :: ParserEnd r r
 
-type family RunCharParser'End idx res where
-    RunCharParser'End idx ('Left  e) = 'Left e
-    RunCharParser'End idx ('Right r) = 'Right '(r, "")
-
-type CharParserSym s r = Char ~> s ~> Result s r
-type CharParserEndSym s r = s ~> Either ErrorMessage r
-
-type CharParserSym' s r = (CharParserSym s r, CharParserEndSym s r, Result s r)
-
-type DropSym :: CharParserSym Natural ()
-data DropSym f
-type instance App DropSym f = DropSym1 f
-
-type DropSym1 :: Char -> Natural ~> Result Natural ()
-data DropSym1 ch n
-type instance App (DropSym1 ch) n = Drop ch n
-
-type DropEndSym :: CharParserEndSym Natural ()
-data DropEndSym n
-type instance App DropEndSym n = DropEnd n
+{-
 
 -- TODO not using pInit. clumsy
 type Isolate :: CharParserSym' s r -> CharParser (Natural, s) r
@@ -192,29 +153,4 @@ type ToNatEndSym :: CharParserEndSym Natural Natural
 data ToNatEndSym n
 type instance App ToNatEndSym s = ToNatEnd s
 
-{-
-type family RunCharParser'' pCh pEnd idx s sym where
-    RunCharParser'' pCh pEnd idx ('Err  e) _ = 'Left  e
-    RunCharParser'' pCh pEnd idx ('Done r) 'Nothing =
-        -- TODO early Done keeps prev char (fixes Drop)
-        'Right '(r, "")
-    RunCharParser'' pCh pEnd idx ('Done r) ('Just '(ch, sym)) =
-        -- TODO early Done keeps prev char (fixes Drop)
-        'Right '(r, ConsSymbol prevCh (ConsSymbol ch sym))
-    RunCharParser'' pCh pEnd idx prevCh ('Cont s) 'Nothing =
-        RunCharParser'End (pEnd @@ s)
-    RunCharParser'' pCh pEnd idx prevCh ('Cont s) ('Just '(ch, sym)) =
-        RunCharParser'' pCh pEnd idx prevCh (pCh @@ ch @@ s) (UnconsSymbol sym)
--}
-
-{-
-type PState = (Natural, Char)
-type Parser a =
-    PState -> Maybe (Char, Symbol) -> Either ErrorMessage (PState, a)
-type ParserSym e a =
-    PState ~> Maybe (Char, Symbol) ~> Either ErrorMessage (PState, a)
-
-type ParserF e a = (Maybe Char ~> a ~> Result e a r) -> (r, Symbol)
-type DropFParse :: ParserF Natural ()
-type DropFEnd :: ParserF () Natural Symbol
 -}
