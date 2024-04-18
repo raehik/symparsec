@@ -12,7 +12,7 @@ type ThenVR
     -> Parser (Either sl (rl, sr)) rl
 type family ThenVR pl pr where
     ThenVR '(plCh, plEnd, sl) '(prCh, prEnd, sr) =
-        '(ThenVRChSym plCh prCh sr, ThenVREndSym prEnd, 'Left sl)
+        '(ThenVRChSym plCh prCh sr, ThenVREndSym prEnd, Left sl)
 
 type ThenVRCh
     :: ParserChSym sl rl
@@ -20,29 +20,29 @@ type ThenVRCh
     -> sr
     -> ParserCh (Either sl (rl, sr)) rl
 type family ThenVRCh plCh prCh sr ch s where
-    ThenVRCh plCh prCh sr ch ('Left  sl) =
+    ThenVRCh plCh prCh sr ch (Left  sl) =
         ThenVRL sr (plCh @@ ch @@ sl)
-    ThenVRCh plCh prCh _  ch ('Right '(rl, sr)) =
+    ThenVRCh plCh prCh _  ch (Right '(rl, sr)) =
         ThenVRR rl (prCh @@ ch @@ sr)
 
 type family ThenVRL sr resl where
-    ThenVRL sr ('Err  el) = 'Err  ('Text "then: left error" :$$: el)
-    ThenVRL sr ('Cont sl) = 'Cont ('Left  sl)
-    ThenVRL sr ('Done rl) = 'Cont ('Right '(rl, sr))
+    ThenVRL sr (Err  el) = Err  (Text "then: left error" :$$: el)
+    ThenVRL sr (Cont sl) = Cont (Left  sl)
+    ThenVRL sr (Done rl) = Cont (Right '(rl, sr))
 
 type family ThenVRR rl resr where
-    ThenVRR rl ('Err  er) = 'Err  ('Text "then: right error" :$$: er)
-    ThenVRR rl ('Cont sr) = 'Cont ('Right '(rl, sr))
-    ThenVRR rl ('Done rr) = 'Done rl
+    ThenVRR rl (Err  er) = Err  (Text "then: right error" :$$: er)
+    ThenVRR rl (Cont sr) = Cont (Right '(rl, sr))
+    ThenVRR rl (Done rr) = Done rl
 
 type family ThenVREnd prEnd s where
-    ThenVREnd prEnd ('Left  sl) = 'Left ('Text "thenvr: ended during left")
-    ThenVREnd prEnd ('Right '(rl, sr)) =
+    ThenVREnd prEnd (Left  sl) = Left (Text "thenvr: ended during left")
+    ThenVREnd prEnd (Right '(rl, sr)) =
         ThenVREnd' rl (prEnd @@ sr)
 
 type family ThenVREnd' rl s where
-    ThenVREnd' rl ('Left  er) = 'Left  ('Text "thenvr: right end error" :$$: er)
-    ThenVREnd' rl ('Right rr) = 'Right rl
+    ThenVREnd' rl (Left  er) = Left  (Text "thenvr: right end error" :$$: er)
+    ThenVREnd' rl (Right rr) = Right rl
 
 type ThenVRChSym
     :: ParserChSym sl rl

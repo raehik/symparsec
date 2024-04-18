@@ -26,12 +26,12 @@ type family NatBaseCh base parseDigit ch n where
         NatBaseCh' base n (parseDigit @@ ch)
 
 type family NatBaseCh' base n mDigit where
-    NatBaseCh' base n 'Nothing      =
-        'Err ('Text "not a base " :<>: 'ShowType base :<>: 'Text " digit")
-    NatBaseCh' base n ('Just digit) = 'Cont (n * base + digit)
+    NatBaseCh' base n Nothing      =
+        Err (Text "not a base " :<>: ShowType base :<>: Text " digit")
+    NatBaseCh' base n (Just digit) = Cont (n * base + digit)
 
 type NatBaseEnd :: ParserEnd Natural Natural
-type NatBaseEnd n = 'Right n
+type NatBaseEnd n = Right n
 
 type NatBaseChSym
     :: Natural
@@ -69,4 +69,3 @@ type instance App ParseDecimalDigitSym a = ParseDecimalDigit a
 type ParseHexDigitSym :: Char ~> Maybe Natural
 data ParseHexDigitSym a
 type instance App ParseHexDigitSym a = ParseHexDigit a
-

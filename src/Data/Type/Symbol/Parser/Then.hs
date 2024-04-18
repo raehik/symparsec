@@ -12,7 +12,7 @@ type Then
     -> Parser (Either sl (rl, sr)) (rl, rr)
 type family Then pl pr where
     Then '(plCh, plEnd, sl) '(prCh, prEnd, sr) =
-        '(ThenChSym plCh prCh sr, ThenEndSym prEnd, 'Left sl)
+        '(ThenChSym plCh prCh sr, ThenEndSym prEnd, Left sl)
 
 type ThenCh
     :: ParserChSym sl rl
@@ -20,29 +20,29 @@ type ThenCh
     -> sr
     -> ParserCh (Either sl (rl, sr)) (rl, rr)
 type family ThenCh plCh prCh sr ch s where
-    ThenCh plCh prCh sr ch ('Left  sl) =
+    ThenCh plCh prCh sr ch (Left  sl) =
         ThenL sr (plCh @@ ch @@ sl)
-    ThenCh plCh prCh _  ch ('Right '(rl, sr)) =
+    ThenCh plCh prCh _  ch (Right '(rl, sr)) =
         ThenR rl (prCh @@ ch @@ sr)
 
 type family ThenL sr resl where
-    ThenL sr ('Err  el) = 'Err  ('Text "then: left error" :$$: el)
-    ThenL sr ('Cont sl) = 'Cont ('Left  sl)
-    ThenL sr ('Done rl) = 'Cont ('Right '(rl, sr))
+    ThenL sr (Err  el) = Err  (Text "then: left error" :$$: el)
+    ThenL sr (Cont sl) = Cont (Left  sl)
+    ThenL sr (Done rl) = Cont (Right '(rl, sr))
 
 type family ThenR rl resr where
-    ThenR rl ('Err  er) = 'Err  ('Text "then: right error" :$$: er)
-    ThenR rl ('Cont sr) = 'Cont ('Right '(rl, sr))
-    ThenR rl ('Done rr) = 'Done '(rl, rr)
+    ThenR rl (Err  er) = Err  (Text "then: right error" :$$: er)
+    ThenR rl (Cont sr) = Cont (Right '(rl, sr))
+    ThenR rl (Done rr) = Done '(rl, rr)
 
 type family ThenEnd prEnd s where
-    ThenEnd prEnd ('Left sl) = 'Left ('Text "then: ended during left")
-    ThenEnd prEnd ('Right '(rl, sr)) =
+    ThenEnd prEnd (Left sl) = Left (Text "then: ended during left")
+    ThenEnd prEnd (Right '(rl, sr)) =
         ThenEnd' rl (prEnd @@ sr)
 
 type family ThenEnd' rl s where
-    ThenEnd' rl ('Left  er) = 'Left  ('Text "then: right end error" :$$: er)
-    ThenEnd' rl ('Right rr) = 'Right '(rl, rr)
+    ThenEnd' rl (Left  er) = Left  (Text "then: right end error" :$$: er)
+    ThenEnd' rl (Right rr) = Right '(rl, rr)
 
 type ThenChSym
     :: ParserChSym sl rl

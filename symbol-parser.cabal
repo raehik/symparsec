@@ -27,8 +27,6 @@ source-repository head
 library
   exposed-modules:
       Data.Type.Char.Digits
-      Data.Type.Symbol
-      Data.Type.Symbol.Natural
       Data.Type.Symbol.Parser
       Data.Type.Symbol.Parser.Drop
       Data.Type.Symbol.Parser.Internal

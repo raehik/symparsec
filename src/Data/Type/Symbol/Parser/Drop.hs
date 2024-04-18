@@ -11,16 +11,16 @@ type Drop n = '(DropChSym, DropEndSym, n)
 
 type DropCh :: ParserCh Natural ()
 type family DropCh _ch n where
-    DropCh _ 0 = 'Err ('Text "can't drop 0 due to parser limitations. sorry")
-    DropCh _ 1 = 'Done '()
-    DropCh _ n = 'Cont (n-1)
+    DropCh _ 0 = Err (Text "can't drop 0 due to parser limitations. sorry")
+    DropCh _ 1 = Done '()
+    DropCh _ n = Cont (n-1)
 
 type DropEnd :: ParserEnd Natural ()
 type family DropEnd n where
-    DropEnd 0 = 'Right '()
-    DropEnd n = 'Left
-      ( 'Text "tried to drop "
-        :<>: 'ShowType n :<>: 'Text " chars from empty symbol")
+    DropEnd 0 = Right '()
+    DropEnd n = Left
+      ( Text "tried to drop "
+        :<>: ShowType n :<>: Text " chars from empty symbol")
 
 type DropChSym :: ParserChSym Natural ()
 data DropChSym f

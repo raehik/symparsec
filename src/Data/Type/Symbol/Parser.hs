@@ -30,6 +30,14 @@ import Data.Type.Symbol.Parser.Then
 import Data.Type.Symbol.Parser.Then.VoidLeft
 import Data.Type.Symbol.Parser.Then.VoidRight
 
+-- | Sequence parsers, returning both values in a tuple.
 type pl :<*>: pr = Then   pl pr
+
+-- | Sequence parsers, discarding the return value of the left parser
 type pl  :*>: pr = ThenVL pl pr
+
+-- | Sequence parsers, discarding the return value of the right parser.
+--
+-- Consider using ':*>:' instead, which is simpler and potentially faster since
+-- we parse L->R.
 type pl :<*:  pr = ThenVR pl pr
