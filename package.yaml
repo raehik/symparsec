@@ -53,12 +53,13 @@ default-extensions:
 
 ghc-options:
 - -Wall
+- -Wno-unticked-promoted-constructors
 # TODO GHC 9.2 complains about unticked promoted constructors, but
 # https://gitlab.haskell.org/ghc/ghc/-/issues/20531 removes that from -Wall and
 # recommends never ticking unless necessary
 
 dependencies:
-- base >= 4.14 && < 5
+- base >= 4.16 && < 5
 - defun-core ^>= 0.1
 
 library:
