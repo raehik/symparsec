@@ -53,10 +53,10 @@ default-extensions:
 
 ghc-options:
 - -Wall
+
+# omitting ticks is fine (prevents warnings for <= GHC 9.2)
+# see: https://gitlab.haskell.org/ghc/ghc/-/issues/20531
 - -Wno-unticked-promoted-constructors
-# TODO GHC 9.2 complains about unticked promoted constructors, but
-# https://gitlab.haskell.org/ghc/ghc/-/issues/20531 removes that from -Wall and
-# recommends never ticking unless necessary
 
 dependencies:
 - base >= 4.16 && < 5
