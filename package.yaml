@@ -8,10 +8,11 @@ extra-source-files:
 category: Types, Data
 license: MIT
 license-file: LICENSE
-#tested-with:
-#- GHC==9.8
-#- GHC==9.6
-#- GHC==9.4
+tested-with:
+- GHC==9.8
+- GHC==9.6
+- GHC==9.4
+- GHC==9.2
 
 github: raehik/symbol-parser
 maintainer: Ben Orchard <thefirstmuffinman@gmail.com>

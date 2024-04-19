@@ -1,3 +1,8 @@
+## Unreleased
+* remove some old code (`Data.Type.Symbol`, `Data.Type.Symbol.Natural`)
+* fix base lower bound (at least base-4.16, == GHC 9.2)
+* style: don't tick promoted constructors unless necessary for disambiguation
+
 ## 0.1.0 (2024-04-17)
 Initial release.
 
