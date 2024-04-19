@@ -6,18 +6,14 @@ import Data.Type.Symbol.Parser.Internal
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App )
 
-type RevCharsToSymbol chs = RevCharsToSymbol' "" chs
-type family RevCharsToSymbol' sym chs where
-    RevCharsToSymbol' sym '[]        = sym
-    RevCharsToSymbol' sym (ch : chs) = RevCharsToSymbol' (ConsSymbol ch sym) chs
-
 type Take :: Natural -> Parser (Natural, [Char]) Symbol
-type Take n = '(TakeChSym, TakeEndSym, '(n, '[]))
+type family Take n where
+    Take 0 =
+        '(FailChSym "can't take 0 due to parser limitations. sorry", TakeEndSym, '(0, '[]))
+    Take n = '(TakeChSym, TakeEndSym, '(n, '[]))
 
 type TakeCh :: ParserCh (Natural, [Char]) Symbol
 type family TakeCh ch s where
-    TakeCh _  '(0, _)   =
-        Err (Text "can't take 0 due to parser limitations. sorry")
     TakeCh ch '(1, chs) = Done (RevCharsToSymbol (ch : chs))
     TakeCh ch '(n, chs) = Cont '(n-1, ch : chs)
 
@@ -27,6 +23,11 @@ type family TakeEnd s where
     TakeEnd '(n, _)   = Left
       ( Text "tried to take "
         :<>: ShowType n :<>: Text " chars from empty symbol")
+
+type RevCharsToSymbol chs = RevCharsToSymbol' "" chs
+type family RevCharsToSymbol' sym chs where
+    RevCharsToSymbol' sym '[]        = sym
+    RevCharsToSymbol' sym (ch : chs) = RevCharsToSymbol' (ConsSymbol ch sym) chs
 
 type TakeChSym :: ParserChSym (Natural, [Char]) Symbol
 data TakeChSym f

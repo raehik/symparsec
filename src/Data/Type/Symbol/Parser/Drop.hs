@@ -7,11 +7,13 @@ import GHC.TypeLits
 import DeFun.Core ( type (~>), type App )
 
 type Drop :: Natural -> Parser Natural ()
-type Drop n = '(DropChSym, DropEndSym, n)
+type family Drop n where
+    Drop 0 =
+        '(FailChSym "can't drop 0 due to parser limitations. sorry", DropEndSym, 0)
+    Drop n = '(DropChSym, DropEndSym, n)
 
 type DropCh :: ParserCh Natural ()
 type family DropCh ch n where
-    DropCh _ 0 = Err (Text "can't drop 0 due to parser limitations. sorry")
     DropCh _ 1 = Done '()
     DropCh _ n = Cont (n-1)
 

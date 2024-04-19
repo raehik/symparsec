@@ -15,23 +15,18 @@ type NatHex = NatBase 16 ParseHexDigitSym
 type NatBase
     :: Natural -> (Char ~> Maybe Natural) -> Parser Natural Natural
 type NatBase base parseDigit =
-    '(NatBaseChSym base parseDigit, NatBaseEndSym, 0)
+    '(NatBaseChSym base parseDigit, EmitEndSym, 0)
 
 type NatBaseCh
     :: Natural
     -> (Char ~> Maybe Natural)
     -> ParserCh Natural Natural
-type family NatBaseCh base parseDigit ch n where
-    NatBaseCh base parseDigit ch n =
-        NatBaseCh' base n (parseDigit @@ ch)
+type NatBaseCh base parseDigit ch n = NatBaseCh' base n (parseDigit @@ ch)
 
 type family NatBaseCh' base n mDigit where
     NatBaseCh' base n Nothing      =
         Err (Text "not a base " :<>: ShowType base :<>: Text " digit")
     NatBaseCh' base n (Just digit) = Cont (n * base + digit)
-
-type NatBaseEnd :: ParserEnd Natural Natural
-type NatBaseEnd n = Right n
 
 type NatBaseChSym
     :: Natural
@@ -49,10 +44,6 @@ type NatBaseChSym1
 data NatBaseChSym1 base parseDigit ch n
 type instance App (NatBaseChSym1 base parseDigit ch) n =
     NatBaseCh base parseDigit ch n
-
-type NatBaseEndSym :: ParserEndSym Natural Natural
-data NatBaseEndSym n
-type instance App NatBaseEndSym s = NatBaseEnd s
 
 type ParseBinaryDigitSym :: Char ~> Maybe Natural
 data ParseBinaryDigitSym a

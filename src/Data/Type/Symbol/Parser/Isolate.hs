@@ -10,6 +10,8 @@ import DeFun.Core ( type (~>), type (@@), type App )
 
 type Isolate :: Natural -> Parser s r -> Parser (Natural, s) r
 type family Isolate n p where
+    Isolate 0 '(pCh, pEnd, s) =
+        '(FailChSym "cannot isolate 0 due to parser limitations", IsolateEndSym, '(0, s))
     Isolate n '(pCh, pEnd, s) = '(IsolateChSym pCh pEnd, IsolateEndSym, '(n, s))
 
 type IsolateCh
@@ -17,8 +19,6 @@ type IsolateCh
     -> ParserEndSym s r
     -> ParserCh (Natural, s) r
 type family IsolateCh pCh pEnd ch s where
-    IsolateCh pCh pEnd ch '(0, s) =
-        Err (Text "cannot isolate 0 due to parser limitations")
     IsolateCh pCh pEnd ch '(1, s) = IsolateInnerEnd' pEnd (pCh @@ ch @@ s)
     IsolateCh pCh pEnd ch '(n, s) = IsolateInner n (pCh @@ ch @@ s)
 
