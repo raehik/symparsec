@@ -2,9 +2,10 @@
 
 -- TODO improve errors (I was lazy)
 
-module Data.Type.Symbol.Parser.Isolate where
+module Data.Type.Symbol.Parser.Combinator.Isolate ( Isolate ) where
 
-import Data.Type.Symbol.Parser.Internal
+import Data.Type.Symbol.Parser.Types
+import Data.Type.Symbol.Parser.Common ( FailChSym )
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type (@@), type App )
 

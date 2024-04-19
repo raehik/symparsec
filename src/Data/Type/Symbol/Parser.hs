@@ -25,16 +25,17 @@ module Data.Type.Symbol.Parser
   , NatBase
   ) where
 
-import Data.Type.Symbol.Parser.Internal
-import Data.Type.Symbol.Parser.Isolate
-import Data.Type.Symbol.Parser.Drop
-import Data.Type.Symbol.Parser.Natural
-import Data.Type.Symbol.Parser.Then
-import Data.Type.Symbol.Parser.Then.VoidLeft
-import Data.Type.Symbol.Parser.Then.VoidRight
-import Data.Type.Symbol.Parser.Literal
-import Data.Type.Symbol.Parser.End
-import Data.Type.Symbol.Parser.Take
+import Data.Type.Symbol.Parser.Run ( RunParser )
+import Data.Type.Symbol.Parser.Types ( Parser )
+import Data.Type.Symbol.Parser.Combinator.Isolate
+import Data.Type.Symbol.Parser.Combinator.Drop
+import Data.Type.Symbol.Parser.Combinator.Natural
+import Data.Type.Symbol.Parser.Combinator.Then
+import Data.Type.Symbol.Parser.Combinator.Then.VoidLeft
+import Data.Type.Symbol.Parser.Combinator.Then.VoidRight
+import Data.Type.Symbol.Parser.Combinator.Literal
+import Data.Type.Symbol.Parser.Combinator.End
+import Data.Type.Symbol.Parser.Combinator.Take
 
 -- | Sequence parsers, returning both values in a tuple.
 type pl :<*>: pr = Then   pl pr

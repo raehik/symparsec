@@ -1,8 +1,9 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Type.Symbol.Parser.Take {- ( type Take ) -} where
+module Data.Type.Symbol.Parser.Combinator.Take ( Take ) where
 
-import Data.Type.Symbol.Parser.Internal
+import Data.Type.Symbol.Parser.Types
+import Data.Type.Symbol.Parser.Common ( FailChSym )
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App )
 

@@ -1,6 +1,7 @@
-module Data.Type.Symbol.Parser.End ( type End ) where
+module Data.Type.Symbol.Parser.Combinator.End ( End ) where
 
-import Data.Type.Symbol.Parser.Internal
+import Data.Type.Symbol.Parser.Types
+import Data.Type.Symbol.Parser.Common ( EmitEndSym )
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App )
 

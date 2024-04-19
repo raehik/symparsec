@@ -1,8 +1,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Type.Symbol.Parser.Then where
+module Data.Type.Symbol.Parser.Combinator.Then ( Then ) where
 
-import Data.Type.Symbol.Parser.Internal
+import Data.Type.Symbol.Parser.Types
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type (@@), type App )
 

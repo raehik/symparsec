@@ -1,8 +1,9 @@
 {-# LANGUAGE UndecidableInstances #-} -- for natural subtraction
 
-module Data.Type.Symbol.Parser.Drop ( type Drop ) where
+module Data.Type.Symbol.Parser.Combinator.Drop ( Drop ) where
 
-import Data.Type.Symbol.Parser.Internal
+import Data.Type.Symbol.Parser.Types
+import Data.Type.Symbol.Parser.Common ( FailChSym )
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App )
 

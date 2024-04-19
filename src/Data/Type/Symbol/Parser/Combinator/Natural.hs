@@ -1,8 +1,12 @@
 {-# LANGUAGE UndecidableInstances #-} -- for natural multiplication etc.
 
-module Data.Type.Symbol.Parser.Natural where
+module Data.Type.Symbol.Parser.Combinator.Natural
+  ( NatBin, NatOct, NatDec, NatHex
+  , NatBase
+  ) where
 
-import Data.Type.Symbol.Parser.Internal
+import Data.Type.Symbol.Parser.Types
+import Data.Type.Symbol.Parser.Common ( EmitEndSym )
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App, type (@@) )
 import Data.Type.Char.Digits
