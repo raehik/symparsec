@@ -13,6 +13,8 @@ module Data.Type.Symbol.Parser
 
   -- ** Primitives
   , Drop
+  , Literal
+  , End
 
   -- *** Naturals
   , NatDec
@@ -29,6 +31,8 @@ import Data.Type.Symbol.Parser.Natural
 import Data.Type.Symbol.Parser.Then
 import Data.Type.Symbol.Parser.Then.VoidLeft
 import Data.Type.Symbol.Parser.Then.VoidRight
+import Data.Type.Symbol.Parser.Literal
+import Data.Type.Symbol.Parser.End
 
 -- | Sequence parsers, returning both values in a tuple.
 type pl :<*>: pr = Then   pl pr

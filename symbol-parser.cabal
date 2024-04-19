@@ -34,8 +34,10 @@ library
       Data.Type.Char.Digits
       Data.Type.Symbol.Parser
       Data.Type.Symbol.Parser.Drop
+      Data.Type.Symbol.Parser.End
       Data.Type.Symbol.Parser.Internal
       Data.Type.Symbol.Parser.Isolate
+      Data.Type.Symbol.Parser.Literal
       Data.Type.Symbol.Parser.Natural
       Data.Type.Symbol.Parser.Then
       Data.Type.Symbol.Parser.Then.VoidLeft

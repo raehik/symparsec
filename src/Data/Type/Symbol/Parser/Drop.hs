@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableInstances #-} -- for natural subtraction
 
 module Data.Type.Symbol.Parser.Drop ( type Drop ) where
 

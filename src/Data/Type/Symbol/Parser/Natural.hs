@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableInstances #-} -- for natural multiplication etc.
 
 module Data.Type.Symbol.Parser.Natural where
 
