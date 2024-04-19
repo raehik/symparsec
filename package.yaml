@@ -1,5 +1,5 @@
 name: symbol-parser
-version: 0.1.0
+version: 0.2.0
 synopsis: Type level string parser combinators
 description: Please see README.md.
 extra-source-files:

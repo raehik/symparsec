@@ -1,4 +1,5 @@
-## Unreleased
+## 0.2.0 (2024-04-19)
+* add two more combinators: `End`, `Literal`
 * remove some old code (`Data.Type.Symbol`, `Data.Type.Symbol.Natural`)
 * fix base lower bound (at least base-4.16, == GHC 9.2)
 * style: don't tick promoted constructors unless necessary for disambiguation
