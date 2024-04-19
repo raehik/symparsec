@@ -10,7 +10,7 @@ type End = '(EndChSym, EmitEndSym, '())
 
 type EndCh :: ParserCh () ()
 type family EndCh ch u where
-    EndCh _ '() = Err (Text "expected end of string")
+    EndCh _ '() = Err (EBase "End" (Text "expected end of string"))
 
 type EndChSym :: ParserChSym () ()
 data EndChSym f

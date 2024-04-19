@@ -28,8 +28,8 @@ type NatBaseCh
 type NatBaseCh base parseDigit ch n = NatBaseCh' base n (parseDigit @@ ch)
 
 type family NatBaseCh' base n mDigit where
-    NatBaseCh' base n Nothing      =
-        Err (Text "not a base " :<>: ShowType base :<>: Text " digit")
+    NatBaseCh' base n Nothing      = Err (EBase "NatBase"
+        (Text "not a base " :<>: ShowType base :<>: Text " digit"))
     NatBaseCh' base n (Just digit) = Cont (n * base + digit)
 
 type NatBaseChSym

@@ -26,22 +26,22 @@ type family ThenCh plCh prCh sr ch s where
         ThenR rl (prCh @@ ch @@ sr)
 
 type family ThenL sr resl where
-    ThenL sr (Err  el) = Err  (Text "then: left error" :$$: el)
+    ThenL sr (Err  el) = Err  (EIn "Then(L)" el)
     ThenL sr (Cont sl) = Cont (Left  sl)
     ThenL sr (Done rl) = Cont (Right '(rl, sr))
 
 type family ThenR rl resr where
-    ThenR rl (Err  er) = Err  (Text "then: right error" :$$: er)
+    ThenR rl (Err  er) = Err  (EIn "Then(R)" er)
     ThenR rl (Cont sr) = Cont (Right '(rl, sr))
     ThenR rl (Done rr) = Done '(rl, rr)
 
 type family ThenEnd prEnd s where
-    ThenEnd prEnd (Left sl) = Left (Text "then: ended during left")
+    ThenEnd prEnd (Left sl) = Left (EBase "Then" (Text "ended during left"))
     ThenEnd prEnd (Right '(rl, sr)) =
         ThenEnd' rl (prEnd @@ sr)
 
 type family ThenEnd' rl s where
-    ThenEnd' rl (Left  er) = Left  (Text "then: right end error" :$$: er)
+    ThenEnd' rl (Left  er) = Left  (EIn "Then(R)" er)
     ThenEnd' rl (Right rr) = Right '(rl, rr)
 
 type ThenChSym

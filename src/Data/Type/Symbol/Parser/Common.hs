@@ -1,27 +1,30 @@
 module Data.Type.Symbol.Parser.Common
-  ( type FailChSym
-  , type EmitEndSym
+  ( FailChSym
+  , FailEndSym
+  , EmitEndSym
+  , ErrParserLimitation
   ) where
 
 import Data.Type.Symbol.Parser.Types
 import GHC.TypeLits
 import DeFun.Core ( type App, type (~>) )
 
-type FailCh :: Symbol -> ParserCh s r
-type family FailCh eStr ch s where
-    FailCh eStr _ _ = Err (Text eStr)
+type FailChSym :: Symbol -> ErrorMessage -> ParserChSym s r
+data FailChSym name e f
+type instance App (FailChSym name e) f = FailChSym1 name e f
 
-type FailChSym :: Symbol -> ParserChSym s r
-data FailChSym eStr f
-type instance App (FailChSym eStr) f = FailChSym1 eStr f
+type FailChSym1 :: Symbol -> ErrorMessage -> Char -> s ~> Result s r
+data FailChSym1 name e ch s
+type instance App (FailChSym1 name e ch) s = Err (EBase name e)
 
-type FailChSym1 :: Symbol -> Char -> s ~> Result s r
-data FailChSym1 eStr ch s
-type instance App (FailChSym1 eStr ch) s = FailCh eStr ch s
+type FailEndSym :: Symbol -> ErrorMessage -> ParserEndSym s r
+data FailEndSym name e s
+type instance App (FailEndSym name e) s = Left (EBase name e)
 
-type EmitEnd :: ParserEnd r r
-type EmitEnd r = Right r
-
+-- | Emit state directly on end of input.
 type EmitEndSym :: ParserEndSym r r
 data EmitEndSym r
-type instance App EmitEndSym r = EmitEnd r
+type instance App EmitEndSym r = Right r
+
+type ErrParserLimitation :: Symbol -> ErrorMessage
+type ErrParserLimitation msg = Text "parser limitation: " :<>: Text msg

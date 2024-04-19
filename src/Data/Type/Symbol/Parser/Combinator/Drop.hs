@@ -3,14 +3,14 @@
 module Data.Type.Symbol.Parser.Combinator.Drop ( Drop ) where
 
 import Data.Type.Symbol.Parser.Types
-import Data.Type.Symbol.Parser.Common ( FailChSym )
+import Data.Type.Symbol.Parser.Common
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App )
 
 type Drop :: Natural -> Parser Natural ()
 type family Drop n where
     Drop 0 =
-        '(FailChSym "can't drop 0 due to parser limitations. sorry", DropEndSym, 0)
+        '(FailChSym "Drop" (ErrParserLimitation "can't drop 0"), DropEndSym, 0)
     Drop n = '(DropChSym, DropEndSym, n)
 
 type DropCh :: ParserCh Natural ()
@@ -21,9 +21,9 @@ type family DropCh ch n where
 type DropEnd :: ParserEnd Natural ()
 type family DropEnd n where
     DropEnd 0 = Right '()
-    DropEnd n = Left
+    DropEnd n = Left (EBase "Drop"
       ( Text "tried to drop "
-        :<>: ShowType n :<>: Text " chars from empty symbol")
+        :<>: ShowType n :<>: Text " chars from empty symbol"))
 
 type DropChSym :: ParserChSym Natural ()
 data DropChSym f

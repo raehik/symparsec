@@ -44,6 +44,7 @@ library
       Data.Type.Symbol.Parser.Combinator.Then.VoidRight
       Data.Type.Symbol.Parser.Common
       Data.Type.Symbol.Parser.Run
+      Data.Type.Symbol.Parser.Run.Errors
       Data.Type.Symbol.Parser.Types
   other-modules:
       Paths_symbol_parser

@@ -26,22 +26,23 @@ type family ThenVRCh plCh prCh sr ch s where
         ThenVRR rl (prCh @@ ch @@ sr)
 
 type family ThenVRL sr resl where
-    ThenVRL sr (Err  el) = Err  (Text "then: left error" :$$: el)
+    ThenVRL sr (Err  el) = Err  (EIn "ThenVR(L)" el)
     ThenVRL sr (Cont sl) = Cont (Left  sl)
     ThenVRL sr (Done rl) = Cont (Right '(rl, sr))
 
 type family ThenVRR rl resr where
-    ThenVRR rl (Err  er) = Err  (Text "then: right error" :$$: er)
+    ThenVRR rl (Err  er) = Err  (EIn "ThenVR(R)" er)
     ThenVRR rl (Cont sr) = Cont (Right '(rl, sr))
     ThenVRR rl (Done rr) = Done rl
 
 type family ThenVREnd prEnd s where
-    ThenVREnd prEnd (Left  sl) = Left (Text "thenvr: ended during left")
+    ThenVREnd prEnd (Left  sl) =
+        Left (EBase "ThenVR" (Text "ended during left"))
     ThenVREnd prEnd (Right '(rl, sr)) =
         ThenVREnd' rl (prEnd @@ sr)
 
 type family ThenVREnd' rl s where
-    ThenVREnd' rl (Left  er) = Left  (Text "thenvr: right end error" :$$: er)
+    ThenVREnd' rl (Left  er) = Left  (EIn "ThenVR(R)" er)
     ThenVREnd' rl (Right rr) = Right rl
 
 type ThenVRChSym

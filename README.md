@@ -3,14 +3,14 @@ Type-level string (`Symbol`) parser combinators.
 
 ## Features
 * Define parsers compositionally as you would on the term level.
-* Pretty parse errors.
+* Pretty parse errors. _(And I can make them prettier later, when I get bored.)_
 * Probably not _that_ slow.
 * No runtime cost (you shall find no term-level code here).
 
 ## Examples
 ```haskell
 ghci> import Data.Type.Symbol.Parser
-ghci> :k! RunParser (Drop 3 :*>: Isolate 2 NatDec :<*>: (Drop 3 :*>: NatHex)) "___10___FF"
+ghci> :k! Run (Drop 3 :*>: Isolate 2 NatDec :<*>: (Drop 3 :*>: NatHex)) "___10___FF"
 ...
 = Right '( '(10, 255), "")
 ```
@@ -39,7 +39,7 @@ As of GHC 9.2, `Symbol`s may be decomposed via `UnconsSymbol :: Symbol -> Maybe
 
 ```haskell
 type ParserCh s r = Char -> s -> Result s r
-data Result   s r = Cont s | Done r | Err ErrorMessage
+data Result   s r = Cont s | Done r | Err EParser
 ```
 
 A parser is a function which takes a `Char`, the current state `s`, and returns
@@ -47,31 +47,16 @@ some result:
 
 * `Cont s`: keep going, here's the next state `s`
 * `Done r`: parse successful with value `r`
-* `Err  e`: parse error, pretty details in `e`
+* `Err  EParser`: parse error, details in the `EParser` (a structured error)
 
-`RunParser` handles calling the parser `Char` by `Char`, threading the state
+`Run` handles calling the parser `Char` by `Char`, threading the state
 through, and does some bookkeeping for nice errors.
 
-This is all we need for a flexible parser combinator setup. All further work is
-done via combinators.
+TODO:
 
-### Combinator basics
-I made a small fib above. There is a bit more to parsers:
-
-```
-
-For simplicity, 
-
-examples
-Let's implement a combinator `Drop n`, which drops `n` characters from the
-input. 
-Let's look at `Drop n`, a parser which drops `n` characters from the input.
-
-```haskell
-type Drop :: Natural -> Parser Natural ()
-```
-
-### Implementation details
+* bit more to parsers, see the end parser
+* also explain the consume rule, why it's kept (apparent simplicity) and how to
+  work around it (do extra work at parser start)
 * Parsers are type families, yet we pass them around unsaturated as type
   arguments. We do this via defunctionalization symbols, with plumbing provided
   by Oleg's fantastic [defun-core][hackage-defun-core].

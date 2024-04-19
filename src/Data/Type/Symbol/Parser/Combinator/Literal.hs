@@ -3,38 +3,50 @@
 module Data.Type.Symbol.Parser.Combinator.Literal ( Literal ) where
 
 import Data.Type.Symbol.Parser.Types
-import Data.Type.Symbol.Parser.Common ( FailChSym )
+import Data.Type.Symbol.Parser.Common
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App )
 
-type Literal :: Symbol -> Parser (Maybe (Char, Symbol)) ()
-type family Literal sym where
-    Literal "" =
-        '(FailChSym "cannot parse the empty literal due to parser limitations", LiteralEndSym, Nothing)
-    Literal sym = '(LiteralChSym, LiteralEndSym, UnconsSymbol sym)
+type Literal :: Symbol -> Parser (Char, Maybe (Char, Symbol)) ()
+type Literal sym = Literal' (UnconsSymbol sym)
 
-type LiteralCh :: ParserCh (Maybe (Char, Symbol)) ()
-type family LiteralCh ch msym where
-    LiteralCh ch (Just '(ch,  ""))  = Done '()
-    LiteralCh ch (Just '(ch,  sym)) = Cont (UnconsSymbol sym)
-    LiteralCh ch (Just '(ch', sym)) = Err
-        (Text "expected " :<>: ShowType ch :<>: Text ", got " :<>: ShowType ch')
+type EEmptyLit = ErrParserLimitation "cannot parse empty literal"
 
-type LiteralEnd :: ParserEnd (Maybe (Char, Symbol)) ()
-type family LiteralEnd msym where
-    LiteralEnd Nothing = Right '()
-    LiteralEnd (Just '(ch, sym)) = Left
-      ( Text "still parsing literal: " :<>: Text (ConsSymbol ch sym))
+type family Literal' msym where
+    Literal' Nothing           =
+        '( FailChSym "Literal" EEmptyLit
+         , FailEndSym "Literal" EEmptyLit, '( '\0', Nothing))
+    Literal' (Just '(ch, sym)) =
+        '(LiteralChSym, LiteralEndSym, '(ch, UnconsSymbol sym))
 
-type LiteralChSym :: ParserChSym (Maybe (Char, Symbol)) ()
+type family LiteralCh ch s where
+    LiteralCh ch0 '(ch0, Just '(ch1, sym)) = Cont '(ch1, UnconsSymbol sym)
+    LiteralCh ch0 '(ch0, Nothing)          = Done '()
+    LiteralCh ch  '(ch0, msym)             = Err (EBase "Literal"
+        (      Text "expected " :<>: ShowType ch0
+          :<>: Text ", got " :<>: ShowType ch))
+
+type LiteralEnd :: ParserEnd (Char, Maybe (Char, Symbol)) ()
+type family LiteralEnd s where
+    LiteralEnd '(ch0, msym) = Left (EBase "Literal"
+      (      Text "still parsing literal: "
+        :<>: Text (ConsSymbol ch0 (ReconsSymbol msym))))
+
+type family ReconsSymbol msym where
+    ReconsSymbol Nothing           = ""
+    ReconsSymbol (Just '(ch, sym)) = ConsSymbol ch sym
+
+type LiteralChSym :: ParserChSym (Char, Maybe (Char, Symbol)) ()
 data LiteralChSym f
 type instance App LiteralChSym f = LiteralChSym1 f
 
 type LiteralChSym1
-    :: Char -> Maybe (Char, Symbol) ~> Result (Maybe (Char, Symbol)) ()
-data LiteralChSym1 ch n
-type instance App (LiteralChSym1 ch) n = LiteralCh ch n
+    :: Char
+    -> (Char, Maybe (Char, Symbol))
+    ~> Result (Char, Maybe (Char, Symbol)) ()
+data LiteralChSym1 ch s
+type instance App (LiteralChSym1 ch) s = LiteralCh ch s
 
-type LiteralEndSym :: ParserEndSym (Maybe (Char, Symbol)) ()
-data LiteralEndSym msym
-type instance App LiteralEndSym msym = LiteralEnd msym
+type LiteralEndSym :: ParserEndSym (Char, Maybe (Char, Symbol)) ()
+data LiteralEndSym s
+type instance App LiteralEndSym s = LiteralEnd s
