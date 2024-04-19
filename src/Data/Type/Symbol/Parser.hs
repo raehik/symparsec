@@ -2,7 +2,7 @@ module Data.Type.Symbol.Parser
   (
   -- * Base definitions
     Parser
-  , RunParser
+  , Run
 
   -- * Parsers
   -- ** Combinators
@@ -25,8 +25,8 @@ module Data.Type.Symbol.Parser
   , NatBase
   ) where
 
-import Data.Type.Symbol.Parser.Run ( RunParser )
-import Data.Type.Symbol.Parser.Types ( Parser )
+import Data.Type.Symbol.Parser.Run
+import Data.Type.Symbol.Parser.Types
 import Data.Type.Symbol.Parser.Combinator.Isolate
 import Data.Type.Symbol.Parser.Combinator.Drop
 import Data.Type.Symbol.Parser.Combinator.Natural
