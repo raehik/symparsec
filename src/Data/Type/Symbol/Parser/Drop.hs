@@ -10,7 +10,7 @@ type Drop :: Natural -> Parser Natural ()
 type Drop n = '(DropChSym, DropEndSym, n)
 
 type DropCh :: ParserCh Natural ()
-type family DropCh _ch n where
+type family DropCh ch n where
     DropCh _ 0 = Err (Text "can't drop 0 due to parser limitations. sorry")
     DropCh _ 1 = Done '()
     DropCh _ n = Cont (n-1)

@@ -39,6 +39,7 @@ library
       Data.Type.Symbol.Parser.Isolate
       Data.Type.Symbol.Parser.Literal
       Data.Type.Symbol.Parser.Natural
+      Data.Type.Symbol.Parser.Take
       Data.Type.Symbol.Parser.Then
       Data.Type.Symbol.Parser.Then.VoidLeft
       Data.Type.Symbol.Parser.Then.VoidRight
