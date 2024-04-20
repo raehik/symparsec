@@ -1,4 +1,4 @@
-module Data.Type.Symbol.Parser.Combinator.End ( End ) where
+module Data.Type.Symbol.Parser.Parser.End ( End ) where
 
 import Data.Type.Symbol.Parser.Types
 import Data.Type.Symbol.Parser.Common ( EmitEndSym )

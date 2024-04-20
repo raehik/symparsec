@@ -27,15 +27,15 @@ module Data.Type.Symbol.Parser
 
 import Data.Type.Symbol.Parser.Run
 import Data.Type.Symbol.Parser.Types
-import Data.Type.Symbol.Parser.Combinator.Isolate
-import Data.Type.Symbol.Parser.Combinator.Drop
-import Data.Type.Symbol.Parser.Combinator.Natural
-import Data.Type.Symbol.Parser.Combinator.Then
-import Data.Type.Symbol.Parser.Combinator.Then.VoidLeft
-import Data.Type.Symbol.Parser.Combinator.Then.VoidRight
-import Data.Type.Symbol.Parser.Combinator.Literal
-import Data.Type.Symbol.Parser.Combinator.End
-import Data.Type.Symbol.Parser.Combinator.Take
+import Data.Type.Symbol.Parser.Parser.Isolate
+import Data.Type.Symbol.Parser.Parser.Drop
+import Data.Type.Symbol.Parser.Parser.Natural
+import Data.Type.Symbol.Parser.Parser.Then
+import Data.Type.Symbol.Parser.Parser.Then.VoidLeft
+import Data.Type.Symbol.Parser.Parser.Then.VoidRight
+import Data.Type.Symbol.Parser.Parser.Literal
+import Data.Type.Symbol.Parser.Parser.End
+import Data.Type.Symbol.Parser.Parser.Take
 
 -- | Sequence parsers, returning both values in a tuple.
 type pl :<*>: pr = Then   pl pr

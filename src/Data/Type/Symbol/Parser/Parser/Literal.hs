@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Type.Symbol.Parser.Combinator.Literal ( Literal ) where
+module Data.Type.Symbol.Parser.Parser.Literal ( Literal ) where
 
 import Data.Type.Symbol.Parser.Types
 import Data.Type.Symbol.Parser.Common

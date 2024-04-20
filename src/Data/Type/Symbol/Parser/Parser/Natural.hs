@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-} -- for natural multiplication etc.
 
-module Data.Type.Symbol.Parser.Combinator.Natural
+module Data.Type.Symbol.Parser.Parser.Natural
   ( NatBin, NatOct, NatDec, NatHex
   , NatBase
   ) where

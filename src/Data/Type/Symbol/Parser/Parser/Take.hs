@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Type.Symbol.Parser.Combinator.Take ( Take ) where
+module Data.Type.Symbol.Parser.Parser.Take ( Take ) where
 
 import Data.Type.Symbol.Parser.Types
 import Data.Type.Symbol.Parser.Common

@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Type.Symbol.Parser.Combinator.Isolate ( Isolate ) where
+module Data.Type.Symbol.Parser.Parser.Isolate ( Isolate ) where
 
 import Data.Type.Symbol.Parser.Types
 import Data.Type.Symbol.Parser.Common

@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-} -- for natural subtraction
 
-module Data.Type.Symbol.Parser.Combinator.Drop ( Drop, Drop' ) where
+module Data.Type.Symbol.Parser.Parser.Drop ( Drop, Drop' ) where
 
 import Data.Type.Symbol.Parser.Types
 import Data.Type.Symbol.Parser.Common

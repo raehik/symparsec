@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Type.Symbol.Parser.Combinator.Then.VoidLeft ( ThenVL ) where
+module Data.Type.Symbol.Parser.Parser.Then.VoidLeft ( ThenVL ) where
 
 import Data.Type.Symbol.Parser.Types
 import GHC.TypeLits

@@ -33,16 +33,16 @@ library
   exposed-modules:
       Data.Type.Char.Digits
       Data.Type.Symbol.Parser
-      Data.Type.Symbol.Parser.Combinator.Drop
-      Data.Type.Symbol.Parser.Combinator.End
-      Data.Type.Symbol.Parser.Combinator.Isolate
-      Data.Type.Symbol.Parser.Combinator.Literal
-      Data.Type.Symbol.Parser.Combinator.Natural
-      Data.Type.Symbol.Parser.Combinator.Take
-      Data.Type.Symbol.Parser.Combinator.Then
-      Data.Type.Symbol.Parser.Combinator.Then.VoidLeft
-      Data.Type.Symbol.Parser.Combinator.Then.VoidRight
       Data.Type.Symbol.Parser.Common
+      Data.Type.Symbol.Parser.Parser.Drop
+      Data.Type.Symbol.Parser.Parser.End
+      Data.Type.Symbol.Parser.Parser.Isolate
+      Data.Type.Symbol.Parser.Parser.Literal
+      Data.Type.Symbol.Parser.Parser.Natural
+      Data.Type.Symbol.Parser.Parser.Take
+      Data.Type.Symbol.Parser.Parser.Then
+      Data.Type.Symbol.Parser.Parser.Then.VoidLeft
+      Data.Type.Symbol.Parser.Parser.Then.VoidRight
       Data.Type.Symbol.Parser.Run
       Data.Type.Symbol.Parser.Types
   other-modules:
