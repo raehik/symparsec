@@ -1,3 +1,8 @@
+## 0.3.0 (2024-04-20)
+* add new parsers: `Take`, `:<|>:`
+* tons of cleanup, renaming (`RunParser` -> `Run`)
+* add handful of tests (via type-spec)
+
 ## 0.2.0 (2024-04-19)
 * add two more combinators: `End`, `Literal`
 * remove some old code (`Data.Type.Symbol`, `Data.Type.Symbol.Natural`)
