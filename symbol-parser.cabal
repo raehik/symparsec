@@ -32,6 +32,7 @@ source-repository head
 library
   exposed-modules:
       Data.Type.Char.Digits
+      Data.Type.List
       Data.Type.Symbol.Parser
       Data.Type.Symbol.Parser.Common
       Data.Type.Symbol.Parser.Parser.Drop
@@ -39,6 +40,7 @@ library
       Data.Type.Symbol.Parser.Parser.Isolate
       Data.Type.Symbol.Parser.Parser.Literal
       Data.Type.Symbol.Parser.Parser.Natural
+      Data.Type.Symbol.Parser.Parser.Or
       Data.Type.Symbol.Parser.Parser.Take
       Data.Type.Symbol.Parser.Parser.Then
       Data.Type.Symbol.Parser.Parser.Then.VoidLeft

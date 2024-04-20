@@ -10,6 +10,7 @@ module Data.Type.Symbol.Parser
   , (:<*>:)
   ,  (:*>:)
   , (:<*:)
+  , (:<|>:)
 
   -- ** Primitives
   , Take
@@ -36,6 +37,7 @@ import Data.Type.Symbol.Parser.Parser.Then.VoidRight
 import Data.Type.Symbol.Parser.Parser.Literal
 import Data.Type.Symbol.Parser.Parser.End
 import Data.Type.Symbol.Parser.Parser.Take
+import Data.Type.Symbol.Parser.Parser.Or
 
 -- | Sequence parsers, returning both values in a tuple.
 type pl :<*>: pr = Then   pl pr
@@ -48,3 +50,5 @@ type pl  :*>: pr = ThenVL pl pr
 -- Consider using ':*>:' instead, which is simpler and potentially faster since
 -- we parse L->R.
 type pl :<*:  pr = ThenVR pl pr
+
+type pl :<|>: pr = Or pl pr

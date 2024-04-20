@@ -106,6 +106,11 @@ stuck type families on misuse).
 
 For concrete examples, see the implementation of `Drop` and `Literal`.
 
+### Pitfall: Not all parsers are definable
+* No changing parser state. Thus, parsers such as `Try :: Parser s r -> Parser
+  (s, [Char]) r` are not definable. Even `<|>` is limited, as the RHS parser may
+  not exit earlier than the LHS parser (TODO: is this actually correct lol).
+
 ## Contributing
 I would gladly accept further combinators or other suggestions. Please add an
 issue or pull request, or contact me via email or whatever (I'm raehik
