@@ -43,6 +43,7 @@ type family RunCh pCh pEnd idx ch' msym res where
         Left ('ERun idx ch' e)
 
 -- | Inspect end parser result.
+type RunEnd :: Natural -> Char -> Either E r -> Either ERun (r, Symbol)
 type family RunEnd idx ch res where
     RunEnd idx ch (Right r) = Right '(r, "")
     RunEnd idx ch (Left  e) = Left ('ERun idx ch e)
