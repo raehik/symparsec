@@ -17,10 +17,8 @@ This is a problematic combinator:
 module Data.Type.Symbol.Parser.Parser.Or ( Or ) where
 
 import Data.Type.Symbol.Parser.Types
-import Data.Type.Symbol.Parser.Common
 import DeFun.Core ( type (@@), type App )
 import Data.Type.List ( Reverse )
-import GHC.TypeError -- TODO
 
 type Or
     :: Parser sl rl

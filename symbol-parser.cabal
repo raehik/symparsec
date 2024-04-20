@@ -67,3 +67,29 @@ library
       base >=4.16 && <5
     , defun-core ==0.1.*
   default-language: GHC2021
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Paths_symbol_parser
+  hs-source-dirs:
+      test
+  default-extensions:
+      LambdaCase
+      NoStarIsType
+      DerivingVia
+      DeriveAnyClass
+      GADTs
+      RoleAnnotations
+      DefaultSignatures
+      TypeFamilies
+      DataKinds
+      MagicHash
+  ghc-options: -Wall -Wno-unticked-promoted-constructors
+  build-depends:
+      base >=4.16 && <5
+    , defun-core ==0.1.*
+    , symbol-parser
+    , type-spec >=0.4.0.0 && <0.5
+  default-language: GHC2021

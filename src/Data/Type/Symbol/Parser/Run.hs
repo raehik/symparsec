@@ -73,3 +73,11 @@ type family MapLeftPrettyERun eea where
 type family ReconsSymbol msym where
     ReconsSymbol Nothing           = ""
     ReconsSymbol (Just '(ch, sym)) = ConsSymbol ch sym
+
+-- | Error while running parser.
+data ERun
+  -- | Parser error at index X, character C.
+  = ERun Natural Char E
+
+  -- | Parser error on the empty string.
+  | ERun0 E

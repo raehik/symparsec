@@ -55,8 +55,8 @@ default-extensions:
 ghc-options:
 - -Wall
 
-# omitting ticks is fine (prevents warnings for <= GHC 9.2)
-# see: https://gitlab.haskell.org/ghc/ghc/-/issues/20531
+# omitting ticks is good; see https://gitlab.haskell.org/ghc/ghc/-/issues/20531
+# (off by default since GHC 9.4)
 - -Wno-unticked-promoted-constructors
 
 dependencies:
@@ -65,3 +65,11 @@ dependencies:
 
 library:
   source-dirs: src
+
+tests:
+  spec:
+    source-dirs: test
+    main: Main.hs
+    dependencies:
+    - symbol-parser
+    - type-spec ^>= 0.4.0.0
