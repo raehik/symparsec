@@ -2,9 +2,9 @@
 Type-level string (`Symbol`) parser combinators.
 
 ## Features
-* Define parsers compositionally as you would on the term level.
-* Pretty parse errors. _(And I can make them prettier later, when I get bored.)_
-* Probably not _that_ slow.
+* Define parsers compositionally, largely as you would on the term level.
+* Pretty parse errors.
+* Hopefully decent performance.
 * No runtime cost (you shall find no term-level code here).
 
 ## Examples
@@ -39,7 +39,7 @@ As of GHC 9.2, `Symbol`s may be decomposed via `UnconsSymbol :: Symbol -> Maybe
 
 ```haskell
 type ParserCh s r = Char -> s -> Result s r
-data Result   s r = Cont s | Done r | Err EParser
+data Result   s r = Cont s | Done r | Err E
 ```
 
 A parser is a function which takes a `Char`, the current state `s`, and returns
@@ -47,21 +47,66 @@ some result:
 
 * `Cont s`: keep going, here's the next state `s`
 * `Done r`: parse successful with value `r`
-* `Err  EParser`: parse error, details in the `EParser` (a structured error)
+* `Err  E`: parse error, details in the `E` (a structured error)
 
-`Run` handles calling the parser `Char` by `Char`, threading the state
-through, and does some bookkeeping for nice errors.
+`Run` handles calling the parser `Char` by `Char`, threading the state through,
+and does some bookkeeping for nice errors.
 
-TODO:
+This is a good first step, but we have some outstanding issues:
 
-* bit more to parsers, see the end parser
-* also explain the consume rule, why it's kept (apparent simplicity) and how to
-  work around it (do extra work at parser start)
-* Parsers are type families, yet we pass them around unsaturated as type
-  arguments. We do this via defunctionalization symbols, with plumbing provided
-  by Oleg's fantastic [defun-core][hackage-defun-core].
+* What do we do when we reach the end of the string?
+* How do we initialize parser state?
+* How do we pass parsers around? (As of 2024-04-20, GHC HEAD does not support
+  unsaturated type families.)
 
-## I want to help
+As always, types are our salvation.
+
+```haskell
+type ParserEnd s r = s -> Either E r
+type Parser s r = (ParserChSym s r, ParserEndSym s r, s)
+
+type ParserChSym s r = Char ~> s ~> Result s r
+type ParserEndSym s r = s ~> Either E r
+```
+
+We define a parser as a tuple of a character parser, an end handler, and an
+initial state. The types ending in `Sym` are _defunctionalization symbols_,
+which enable us to pass our parsers around as type-level functions. The plumbing
+is provided Oleg's fantastic library [defun-core][hackage-defun-core].
+
+### Example: `NatDec`
+Let's write a parser that parses a natural decimal.
+
+```haskell
+type NatDec = '(NatDecChSym, NatDecEndSym, 0)
+
+type NatDecCh ch acc = NatDecCh' acc (ParseDecimalDigitSym @@ ch)
+type family NatDecCh' acc mDigit where
+    NatDecCh' acc (Just digit) = Cont (acc * 10 + digit)
+    NatDecCh' acc Nothing      = Err -- ...
+
+type NatDecEnd acc = Right acc
+
+-- boring defunctionalization symbol definitions
+```
+
+At each `Char`, we attempt to parse as a digit. If it's valid, we multiply the
+current accumulator by 10 (a left shift) and add the digit value. At the end of
+the string, we simply emit the current accumulator.
+
+It can be that easy to define a parser with symbol-parser! But it isn't always.
+Combinators get weird thanks to state handling. Take a look at `Isolate`, then
+`Then`.
+
+### Pitfall: Character parsers always consume
+There is no backtracking or lookahead, that you do not implement yourself. This
+keeps the parser execution extremely simple, but breaks null parsers such as
+`Drop 0`, so these must be handled specially (unless you don't getting mind
+stuck type families on misuse).
+
+For concrete examples, see the implementation of `Drop` and `Literal`.
+
+## Contributing
 I would gladly accept further combinators or other suggestions. Please add an
 issue or pull request, or contact me via email or whatever (I'm raehik
 everywhere).

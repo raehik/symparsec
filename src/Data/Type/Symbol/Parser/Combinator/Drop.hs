@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-} -- for natural subtraction
 
-module Data.Type.Symbol.Parser.Combinator.Drop ( Drop ) where
+module Data.Type.Symbol.Parser.Combinator.Drop ( Drop, Drop' ) where
 
 import Data.Type.Symbol.Parser.Types
 import Data.Type.Symbol.Parser.Common
@@ -11,7 +11,11 @@ type Drop :: Natural -> Parser Natural ()
 type family Drop n where
     Drop 0 =
         '(FailChSym "Drop" (ErrParserLimitation "can't drop 0"), DropEndSym, 0)
-    Drop n = '(DropChSym, DropEndSym, n)
+    Drop n = Drop' n
+
+-- | Unsafe 'Drop' which doesn't check for 0. May get stuck.
+type Drop' :: Natural -> Parser Natural ()
+type Drop' n = '(DropChSym, DropEndSym, n)
 
 type DropCh :: ParserCh Natural ()
 type family DropCh ch n where

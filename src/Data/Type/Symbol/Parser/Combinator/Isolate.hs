@@ -30,7 +30,7 @@ type family IsolateInnerEnd' pEnd res where
     IsolateInnerEnd' pEnd (Done r) = Done r
     IsolateInnerEnd' pEnd (Cont s) = IsolateInnerEnd (pEnd @@ s)
 
-type IsolateInnerEnd :: Either EParser r -> Result (Natural, s) r
+type IsolateInnerEnd :: Either E r -> Result (Natural, s) r
 type family IsolateInnerEnd a where
     IsolateInnerEnd (Left  e) = Err  (EIn "Isolate" e)
     IsolateInnerEnd (Right r) = Done r

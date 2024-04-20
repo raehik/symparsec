@@ -15,12 +15,12 @@ type ParserCh  s r = Char -> s -> Result s r
 
 -- | The result of a single step of a parser.
 data Result s r
-  = Cont s       -- ^ OK, continue with the given state
-  | Done r       -- ^ OK, parse successful with result @r@
-  | Err  EParser -- ^ parse error
+  = Cont s -- ^ OK, continue with the given state
+  | Done r -- ^ OK, parse successful with result @r@
+  | Err  E -- ^ parse error
 
 -- | What a parser should do at the end of a 'Symbol'.
-type ParserEnd s r = s -> Either EParser r
+type ParserEnd s r = s -> Either E r
 
 -- | A parser you can pass (heh) around.
 --
@@ -32,9 +32,10 @@ type Parser s r = (ParserChSym s r, ParserEndSym s r, s)
 type ParserChSym s r = Char ~> s ~> Result s r
 
 -- | A defunctionalization symbol for a 'ParserEnd'.
-type ParserEndSym s r = s ~> Either EParser r
+type ParserEndSym s r = s ~> Either E r
 
-data EParser
+-- | Parser error.
+data E
   -- | Base parser error.
   = EBase
         Symbol       -- ^ parser name
@@ -42,12 +43,13 @@ data EParser
 
   -- | Inner parser error inside combinator.
   | EIn
-        Symbol  -- ^ combinator name
-        EParser -- ^ inner error
+        Symbol -- ^ combinator name
+        E      -- ^ inner error
 
-data E
+-- | Error while running parser.
+data ERun
   -- | Parser error at index X, character C.
-  = E Natural Char EParser
+  = ERun Natural Char E
 
   -- | Parser error on the empty string.
-  | E0 EParser
+  | ERun0 E
