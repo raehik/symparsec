@@ -19,7 +19,7 @@ ghci> :k! Run (Drop 3 :*>: Isolate 2 NatDec :<*>: (Drop 3 :*>: NatHex)) "___10__
 Via `GHC.Generics`, we may inspect Haskell data types on the type level.
 Constructor names are `Symbols`. Ever reify these, then perform some sort of
 checking or parsing on the term level? symbol-parser does the parsing on the
-term level instead. Catch bugs earlier, get faster runtime.
+type level instead. Catch bugs earlier, get faster runtime.
 
 ## Design
 ### Parser basics
