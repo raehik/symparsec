@@ -1,4 +1,4 @@
-name: symbol-parser
+name: symparsec
 version: 0.3.0
 synopsis: Type level string parser combinators
 description: Please see README.md.
@@ -14,7 +14,7 @@ tested-with:
 - GHC==9.4
 - GHC==9.2
 
-github: raehik/symbol-parser
+github: raehik/symparsec
 maintainer: Ben Orchard <thefirstmuffinman@gmail.com>
 author: Ben Orchard
 
@@ -71,5 +71,5 @@ tests:
     source-dirs: test
     main: Main.hs
     dependencies:
-    - symbol-parser
+    - symparsec
     - type-spec ^>= 0.4.0.0

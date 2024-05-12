@@ -1,4 +1,4 @@
-# symbol-parser to-dos
+# Symparsec to-dos
 * consider binary combinator names...
   * now using infix as base, but the internals use non-infix because it's
     easier. but they won't display properly in type errors... meh

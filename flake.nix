@@ -14,7 +14,7 @@
   let
     # simple devshell for non-dev compilers: really just want `cabal repl`
     nondevDevShell = compiler: {
-      mkShellArgs.name = "${compiler}-symbol-parser";
+      mkShellArgs.name = "${compiler}-symparsec";
       hoogle = false;
       tools = _: {
         hlint = null;
@@ -27,7 +27,7 @@
       systems = inputs.nixpkgs.lib.systems.flakeExposed;
       imports = [ inputs.haskell-flake.flakeModule ];
       perSystem = { self', pkgs, config, ... }: {
-        packages.default  = self'.packages.ghc96-symbol-parser;
+        packages.default  = self'.packages.ghc96-symparsec;
         devShells.default = self'.devShells.ghc96;
         haskellProjects.ghc98 = {
           basePackages = pkgs.haskell.packages.ghc98;
@@ -35,7 +35,7 @@
         };
         haskellProjects.ghc96 = {
           basePackages = pkgs.haskell.packages.ghc96;
-          devShell.mkShellArgs.name = "ghc96-symbol-parser";
+          devShell.mkShellArgs.name = "ghc96-symparsec";
         };
         haskellProjects.ghc94 = {
           basePackages = pkgs.haskell.packages.ghc94;

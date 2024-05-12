@@ -1,15 +1,19 @@
-# symbol-parser
-Type-level string (`Symbol`) parser combinators.
+# Symparsec
+Type level string (`Symbol`) parser combinators.
+
+It's a Parsec for `Symbol`s; thus, Symparsec.
+
+Previously named symbol-parser.
 
 ## Features
 * Define parsers compositionally, largely as you would on the term level.
 * Pretty parse errors.
 * Hopefully decent performance.
-* No runtime cost (you shall find no term-level code here).
+* No runtime cost (you shall find no term level code here).
 
 ## Examples
 ```haskell
-ghci> import Data.Type.Symbol.Parser
+ghci> import Symparsec
 ghci> :k! Run (Drop 3 :*>: Isolate 2 NatDec :<*>: (Drop 3 :*>: NatHex)) "___10___FF"
 ...
 = Right '( '(10, 255), "")
@@ -18,8 +22,8 @@ ghci> :k! Run (Drop 3 :*>: Isolate 2 NatDec :<*>: (Drop 3 :*>: NatHex)) "___10__
 ## Why?
 Via `GHC.Generics`, we may inspect Haskell data types on the type level.
 Constructor names are `Symbols`. Ever reify these, then perform some sort of
-checking or parsing on the term level? symbol-parser does the parsing on the
-type level instead. Catch bugs earlier, get faster runtime.
+checking or parsing on the term level? Symparsec does the parsing on the type
+level instead. Catch bugs earlier, get faster runtime.
 
 ## Design
 ### Parser basics
@@ -94,7 +98,7 @@ At each `Char`, we attempt to parse as a digit. If it's valid, we multiply the
 current accumulator by 10 (a left shift) and add the digit value. At the end of
 the string, we simply emit the current accumulator.
 
-It can be that easy to define a parser with symbol-parser! But it isn't always.
+It can be that easy to define a parser with Symparsec! But it isn't always.
 Combinators get weird thanks to state handling. Take a look at `Isolate`, then
 `Then`.
 
