@@ -1,4 +1,5 @@
-## Unreleased
+## 0.4.0 (2024-05-12)
+* rebrand from symbol-parser to Symparsec
 * rename `Drop` -> `Skip` (more commonly used for monadic parsers)
 * document parsers
 * provide fixity declarations for infix binary combinators

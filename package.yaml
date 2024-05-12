@@ -1,5 +1,5 @@
 name: symparsec
-version: 0.3.0
+version: 0.4.0
 synopsis: Type level string parser combinators
 description: Please see README.md.
 extra-source-files:
