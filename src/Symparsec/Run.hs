@@ -1,8 +1,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Type.Symbol.Parser.Run ( Run ) where
+module Symparsec.Run ( Run ) where
 
-import Data.Type.Symbol.Parser.Parser
+import Symparsec.Parser
 import GHC.TypeLits
 import DeFun.Core ( type (@@) )
 

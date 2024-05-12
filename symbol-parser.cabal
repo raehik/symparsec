@@ -31,23 +31,23 @@ source-repository head
 
 library
   exposed-modules:
-      Data.Type.Char.Digits
-      Data.Type.List
-      Data.Type.Symbol.Parser
-      Data.Type.Symbol.Parser.Parser
-      Data.Type.Symbol.Parser.Parser.Common
-      Data.Type.Symbol.Parser.Parser.End
-      Data.Type.Symbol.Parser.Parser.Isolate
-      Data.Type.Symbol.Parser.Parser.Literal
-      Data.Type.Symbol.Parser.Parser.Natural
-      Data.Type.Symbol.Parser.Parser.Or
-      Data.Type.Symbol.Parser.Parser.Skip
-      Data.Type.Symbol.Parser.Parser.Take
-      Data.Type.Symbol.Parser.Parser.Then
-      Data.Type.Symbol.Parser.Parser.Then.VoidLeft
-      Data.Type.Symbol.Parser.Parser.Then.VoidRight
-      Data.Type.Symbol.Parser.Parsers
-      Data.Type.Symbol.Parser.Run
+      Symparsec
+      Symparsec.Internal.Digits
+      Symparsec.Internal.List
+      Symparsec.Parser
+      Symparsec.Parser.Common
+      Symparsec.Parser.End
+      Symparsec.Parser.Isolate
+      Symparsec.Parser.Literal
+      Symparsec.Parser.Natural
+      Symparsec.Parser.Or
+      Symparsec.Parser.Skip
+      Symparsec.Parser.Take
+      Symparsec.Parser.Then
+      Symparsec.Parser.Then.VoidLeft
+      Symparsec.Parser.Then.VoidRight
+      Symparsec.Parsers
+      Symparsec.Run
   other-modules:
       Paths_symbol_parser
   hs-source-dirs:

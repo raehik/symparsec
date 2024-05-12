@@ -1,13 +1,13 @@
 -- | Common definitions for parsers.
 
-module Data.Type.Symbol.Parser.Parser.Common
+module Symparsec.Parser.Common
   ( FailChSym
   , FailEndSym
   , EmitEndSym
   , ErrParserLimitation
   ) where
 
-import Data.Type.Symbol.Parser.Parser
+import Symparsec.Parser
 import GHC.TypeLits
 import DeFun.Core ( type App, type (~>) )
 

@@ -1,15 +1,15 @@
 {-# LANGUAGE UndecidableInstances #-} -- for natural multiplication etc.
 
-module Data.Type.Symbol.Parser.Parser.Natural
+module Symparsec.Parser.Natural
   ( NatBin, NatOct, NatDec, NatHex
   , NatBase
   ) where
 
-import Data.Type.Symbol.Parser.Parser
-import Data.Type.Symbol.Parser.Parser.Common ( EmitEndSym )
+import Symparsec.Parser
+import Symparsec.Parser.Common ( EmitEndSym )
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App, type (@@) )
-import Data.Type.Char.Digits
+import Symparsec.Internal.Digits
 
 -- | Parse a binary (base 2) natural.
 type NatBin = NatBase  2 ParseBinaryDigitSym

@@ -1,9 +1,9 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Type.Symbol.Parser.Parser.Take ( Take ) where
+module Symparsec.Parser.Take ( Take ) where
 
-import Data.Type.Symbol.Parser.Parser
-import Data.Type.Symbol.Parser.Parser.Common
+import Symparsec.Parser
+import Symparsec.Parser.Common
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App )
 

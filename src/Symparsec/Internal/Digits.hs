@@ -3,7 +3,7 @@
 A 'Nothing' indicates the given 'Char' was not a valid digit for the given base.
 -}
 
-module Data.Type.Char.Digits where
+module Symparsec.Internal.Digits where
 
 import GHC.TypeLits
 

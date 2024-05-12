@@ -1,9 +1,9 @@
 {-# LANGUAGE UndecidableInstances #-} -- for natural subtraction
 
-module Data.Type.Symbol.Parser.Parser.Skip ( Skip, Skip' ) where
+module Symparsec.Parser.Skip ( Skip, Skip' ) where
 
-import Data.Type.Symbol.Parser.Parser
-import Data.Type.Symbol.Parser.Parser.Common
+import Symparsec.Parser
+import Symparsec.Parser.Common
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App )
 

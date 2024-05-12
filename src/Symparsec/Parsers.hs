@@ -3,7 +3,7 @@
 -- You may ignore the equations that Haddock displays: they are internal and
 -- irrelevant to library usage.
 
-module Data.Type.Symbol.Parser.Parsers
+module Symparsec.Parsers
   (
   -- * Binary combinators
   -- $binary-combinators
@@ -31,16 +31,16 @@ module Data.Type.Symbol.Parser.Parsers
   , NatBase
   ) where
 
-import Data.Type.Symbol.Parser.Parser.Isolate
-import Data.Type.Symbol.Parser.Parser.Skip
-import Data.Type.Symbol.Parser.Parser.Natural
-import Data.Type.Symbol.Parser.Parser.Then
-import Data.Type.Symbol.Parser.Parser.Then.VoidLeft
-import Data.Type.Symbol.Parser.Parser.Then.VoidRight
-import Data.Type.Symbol.Parser.Parser.Literal
-import Data.Type.Symbol.Parser.Parser.End
-import Data.Type.Symbol.Parser.Parser.Take
-import Data.Type.Symbol.Parser.Parser.Or
+import Symparsec.Parser.Isolate
+import Symparsec.Parser.Skip
+import Symparsec.Parser.Natural
+import Symparsec.Parser.Then
+import Symparsec.Parser.Then.VoidLeft
+import Symparsec.Parser.Then.VoidRight
+import Symparsec.Parser.Literal
+import Symparsec.Parser.End
+import Symparsec.Parser.Take
+import Symparsec.Parser.Or
 
 -- $binary-combinators
 -- Parsers that combine two parsers. Any parsers that have term-level parallels

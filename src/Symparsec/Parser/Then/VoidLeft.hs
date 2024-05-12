@@ -1,8 +1,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Type.Symbol.Parser.Parser.Then.VoidLeft ( (:*>:) ) where
+module Symparsec.Parser.Then.VoidLeft ( (:*>:) ) where
 
-import Data.Type.Symbol.Parser.Parser
+import Symparsec.Parser
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type (@@), type App )
 

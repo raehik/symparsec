@@ -1,7 +1,7 @@
 module Main where
 
 import Test.TypeSpec
-import Data.Type.Symbol.Parser
+import Symparsec
 
 main :: IO ()
 main = print spec

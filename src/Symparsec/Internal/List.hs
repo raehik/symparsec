@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Type.List where
+module Symparsec.Internal.List where
 
 -- | Reverse a type level list.
 type Reverse as = Reverse' as '[]

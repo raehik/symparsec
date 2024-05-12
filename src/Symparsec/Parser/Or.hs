@@ -14,11 +14,11 @@ This is a problematic combinator:
 -}
 
 
-module Data.Type.Symbol.Parser.Parser.Or ( (:<|>:) ) where
+module Symparsec.Parser.Or ( (:<|>:) ) where
 
-import Data.Type.Symbol.Parser.Parser
+import Symparsec.Parser
+import Symparsec.Internal.List ( Reverse )
 import DeFun.Core ( type (@@), type App )
-import Data.Type.List ( Reverse )
 
 -- | Parser choice. Try left; if it fails, backtrack and try right.
 --

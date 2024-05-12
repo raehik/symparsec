@@ -1,6 +1,6 @@
 -- | Base definitions for type-level symbol parsers.
 
-module Data.Type.Symbol.Parser.Parser
+module Symparsec.Parser
   (
   -- * Parsers
     ParserCh
