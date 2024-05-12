@@ -10,22 +10,29 @@ This is a problematic combinator:
   * Errors degrade due to left parser errors being discarded. Perhaps your
     string was one character off a successful left parse; but if it fails, you
     won't see that error.
-  * It's hard to reason aobut. It might break in certain situations.
+  * It's hard to reason about. It might break in certain situations.
 -}
 
 
-module Data.Type.Symbol.Parser.Parser.Or ( Or ) where
+module Data.Type.Symbol.Parser.Parser.Or ( (:<|>:) ) where
 
-import Data.Type.Symbol.Parser.Types
+import Data.Type.Symbol.Parser.Parser
 import DeFun.Core ( type (@@), type App )
 import Data.Type.List ( Reverse )
 
-type Or
+-- | Parser choice. Try left; if it fails, backtrack and try right.
+--
+-- Be warned that this parser is experimental, and likely brittle. If possible,
+-- consider designing your schema to permit non-backtracking parsing. Or if not,
+-- have both sides always parse the same length, in which case this parser
+-- should probably work fine.
+infixl 3 :<|>:
+type (:<|>:)
     :: Parser sl rl
     -> Parser sr rr
     -> Parser (Either (sl, [Char]) sr) (Either rl rr)
-type family Or pl pr where
-    Or '(plCh, plEnd, sl) '(prCh, prEnd, sr) =
+type family pl :<|>: pr where
+    '(plCh, plEnd, sl) :<|>: '(prCh, prEnd, sr) =
         '(OrChSym plCh prCh sr, OrEndSym plEnd prCh prEnd sr, Left '(sl, '[]))
 
 type OrCh

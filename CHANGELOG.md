@@ -1,3 +1,8 @@
+## Unreleased
+* rename `Drop` -> `Skip` (more commonly used for monadic parsers)
+* document parsers
+* provide fixity declarations for infix binary combinators
+
 ## 0.3.0 (2024-04-20)
 * add new parsers: `Take`, `:<|>:`
 * tons of cleanup, renaming (`RunParser` -> `Run`)

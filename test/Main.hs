@@ -16,7 +16,7 @@ type CstrX_Y =
 spec :: Expect
     '[ Run (Literal "raehik") "raehik" `Is` Right '( '(), "")
      , Run (Literal "raeh") "raehraeh" `Is` Right '( '(), "raeh")
-     , Run (Drop 3 :*>: Literal "HI") "...HI" `Is` Right '( '(), "")
+     , Run (Skip 3 :*>: Literal "HI") "...HI" `Is` Right '( '(), "")
      , Run (Literal "0x" :*>: NatHex) "0xfF" `Is` Right '( 255, "")
      , Run CstrX_Y "Cstr12_AB" `Is` Right '( '(12, 0xAB), "")
      ]

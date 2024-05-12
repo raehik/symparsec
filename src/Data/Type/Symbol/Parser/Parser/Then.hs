@@ -1,17 +1,19 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Type.Symbol.Parser.Parser.Then ( Then ) where
+module Data.Type.Symbol.Parser.Parser.Then ( (:<*>:) ) where
 
-import Data.Type.Symbol.Parser.Types
+import Data.Type.Symbol.Parser.Parser
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type (@@), type App )
 
-type Then
+-- | Sequence two parsers, running left then right, and return both results.
+infixl 4 :<*>:
+type (:<*>:)
     :: Parser sl rl
     -> Parser sr rr
     -> Parser (Either sl (rl, sr)) (rl, rr)
-type family Then pl pr where
-    Then '(plCh, plEnd, sl) '(prCh, prEnd, sr) =
+type family pl :<*>: pr where
+    '(plCh, plEnd, sl) :<*>: '(prCh, prEnd, sr) =
         '(ThenChSym plCh prCh sr, ThenEndSym prEnd, Left sl)
 
 type ThenCh

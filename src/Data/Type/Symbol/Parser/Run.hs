@@ -2,7 +2,7 @@
 
 module Data.Type.Symbol.Parser.Run ( Run ) where
 
-import Data.Type.Symbol.Parser.Types
+import Data.Type.Symbol.Parser.Parser
 import GHC.TypeLits
 import DeFun.Core ( type (@@) )
 

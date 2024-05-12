@@ -2,11 +2,14 @@
 
 module Data.Type.Symbol.Parser.Parser.Isolate ( Isolate ) where
 
-import Data.Type.Symbol.Parser.Types
-import Data.Type.Symbol.Parser.Common
+import Data.Type.Symbol.Parser.Parser
+import Data.Type.Symbol.Parser.Parser.Common
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type (@@), type App )
 
+-- | Run the given parser isolated to the next @n@ characters.
+--
+-- All isolated characters must be consumed.
 type Isolate :: Natural -> Parser s r -> Parser (Natural, s) r
 type family Isolate n p where
     Isolate 0 '(pCh, pEnd, s) =

@@ -34,19 +34,20 @@ library
       Data.Type.Char.Digits
       Data.Type.List
       Data.Type.Symbol.Parser
-      Data.Type.Symbol.Parser.Common
-      Data.Type.Symbol.Parser.Parser.Drop
+      Data.Type.Symbol.Parser.Parser
+      Data.Type.Symbol.Parser.Parser.Common
       Data.Type.Symbol.Parser.Parser.End
       Data.Type.Symbol.Parser.Parser.Isolate
       Data.Type.Symbol.Parser.Parser.Literal
       Data.Type.Symbol.Parser.Parser.Natural
       Data.Type.Symbol.Parser.Parser.Or
+      Data.Type.Symbol.Parser.Parser.Skip
       Data.Type.Symbol.Parser.Parser.Take
       Data.Type.Symbol.Parser.Parser.Then
       Data.Type.Symbol.Parser.Parser.Then.VoidLeft
       Data.Type.Symbol.Parser.Parser.Then.VoidRight
+      Data.Type.Symbol.Parser.Parsers
       Data.Type.Symbol.Parser.Run
-      Data.Type.Symbol.Parser.Types
   other-modules:
       Paths_symbol_parser
   hs-source-dirs:

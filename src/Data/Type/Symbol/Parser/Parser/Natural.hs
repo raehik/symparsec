@@ -5,17 +5,25 @@ module Data.Type.Symbol.Parser.Parser.Natural
   , NatBase
   ) where
 
-import Data.Type.Symbol.Parser.Types
-import Data.Type.Symbol.Parser.Common ( EmitEndSym )
+import Data.Type.Symbol.Parser.Parser
+import Data.Type.Symbol.Parser.Parser.Common ( EmitEndSym )
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App, type (@@) )
 import Data.Type.Char.Digits
 
+-- | Parse a binary (base 2) natural.
 type NatBin = NatBase  2 ParseBinaryDigitSym
+
+-- | Parse an octal (base 8) natural.
 type NatOct = NatBase  8 ParseOctalDigitSym
+
+-- | Parse a decimal (base 10) natural.
 type NatDec = NatBase 10 ParseDecimalDigitSym
+
+-- | Parse a hexadecimal (base 16) natural. Permits mixed-case (@0-9A-Fa-f@).
 type NatHex = NatBase 16 ParseHexDigitSym
 
+-- | Parse a natural in the given base, using the given digit parser.
 type NatBase
     :: Natural -> (Char ~> Maybe Natural) -> Parser Natural Natural
 type NatBase base parseDigit =

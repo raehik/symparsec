@@ -1,7 +1,20 @@
 # symbol-parser to-dos
+* consider binary combinator names...
+  * now using infix as base, but the internals use non-infix because it's
+    easier. but they won't display properly in type errors... meh
+
 ## Combinators
 None in particular. Probably a lot of easy ones though, please consider making
 an issue or PR if you have one in mind.
+
+## Examples
+### aeson
+Big but real world. Write some new aeson generics which do type-level
+constructor name parsing, instead of using `constructorTagModifier`. Daunting
+because aeson has complex generics.
+
+### generic-data-functions
+Fiddly and awfully abstract. WIP.
 
 ## Assorted
 * TODO can we replace ParserEnd parts with an enforced Eot??!!! lmao maybe

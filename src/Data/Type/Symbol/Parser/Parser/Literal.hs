@@ -2,11 +2,12 @@
 
 module Data.Type.Symbol.Parser.Parser.Literal ( Literal ) where
 
-import Data.Type.Symbol.Parser.Types
-import Data.Type.Symbol.Parser.Common
+import Data.Type.Symbol.Parser.Parser
+import Data.Type.Symbol.Parser.Parser.Common
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App )
 
+-- | Parse the given 'Symbol'.
 type Literal :: Symbol -> Parser (Char, Maybe (Char, Symbol)) ()
 type Literal sym = Literal' (UnconsSymbol sym)
 

@@ -2,11 +2,12 @@
 
 module Data.Type.Symbol.Parser.Parser.Take ( Take ) where
 
-import Data.Type.Symbol.Parser.Types
-import Data.Type.Symbol.Parser.Common
+import Data.Type.Symbol.Parser.Parser
+import Data.Type.Symbol.Parser.Parser.Common
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type App )
 
+-- | Return the next @n@ characters.
 type Take :: Natural -> Parser (Natural, [Char]) Symbol
 type family Take n where
     Take 0 =

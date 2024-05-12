@@ -1,17 +1,20 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Data.Type.Symbol.Parser.Parser.Then.VoidLeft ( ThenVL ) where
+module Data.Type.Symbol.Parser.Parser.Then.VoidLeft ( (:*>:) ) where
 
-import Data.Type.Symbol.Parser.Types
+import Data.Type.Symbol.Parser.Parser
 import GHC.TypeLits
 import DeFun.Core ( type (~>), type (@@), type App )
 
-type ThenVL
+-- | Sequence two parsers, running left then right, and discard the return value
+--   of the left parser.
+infixl 4 :*>:
+type (:*>:)
     :: Parser sl rl
     -> Parser sr rr
     -> Parser (Either sl sr) rr
-type family ThenVL pl pr where
-    ThenVL '(plCh, plEnd, sl) '(prCh, prEnd, sr) =
+type family pl :*>: pr where
+    '(plCh, plEnd, sl) :*>: '(prCh, prEnd, sr) =
         '(ThenVLChSym plCh prCh sr, ThenVLEndSym prEnd, Left sl)
 
 type ThenVLCh
