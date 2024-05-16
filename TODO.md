@@ -3,6 +3,20 @@
   * now using infix as base, but the internals use non-infix because it's
     easier. but they won't display properly in type errors... meh
 
+## Automatic reifying
+I believe for this, I need full-blown singletons. `defun` supports that pattern
+and has decent docs, but it's complex and not something I've done before. I
+spent a good few days making various attempts to no avail.
+
+The manual reification is an acceptable holdover to me, especially considering
+combinator parsers work fine.
+
+### Things I've tried that don't work
+* Can't do parsers via class instances due to "conflicting family instance
+  declarations". I suppose I utilize closed type families, but associated type
+  families are open, which I can't have. I can't work around this without not
+  pattern matching in my instance, which defeats the point.
+
 ## Combinators
 None in particular. Probably a lot of easy ones though, please consider making
 an issue or PR if you have one in mind.

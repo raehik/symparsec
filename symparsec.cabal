@@ -47,7 +47,9 @@ library
       Symparsec.Parser.Then.VoidLeft
       Symparsec.Parser.Then.VoidRight
       Symparsec.Parsers
+      Symparsec.Reify
       Symparsec.Run
+      Symparsec.Util
   other-modules:
       Paths_symparsec
   hs-source-dirs:
@@ -67,6 +69,7 @@ library
   build-depends:
       base >=4.16 && <5
     , defun-core ==0.1.*
+    , type-level-show >=0.1.1 && <0.2
   default-language: GHC2021
 
 test-suite spec
@@ -92,5 +95,6 @@ test-suite spec
       base >=4.16 && <5
     , defun-core ==0.1.*
     , symparsec
+    , type-level-show >=0.1.1 && <0.2
     , type-spec >=0.4.0.0 && <0.5
   default-language: GHC2021

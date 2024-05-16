@@ -116,6 +116,10 @@ For concrete examples, see the implementation of `Drop` and `Literal`.
   * Combinators such as `<|>` can emulate backtracking, but they are complex and
     hard to reason about (they may have bugs!).
 
+### Feature: Parsers may be reified to use at runtime
+See `Symparsec.Reify`. Not that this currently requires duplication of work, and
+does not guarantee matching behaviour between type- and term-levels.
+
 ## Contributing
 I would gladly accept further combinators or other suggestions. Please add an
 issue or pull request, or contact me via email or whatever (I'm raehik

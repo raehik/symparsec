@@ -2,26 +2,24 @@
 
 module Symparsec.Parser.Then.VoidLeft ( (:*>:) ) where
 
-import Symparsec.Parser
-import GHC.TypeLits
-import DeFun.Core ( type (~>), type (@@), type App )
+import Symparsec.Parser.Common
 
 -- | Sequence two parsers, running left then right, and discard the return value
 --   of the left parser.
 infixl 4 :*>:
 type (:*>:)
-    :: Parser sl rl
-    -> Parser sr rr
-    -> Parser (Either sl sr) rr
+    :: ParserSym sl rl
+    -> ParserSym sr rr
+    -> ParserSym (Either sl sr) rr
 type family pl :*>: pr where
-    '(plCh, plEnd, sl) :*>: '(prCh, prEnd, sr) =
-        '(ThenVLChSym plCh prCh sr, ThenVLEndSym prEnd, Left sl)
+    'ParserSym plCh plEnd sl :*>: 'ParserSym prCh prEnd sr =
+        'ParserSym (ThenVLChSym plCh prCh sr) (ThenVLEndSym prEnd) (Left sl)
 
 type ThenVLCh
     :: ParserChSym sl rl
     -> ParserChSym sr rr
     -> sr
-    -> ParserCh (Either sl sr) rr
+    -> PParserCh (Either sl sr) rr
 type family ThenVLCh plCh prCh sr ch s where
     ThenVLCh plCh prCh sr ch (Left  sl) =
         ThenVLL sr (plCh @@ ch @@ sl)
@@ -59,7 +57,7 @@ type ThenVLChSym1
     :: ParserChSym sl rl
     -> ParserChSym sr rr
     -> sr
-    -> Char -> Either sl sr ~> Result (Either sl sr) rr
+    -> Char -> Either sl sr ~> PResult (Either sl sr) rr
 data ThenVLChSym1 plCh prCh sr ch s
 type instance App (ThenVLChSym1 plCh prCh sr ch) s = ThenVLCh plCh prCh sr ch s
 

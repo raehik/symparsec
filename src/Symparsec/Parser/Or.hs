@@ -19,6 +19,7 @@ module Symparsec.Parser.Or ( (:<|>:) ) where
 import Symparsec.Parser
 import Symparsec.Internal.List ( Reverse )
 import DeFun.Core ( type (@@), type App )
+import GHC.TypeLits ( Symbol )
 
 -- | Parser choice. Try left; if it fails, backtrack and try right.
 --
@@ -28,18 +29,20 @@ import DeFun.Core ( type (@@), type App )
 -- should probably work fine.
 infixl 3 :<|>:
 type (:<|>:)
-    :: Parser sl rl
-    -> Parser sr rr
-    -> Parser (Either (sl, [Char]) sr) (Either rl rr)
+    :: ParserSym sl rl
+    -> ParserSym sr rr
+    -> ParserSym (Either (sl, [Char]) sr) (Either rl rr)
 type family pl :<|>: pr where
-    '(plCh, plEnd, sl) :<|>: '(prCh, prEnd, sr) =
-        '(OrChSym plCh prCh sr, OrEndSym plEnd prCh prEnd sr, Left '(sl, '[]))
+    'ParserSym plCh plEnd sl :<|>: 'ParserSym prCh prEnd sr = 'ParserSym
+        (OrChSym plCh prCh sr)
+        (OrEndSym plEnd prCh prEnd sr)
+        (Left '(sl, '[]))
 
 type OrCh
     :: ParserChSym sl rl
     -> ParserChSym sr rr
     -> sr
-    -> ParserCh (Either (sl, [Char]) sr) (Either rl rr)
+    -> PParserCh (Either (sl, [Char]) sr) (Either rl rr)
 type family OrCh plCh prCh sr ch s where
     -- | Parsing left
     OrCh plCh prCh sr ch (Left  '(sl, chs)) =
@@ -56,8 +59,8 @@ type OrChL
     :: ParserChSym sr rr
     -> sr
     -> [Char]
-    -> Result sl rl
-    -> Result (Either (sl, [Char]) sr) (Either rl rr)
+    -> PResult sl rl
+    -> PResult (Either (sl, [Char]) sr) (Either rl rr)
 type family OrChL prCh sr chs resl where
     -- | Left parser OK, continue
     OrChL _    _  chs (Cont sl) = Cont (Left  '(sl, chs))
@@ -74,8 +77,8 @@ type family OrChL prCh sr chs resl where
 type OrChLReplay
     :: ParserChSym sr rr
     -> [Char]
-    -> Result sr rr
-    -> Result (Either (sl, [Char]) sr) (Either rl rr)
+    -> PResult sr rr
+    -> PResult (Either (sl, [Char]) sr) (Either rl rr)
 type family OrChLReplay prCh chs resr where
     -- | Right parser OK, last char
     OrChLReplay prCh (ch : '[]) (Cont sr) = OrChR (prCh @@ ch @@ sr)
@@ -108,7 +111,7 @@ type OrEnd
     -> ParserChSym  sr rr
     -> ParserEndSym sr rr
     -> sr
-    -> ParserEnd (Either (sl, [Char]) sr) (Either rl rr)
+    -> PParserEnd (Either (sl, [Char]) sr) (Either rl rr)
 type family OrEnd plEnd prCh prEnd sr res where
     -- | Input ended on L.
     OrEnd plEnd prCh prEnd sr (Left  '(sl, chs)) =
@@ -118,8 +121,8 @@ type family OrEnd plEnd prCh prEnd sr res where
     OrEnd plEnd prCh prEnd _  (Right sr)         = OrEndR (prEnd @@ sr)
 
 type OrEndR
-    :: Either E rr
-    -> Either E (Either rl rr)
+    :: Either (E Symbol) rr
+    -> Either (E Symbol) (Either rl rr)
 type family OrEndR s where
     OrEndR (Left  er) = Left (EIn "Or(R)" er)
     OrEndR (Right rr) = Right (Right rr)
@@ -129,8 +132,8 @@ type OrEndL
     -> ParserEndSym sr rr
     -> sr
     -> [Char]
-    -> Either E rl
-    -> Either E (Either rl rr)
+    -> Either PE rl
+    -> Either PE (Either rl rr)
 type family OrEndL prCh prEnd sr chs res where
     OrEndL prCh prEnd sr chs (Right rl) = Right (Left rl)
     OrEndL prCh prEnd sr chs (Left  el) =
@@ -140,8 +143,8 @@ type OrChLReplay'
     :: ParserChSym  sr rr
     -> ParserEndSym sr rr
     -> [Char]
-    -> Result sr rr
-    -> Either E (Either rl rr)
+    -> PResult sr rr
+    -> Either PE (Either rl rr)
 type family OrChLReplay' prCh prEnd chs resr where
     OrChLReplay' prCh prEnd (ch : '[]) (Cont sr) =
         OrEndR' prEnd (prCh @@ ch @@ sr)
