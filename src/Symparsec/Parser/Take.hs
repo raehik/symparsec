@@ -65,14 +65,14 @@ type instance App (TakeChSym1 ch) s = TakeCh ch s
 type TakeEnd :: PParserEnd (Natural, [Char]) Symbol
 type family TakeEnd s where
     TakeEnd '(0, chs) = Right (RevCharsToSymbol chs)
-    TakeEnd '(n, _)   = Left (TakeEndE n)
+    TakeEnd '(n, _)   = Left (ETakeEnd n)
 
-type TakeEndE n = EBase "Take"
+type ETakeEnd n = EBase "Take"
     (      Text "tried to take "
       :<>: Text (ShowNatDec n) :<>: Text " chars from empty string")
 
-takeEndE :: SNat n -> SE (TakeEndE n)
-takeEndE sn = withKnownSymbol (sShowNatDec sn) singE
+eTakeEnd :: SNat n -> SE (ETakeEnd n)
+eTakeEnd sn = withKnownSymbol (sShowNatDec sn) singE
 
 type TakeEndSym :: ParserEndSym (Natural, [Char]) Symbol
 data TakeEndSym s
@@ -81,4 +81,4 @@ type instance App TakeEndSym s = TakeEnd s
 takeEndSym :: SParserEndSym STakeS SSymbol TakeEndSym
 takeEndSym = Lam $ \(STuple2 sn schs) ->
       testEqElse sn (SNat @0) (SRight $ revCharsToSymbol schs)
-    $ unsafeCoerce $ SLeft $ takeEndE sn
+    $ unsafeCoerce $ SLeft $ eTakeEnd sn

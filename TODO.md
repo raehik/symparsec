@@ -4,11 +4,12 @@
     easier. but they won't display properly in type errors... meh
 
 ## Reifying
-Small tweaks:
-
-* Should I enable reifying to `IsString a => a`? Should I do that in the reify
-  classes? I have weak intuition that might do a better job of guaranteeing good
-  performance (not going through `String`).
+### Automatic return type demoter
+I think having the user demote the return type themselves is appropriate -- most
+general, reminds what sort of library they are using -- but we could write a
+type class that demotes automatically, using base types like `String` and
+`Either` and `Tuple2`. Then if you don't need manual demotion, you can just plug
+in the type class method and it should figure out what to do.
 
 ## Combinators
 None in particular. Probably a lot of easy ones though, please consider making

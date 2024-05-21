@@ -38,7 +38,7 @@ module Symparsec.Parser where
 
 import GHC.TypeLits
 import DeFun.Core ( type (~>), Lam, Lam2 )
-import GHC.Exts ( proxy# )
+import GHC.Exts ( proxy#, withDict )
 import TypeLevelShow.Doc
 import Singleraeh.Either ( SEither )
 import Data.Kind ( Type )
@@ -183,3 +183,5 @@ demoteSE = \case
 
 type SResultEnd = SEither SE
 
+withSingE :: forall e r. SE e -> (SingE e => r) -> r
+withSingE = withDict @(SingE e)
