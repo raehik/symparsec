@@ -16,6 +16,7 @@ import Singleraeh.Maybe ( SMaybe(..) )
 import Singleraeh.Either ( SEither(..) )
 import Singleraeh.Symbol ( ReconsSymbol, sReconsSymbol, sUnconsSymbol )
 import Singleraeh.Natural ( (%+) )
+import Singleraeh.Demote
 
 -- | Run the given parser on the given 'Symbol', returning an 'TE.ErrorMessage'
 --   on failure.
@@ -36,13 +37,14 @@ type family Run' p sym where
 --   returning an 'ERun' on failure.
 --
 -- You must provide a function for demoting the singled return type.
+-- ('Singleraeh.Demote.demote' can do this for you automatically.)
 run'
     :: forall {ps} {pr} (p :: Parser ps pr) r. SingParser p
     => (forall a. PR p a -> r) -> String -> Either (ERun String) (r, String)
 run' demotePR str = withSomeSSymbol str $ \sstr ->
     case sRun' (singParser @p) sstr of
-      SRight (STuple2 r str') -> Right (demotePR r, fromSSymbol str')
-      SLeft  e                -> Left $ demoteSERun e
+      SRight (STuple2 pr sstr') -> Right (demotePR pr, fromSSymbol sstr')
+      SLeft  e                  -> Left $ demoteSERun e
 
 sRun'
     :: SParser ss sr p
@@ -188,3 +190,7 @@ demoteSERun :: SERun erun -> ERun String
 demoteSERun = \case
   SERun  idx ch e -> ERun  (fromSNat idx) (fromSChar ch) (demoteSE e)
   SERun0        e -> ERun0                               (demoteSE e)
+
+instance Demotable SERun where
+    type Demote SERun = ERun String
+    demote = demoteSERun

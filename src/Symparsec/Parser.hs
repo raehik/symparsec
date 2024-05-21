@@ -41,6 +41,7 @@ import DeFun.Core ( type (~>), Lam, Lam2 )
 import GHC.Exts ( proxy#, withDict )
 import TypeLevelShow.Doc
 import Singleraeh.Either ( SEither )
+import Singleraeh.Demote
 import Data.Kind ( Type )
 
 -- | A type-level parser, containing defunctionalization symbols.
@@ -53,27 +54,18 @@ data Parser s r = Parser
   -- ^ Initial parser state.
   }
 
-{-
--- | A term-level parser.
---
--- Parsers contain a character parser, an end handler, and an initial state.
---
--- May not be promoted due to containing function types.
-data Parser str s r = Parser
-  { parserCh   :: ParserCh  str s r
-  -- ^ Character parser.
-  , parserEnd  :: ParserEnd str s r
-  -- ^ End handler.
-  , parserInit :: s
-  -- ^ Initial parser state.
-  }
--}
-
+-- | Parsers with singled implementations.
 class SingParser (p :: Parser s r) where
+    -- | A singleton for the parser state.
     type PS p :: s -> Type
+
+    -- | A singleton for the parser return type.
     type PR p :: r -> Type
+
+    -- | The singled parser.
     singParser' :: SParser (PS p) (PR p) p
 
+-- | 'singParser'' with better type application ergonomics.
 singParser
     :: forall {s} {r} (p :: Parser s r). SingParser p
     => SParser (PS p) (PR p) p
@@ -180,6 +172,10 @@ demoteSE :: SE e -> E String
 demoteSE = \case
   SEBase sname sdoc -> EBase (fromSSymbol sname) (demoteDoc sdoc)
   SEIn   sname se   -> EIn   (fromSSymbol sname) (demoteSE  se)
+
+instance Demotable SE where
+    type Demote SE = E String
+    demote = demoteSE
 
 type SResultEnd = SEither SE
 
