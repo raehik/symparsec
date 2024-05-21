@@ -5,6 +5,8 @@ It's a Parsec for `Symbol`s; thus, Symparsec.
 
 Previously named symbol-parser.
 
+Requires GHC 9.6 for singling parsers.
+
 ## Features
 * Define parsers compositionally, largely as you would on the term level.
 * Pretty parse errors.

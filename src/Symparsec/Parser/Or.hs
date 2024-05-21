@@ -29,11 +29,11 @@ import GHC.TypeLits ( Symbol )
 -- should probably work fine.
 infixl 3 :<|>:
 type (:<|>:)
-    :: ParserSym sl rl
-    -> ParserSym sr rr
-    -> ParserSym (Either (sl, [Char]) sr) (Either rl rr)
+    :: Parser sl rl
+    -> Parser sr rr
+    -> Parser (Either (sl, [Char]) sr) (Either rl rr)
 type family pl :<|>: pr where
-    'ParserSym plCh plEnd sl :<|>: 'ParserSym prCh prEnd sr = 'ParserSym
+    'Parser plCh plEnd sl :<|>: 'Parser prCh prEnd sr = 'Parser
         (OrChSym plCh prCh sr)
         (OrEndSym plEnd prCh prEnd sr)
         (Left '(sl, '[]))

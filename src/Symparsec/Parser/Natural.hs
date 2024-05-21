@@ -24,9 +24,9 @@ type NatHex = NatBase 16 ParseHexDigitSym
 
 -- | Parse a natural in the given base, using the given digit parser.
 type NatBase
-    :: Natural -> (Char ~> Maybe Natural) -> ParserSym Natural Natural
+    :: Natural -> (Char ~> Maybe Natural) -> Parser Natural Natural
 type NatBase base parseDigit =
-    'ParserSym (NatBaseChSym base parseDigit) RightSym 0
+    'Parser (NatBaseChSym base parseDigit) RightSym 0
 
 type NatBaseCh
     :: Natural

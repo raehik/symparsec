@@ -1,31 +1,55 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-} -- for reifying/singled parsers
 
 module Symparsec.Run where -- ( Run, ERun(..) ) where
 
-import Symparsec.Util ( ReconsSymbol )
 import Symparsec.Parser
-import GHC.TypeLits ( Symbol, UnconsSymbol )
+import GHC.TypeLits hiding ( ErrorMessage(..), fromSNat )
+import GHC.TypeNats ( fromSNat )
 import GHC.TypeLits qualified as TE
-import GHC.TypeNats ( Natural, type (+) )
-import DeFun.Core ( type (@@) )
+import DeFun.Core
 import TypeLevelShow.Doc
 import TypeLevelShow.Utils ( ShowChar )
 import TypeLevelShow.Natural ( ShowNatDec )
+import Singleraeh.Tuple ( STuple2(..) )
+import Singleraeh.Maybe ( SMaybe(..) )
+import Singleraeh.Either ( SEither(..) )
+import Singleraeh.Symbol ( ReconsSymbol, sReconsSymbol, sUnconsSymbol )
+import Singleraeh.Natural ( (%+) )
 
 -- | Run the given parser on the given 'Symbol', returning an 'TE.ErrorMessage'
 --   on failure.
-type Run :: ParserSym s r -> Symbol -> Either TE.ErrorMessage (r, Symbol)
+type Run :: Parser s r -> Symbol -> Either TE.ErrorMessage (r, Symbol)
 type Run p sym = MapLeftRender (Run' p sym)
 
 type MapLeftRender :: Either PERun r -> Either TE.ErrorMessage r
 type family MapLeftRender eer where
     MapLeftRender (Right a) = Right a
-    MapLeftRender (Left  e) = Left (RenderDoc (PrettyERun e))
+    MapLeftRender (Left  e) = Left (RenderPDoc (PrettyERun e))
 
 -- | Run the given parser on the given 'Symbol', returning a 'PERun' on failure.
-type Run' :: ParserSym s r -> Symbol -> Either PERun (r, Symbol)
+type Run' :: Parser s r -> Symbol -> Either PERun (r, Symbol)
 type family Run' p sym where
-    Run' ('ParserSym pCh pEnd s) sym = RunStart pCh pEnd s (UnconsSymbol sym)
+    Run' ('Parser pCh pEnd s) sym = RunStart pCh pEnd s (UnconsSymbol sym)
+
+-- | Run the singled version of type-level parser on the given 'String',
+--   returning an 'ERun' on failure.
+--
+-- You must provide a function for demoting the singled return type.
+run'
+    :: forall {ps} {pr} (p :: Parser ps pr) r. SingParser p
+    => (forall a. PR p a -> r) -> String -> Either (ERun String) (r, String)
+run' demotePR str = withSomeSSymbol str $ \sstr ->
+    case sRun' (singParser @p) sstr of
+      SRight (STuple2 r str') -> Right (demotePR r, fromSSymbol str')
+      SLeft  e                -> Left $ demoteSERun e
+
+sRun'
+    :: SParser ss sr p
+    -> SSymbol str
+    -> SEither SERun (STuple2 sr SSymbol) (Run' p str)
+sRun' (SParser pCh pEnd sInit) str =
+    sRunStart pCh pEnd sInit (sUnconsSymbol str)
 
 -- | Run the given parser on the given 'Symbol', emitting a type error on
 --   failure.
@@ -33,7 +57,7 @@ type family Run' p sym where
 -- This /would/ be useful for @:k!@ runs, but it doesn't work properly with
 -- 'TE.TypeError's, printing @= (TypeError ...)@ instead of the error message.
 -- Alas! Instead, do something like @> Proxy \@(RunTest ...)@.
-type RunTest :: ParserSym s r -> Symbol -> (r, Symbol)
+type RunTest :: Parser s r -> Symbol -> (r, Symbol)
 type RunTest p sym = MapLeftTypeError (Run p sym)
 
 type MapLeftTypeError :: Either TE.ErrorMessage a -> a
@@ -48,6 +72,17 @@ type family RunStart pCh pEnd s msym where
 
     -- | Parsing empty string: call special early exit
     RunStart pCh pEnd s Nothing           = RunEnd0 (pEnd @@ s)
+
+sRunStart
+    :: SParserChSym  ss sr pCh
+    -> SParserEndSym ss sr pEnd
+    -> ss s
+    -> SMaybe (STuple2 SChar SSymbol) mstr
+    -> SEither SERun (STuple2 sr SSymbol) (RunStart pCh pEnd s mstr)
+sRunStart pCh pEnd s = \case
+  SJust (STuple2 ch str) ->
+    sRunCh pCh pEnd (SNat @0) ch (sUnconsSymbol str) (pCh @@ ch @@ s)
+  SNothing -> sRunEnd0 (pEnd @@ s)
 
 -- | Inspect character parser result.
 --
@@ -71,6 +106,25 @@ type family RunCh pCh pEnd idx ch' msym res where
     RunCh pCh pEnd idx ch' msym              (Err  e) =
         Left ('ERun idx ch' e)
 
+sRunCh
+    :: SParserChSym  ss sr pCh
+    -> SParserEndSym ss sr pEnd
+    -> SNat idx
+    -> SChar chPrev
+    -> SMaybe (STuple2 SChar SSymbol) mstr
+    -> SResult ss sr res
+    -> SEither SERun (STuple2 sr SSymbol) (RunCh pCh pEnd idx chPrev mstr res)
+sRunCh pCh pEnd idx chPrev mstr = \case
+  SCont s ->
+    case mstr of
+      SJust (STuple2 ch str) ->
+        sRunCh pCh pEnd (idx %+ (SNat @1)) ch (sUnconsSymbol str)
+            (pCh @@ ch @@ s)
+      SNothing ->
+        sRunEnd idx chPrev (pEnd @@ s)
+  SDone r -> SRight (STuple2 r (sReconsSymbol mstr))
+  SErr  e -> SLeft (SERun idx chPrev e)
+
 -- | Inspect end parser result.
 type RunEnd
     :: Natural -> Char
@@ -80,11 +134,26 @@ type family RunEnd idx ch res where
     RunEnd idx ch (Right r) = Right '(r, "")
     RunEnd idx ch (Left  e) = Left ('ERun idx ch e)
 
+sRunEnd
+    :: SNat idx -> SChar ch
+    -> SEither SE sr res
+    -> SEither SERun (STuple2 sr SSymbol) (RunEnd idx ch res)
+sRunEnd idx ch = \case
+  SRight r -> SRight (STuple2 r (SSymbol @""))
+  SLeft  e -> SLeft (SERun idx ch e)
+
 -- | Inspect end parser result for the empty string, where we have no previous
 --   character or (meaningful) index.
 type family RunEnd0 res where
     RunEnd0 (Right r) = Right '(r, "")
     RunEnd0 (Left  e) = Left (ERun0 e)
+
+sRunEnd0
+    :: SEither SE sr res
+    -> SEither SERun (STuple2 sr SSymbol) (RunEnd0 res)
+sRunEnd0 = \case
+  SRight r -> SRight (STuple2 r (SSymbol @""))
+  SLeft  e -> SLeft (SERun0 e)
 
 type PrettyERun :: PERun -> PDoc
 type family PrettyERun e where
@@ -110,3 +179,12 @@ data ERun s
 
 -- | Promoted 'ERun'.
 type PERun = ERun Symbol
+
+data SERun (erun :: PERun) where
+    SERun  :: SNat idx -> SChar ch -> SE e -> SERun ('ERun idx ch e)
+    SERun0 ::                         SE e -> SERun (ERun0 e)
+
+demoteSERun :: SERun erun -> ERun String
+demoteSERun = \case
+  SERun  idx ch e -> ERun  (fromSNat idx) (fromSChar ch) (demoteSE e)
+  SERun0        e -> ERun0                               (demoteSE e)

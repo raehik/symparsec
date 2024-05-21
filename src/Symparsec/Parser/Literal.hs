@@ -4,23 +4,23 @@ module Symparsec.Parser.Literal ( Literal, Literal', Literal'' ) where
 
 import Symparsec.Parser.Common
 import GHC.TypeLits ( Symbol, UnconsSymbol, ConsSymbol )
-import Symparsec.Util ( ReconsSymbol )
+import Singleraeh.Symbol ( ReconsSymbol )
 import TypeLevelShow.Utils ( ShowChar )
 
 -- literal state (it's a mouthful)
 type LiteralS = (Char, Maybe (Char, Symbol))
 
-type Literal'' :: Char -> Maybe (Char, Symbol) -> ParserSym LiteralS ()
-type Literal'' ch msym = 'ParserSym LiteralChSym LiteralEndSym '(ch, msym)
+type Literal'' :: Char -> Maybe (Char, Symbol) -> Parser LiteralS ()
+type Literal'' ch msym = 'Parser LiteralChSym LiteralEndSym '(ch, msym)
 
 -- | Parse the given 'Symbol'.
-type Literal :: Symbol -> ParserSym LiteralS ()
+type Literal :: Symbol -> Parser LiteralS ()
 type Literal sym = Literal' (UnconsSymbol sym)
 
 type EEmptyLit = ErrParserLimitation "cannot parse empty literal"
 
 type family Literal' msym where
-    Literal' Nothing           = 'ParserSym
+    Literal' Nothing           = 'Parser
         (FailChSym "Literal" EEmptyLit)
         (FailEndSym "Literal" EEmptyLit)
         '( '\0', Nothing)

@@ -11,6 +11,8 @@
     haskell-flake.url = "github:srid/haskell-flake";
     type-level-show.url   = "github:raehik/type-level-show";
     type-level-show.flake = false;
+    singleraeh.url   = "github:raehik/singleraeh";
+    singleraeh.flake = false;
   };
   outputs = inputs:
   let
@@ -34,21 +36,25 @@
         haskellProjects.ghc98 = {
           basePackages = pkgs.haskell.packages.ghc98;
           packages.type-level-show.source = inputs.type-level-show;
+          packages.singleraeh.source = inputs.singleraeh;
           devShell = nondevDevShell "ghc98";
         };
         haskellProjects.ghc96 = {
           basePackages = pkgs.haskell.packages.ghc96;
           packages.type-level-show.source = inputs.type-level-show;
+          packages.singleraeh.source = inputs.singleraeh;
           devShell.mkShellArgs.name = "ghc96-symparsec";
         };
         haskellProjects.ghc94 = {
           basePackages = pkgs.haskell.packages.ghc94;
           packages.type-level-show.source = inputs.type-level-show;
+          packages.singleraeh.source = inputs.singleraeh;
           devShell = nondevDevShell "ghc94";
         };
         haskellProjects.ghc92 = {
           basePackages = pkgs.haskell.packages.ghc92;
           packages.type-level-show.source = inputs.type-level-show;
+          packages.singleraeh.source = inputs.singleraeh;
           devShell = nondevDevShell "ghc92";
         };
       };

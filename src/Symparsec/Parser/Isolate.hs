@@ -1,6 +1,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec.Parser.Isolate where -- ( Isolate ) where
+-- TODO complex parser with weird edge cases. needs clean up & tests
+
+module Symparsec.Parser.Isolate ( Isolate, Isolate', Isolate'' ) where
 
 import Symparsec.Parser.Common
 import GHC.TypeLits ( Natural, type (-) )
@@ -9,25 +11,25 @@ import TypeLevelShow.Natural ( ShowNatDec )
 -- | Run the given parser isolated to the next @n@ characters.
 --
 -- All isolated characters must be consumed.
-type Isolate :: Natural -> ParserSym s r -> ParserSym (Natural, s) r
+type Isolate :: Natural -> Parser s r -> Parser (Natural, s) r
 type family Isolate n p where
-    Isolate 0 ('ParserSym pCh pEnd s) = 'ParserSym
+    Isolate 0 ('Parser pCh pEnd s) = 'Parser
         (FailChSym "Isolate" (ErrParserLimitation "cannot isolate 0"))
-        IsolateEndSym '(0, s)
+        (IsolateEndSym pEnd) '(0, s)
     Isolate n p = Isolate' n p
 
 -- | unsafe, doesn't check for bad stuck behaviour
-type Isolate' :: Natural -> ParserSym s r -> ParserSym (Natural, s) r
+type Isolate' :: Natural -> Parser s r -> Parser (Natural, s) r
 type family Isolate' n p where
-    Isolate' n ('ParserSym pCh pEnd s) = Isolate'' n pCh pEnd s
+    Isolate' n ('Parser pCh pEnd s) = Isolate'' n pCh pEnd s
 
 -- | unsafe, and unwrapped for permitting instances
 type Isolate''
     :: Natural
     -> ParserChSym s r -> ParserEndSym s r -> s
-    -> ParserSym (Natural, s) r
+    -> Parser (Natural, s) r
 type Isolate'' n pCh pEnd s =
-    'ParserSym (IsolateChSym pCh pEnd) IsolateEndSym '(n, s)
+    'Parser (IsolateChSym pCh pEnd) (IsolateEndSym pEnd) '(n, s)
 
 type IsolateCh
     :: ParserChSym s r
@@ -58,12 +60,18 @@ type family IsolateInner n a where
         (      Text "isolated parser ended without consuming all input ("
           :<>: Text (ShowNatDec n) :<>: Text " remaining)" ))
 
-type IsolateEnd :: PParserEnd (Natural, s) r
-type family IsolateEnd s where
-    IsolateEnd '(0, s) = Right '(0, s)
-    IsolateEnd '(n, s) = Left (EBase "Isolate"
+type IsolateEnd :: ParserEndSym s r -> PParserEnd (Natural, s) r
+type family IsolateEnd pEnd s where
+    IsolateEnd pEnd '(0, s) = IsolateEnd' (pEnd @@ s)
+    -- ^ will only occur on @Isolate 0@
+    IsolateEnd pEnd '(n, s) = Left (EBase "Isolate"
         (      Text "tried to isolate more than present (needed "
           :<>: Text (ShowNatDec n) :<>: Text " more)" ))
+
+--type IsolateEnd' :: Result s r -> Result (PParserEnd (Natural, s) r
+type family IsolateEnd' res where
+    IsolateEnd' (Right r) = Right r
+    IsolateEnd' (Left  e) = Left (EIn "Isolate" e)
 
 type IsolateChSym
     :: ParserChSym s r
@@ -79,6 +87,6 @@ type IsolateChSym1
 data IsolateChSym1 pCh pEnd ch s
 type instance App (IsolateChSym1 pCh pEnd ch) s = IsolateCh pCh pEnd ch s
 
-type IsolateEndSym :: ParserEndSym (Natural, s) r
-data IsolateEndSym s
-type instance App IsolateEndSym s = IsolateEnd s
+type IsolateEndSym :: ParserEndSym s r -> ParserEndSym (Natural, s) r
+data IsolateEndSym pEnd s
+type instance App (IsolateEndSym pEnd) s = IsolateEnd pEnd s

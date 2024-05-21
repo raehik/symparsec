@@ -7,13 +7,12 @@ import Symparsec.Parser.Common
 -- | Sequence two parsers, running left then right, and return both results.
 infixl 4 :<*>:
 type (:<*>:)
-    :: ParserSym sl rl
-    -> ParserSym sr rr
-    -> ParserSym (Either sl (rl, sr)) (rl, rr)
+    :: Parser sl rl
+    -> Parser sr rr
+    -> Parser (Either sl (rl, sr)) (rl, rr)
 type family pl :<*>: pr where
-    'ParserSym plCh plEnd sl :<*>: 'ParserSym prCh prEnd sr =
+    'Parser plCh plEnd sl :<*>: 'Parser prCh prEnd sr =
         Then' plCh plEnd sl prCh prEnd sr
---        'ParserSym (ThenChSym plCh prCh sr) (ThenEndSym prEnd) (Left sl)
 
 -- TODO thrown plEnd into ThenEndSym because otherwise we get reifying issues.
 -- lmao
@@ -24,9 +23,9 @@ type Then'
     -> ParserChSym  sr rr
     -> ParserEndSym sr rr
     -> sr
-    -> ParserSym (Either sl (rl, sr)) (rl, rr)
+    -> Parser (Either sl (rl, sr)) (rl, rr)
 type Then' plCh plEnd sl prCh prEnd sr =
-    'ParserSym (ThenChSym plCh prCh sr) (ThenEndSym plEnd prEnd) (Left sl)
+    'Parser (ThenChSym plCh prCh sr) (ThenEndSym plEnd prEnd) (Left sl)
 
 type ThenCh
     :: ParserChSym sl rl
@@ -74,6 +73,7 @@ type ThenChSym1
 data ThenChSym1 plCh prCh sr ch s
 type instance App (ThenChSym1 plCh prCh sr ch) s = ThenCh plCh prCh sr ch s
 
+-- TODO plEnd is unused. need it for reifying to work. lmao
 type ThenEndSym
     :: ParserEndSym sl rl
     -> ParserEndSym sr rr

@@ -1,3 +1,7 @@
+## 0.5.0 (2024-05-16)
+* lots of tweaks
+* add parser reifying at `Symparsec.Reify`
+
 ## 0.4.0 (2024-05-12)
 * rebrand from symbol-parser to Symparsec
 * rename `Drop` -> `Skip` (more commonly used for monadic parsers)

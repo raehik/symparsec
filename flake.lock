@@ -72,17 +72,34 @@
         "flake-parts": "flake-parts",
         "haskell-flake": "haskell-flake",
         "nixpkgs": "nixpkgs",
+        "singleraeh": "singleraeh",
         "type-level-show": "type-level-show"
+      }
+    },
+    "singleraeh": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1716255998,
+        "narHash": "sha256-mEp/ONIih6UkIlWjfHqRuR1TfY4SeuT87S5S5TCkLsA=",
+        "owner": "raehik",
+        "repo": "singleraeh",
+        "rev": "fe7950125b6ef6610acc628399f7942ac6089456",
+        "type": "github"
+      },
+      "original": {
+        "owner": "raehik",
+        "repo": "singleraeh",
+        "type": "github"
       }
     },
     "type-level-show": {
       "flake": false,
       "locked": {
-        "lastModified": 1715831437,
-        "narHash": "sha256-XvtRJAuudSAmShyE2oZLm2XNUU8FIDClKTf6oJf1a0s=",
+        "lastModified": 1716255311,
+        "narHash": "sha256-E423DvcYTHS0qazA4ZtTU/vTujZ3Kx6teCebxojw+rU=",
         "owner": "raehik",
         "repo": "type-level-show",
-        "rev": "8d7986d7c5dfb677cea045ea7cedb4edc2b9e334",
+        "rev": "cf9cddfc66cc3cf91f68a0d687d3192bf464371c",
         "type": "github"
       },
       "original": {

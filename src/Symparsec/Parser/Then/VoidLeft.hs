@@ -8,12 +8,12 @@ import Symparsec.Parser.Common
 --   of the left parser.
 infixl 4 :*>:
 type (:*>:)
-    :: ParserSym sl rl
-    -> ParserSym sr rr
-    -> ParserSym (Either sl sr) rr
+    :: Parser sl rl
+    -> Parser sr rr
+    -> Parser (Either sl sr) rr
 type family pl :*>: pr where
-    'ParserSym plCh plEnd sl :*>: 'ParserSym prCh prEnd sr =
-        'ParserSym (ThenVLChSym plCh prCh sr) (ThenVLEndSym prEnd) (Left sl)
+    'Parser plCh plEnd sl :*>: 'Parser prCh prEnd sr =
+        'Parser (ThenVLChSym plCh prCh sr) (ThenVLEndSym prEnd) (Left sl)
 
 type ThenVLCh
     :: ParserChSym sl rl

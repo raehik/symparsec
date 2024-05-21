@@ -25,8 +25,9 @@ import Symparsec.Parser.Take
 import GHC.TypeNats
 import GHC.Exts ( proxy# )
 
-import Symparsec.Parser.Then
 import Symparsec.Parser.End
+import Symparsec.Parser.Isolate
+import Symparsec.Parser.Then
 
 -- | Reify the given type-level parser.
 reifyP
@@ -79,9 +80,18 @@ runEnd f = \case
   Right r -> Right (r, "")
   Left  e -> Left  (f e)
 
--- | Manual reification of type-level parsers.
---
--- No static guarantees that behaviour matches.
+{- | Manual reification of type-level parsers.
+
+Assorted notes:
+
+  * No static guarantees that behaviour matches.
+  * We reify via the parser type, rather than the internal types. I'm not sure
+    this is the right design. It means we can write all definitions in a single
+    class and not have to worry about ambiguity (like we would if we used
+    @Demote s@, @Demote r@), but it's a little weird and is another obstacle in
+    reifying parsers e.g. we can't reify 'Result's because we can't reify @s@
+    and @r@ without the parser that use them.
+-}
 class ReifyP (p :: ParserSym s r) where
     -- | Reified parser state.
     type ReifyPS p :: Type
@@ -175,3 +185,23 @@ instance ReifyP End where
     reifyPCh'   = failCh "End" (Text "expected end of symbol")
     reifyPEnd'  = Right
     reifyPInit' = ()
+
+instance (ReifyP ('ParserSym pCh pEnd s), KnownNat n)
+  => ReifyP (Isolate'' n pCh pEnd s) where
+    type ReifyPS (Isolate'' n pCh pEnd s) =
+        (Natural, ReifyPS ('ParserSym pCh pEnd s))
+    type ReifyPR (Isolate'' n pCh pEnd s) = ReifyPR ('ParserSym pCh pEnd s)
+    reifyPCh'   = failCh "End" (Text "expected end of symbol")
+    reifyPEnd' (n, s) =
+        case n of
+          0 ->
+            case reifyPEnd @('ParserSym pCh pEnd s) s of
+              Right r -> Right r
+              Left  e -> Left (EIn "Isolate" e)
+          _ -> Left (EBase "Isolate"
+            (      Text "tried to isolate more than present (needed "
+              :<>: Text (show n) :<>: Text " more)" ))
+    reifyPInit' = (natVal'' @n, reifyPInit @('ParserSym pCh pEnd s))
+
+natVal'' :: forall (n :: Natural). KnownNat n => Natural
+natVal'' = natVal' (proxy# @n)

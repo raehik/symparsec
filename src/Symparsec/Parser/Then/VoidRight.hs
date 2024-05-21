@@ -11,12 +11,12 @@ import Symparsec.Parser.Common
 -- which is simpler and potentially faster since we parse left-to-right.
 infixl 4 :<*:
 type (:<*:)
-    :: ParserSym sl rl
-    -> ParserSym sr rr
-    -> ParserSym (Either sl (rl, sr)) rl
+    :: Parser sl rl
+    -> Parser sr rr
+    -> Parser (Either sl (rl, sr)) rl
 type family pl :<*: pr where
-    'ParserSym plCh plEnd sl :<*: 'ParserSym prCh prEnd sr =
-        'ParserSym (ThenVRChSym plCh prCh sr) (ThenVREndSym prEnd) (Left sl)
+    'Parser plCh plEnd sl :<*: 'Parser prCh prEnd sr =
+        'Parser (ThenVRChSym plCh prCh sr) (ThenVREndSym prEnd) (Left sl)
 
 type ThenVRCh
     :: ParserChSym sl rl

@@ -8,15 +8,15 @@ import TypeLevelShow.Natural ( ShowNatDec )
 
 -- | Skip forward @n@ characters. Fails if fewer than @n@ characters are
 --   available.
-type Skip :: Natural -> ParserSym Natural ()
+type Skip :: Natural -> Parser Natural ()
 type family Skip n where
-    Skip 0 = 'ParserSym
+    Skip 0 = 'Parser
         (FailChSym "Skip" (ErrParserLimitation "can't drop 0")) SkipEndSym 0
     Skip n = Skip' n
 
 -- | Unsafe 'Skip' which doesn't check for @n=0@. May get stuck.
-type Skip' :: Natural -> ParserSym Natural ()
-type Skip' n = 'ParserSym SkipChSym SkipEndSym n
+type Skip' :: Natural -> Parser Natural ()
+type Skip' n = 'Parser SkipChSym SkipEndSym n
 
 type SkipCh :: PParserCh Natural ()
 type family SkipCh ch n where
