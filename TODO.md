@@ -3,13 +3,12 @@
   * now using infix as base, but the internals use non-infix because it's
     easier. but they won't display properly in type errors... meh
 
-## Reifying
-### Automatic return type demoter
-I think having the user demote the return type themselves is appropriate -- most
-general, reminds what sort of library they are using -- but we could write a
-type class that demotes automatically, using base types like `String` and
-`Either` and `Tuple2`. Then if you don't need manual demotion, you can just plug
-in the type class method and it should figure out what to do.
+## Reifying (=singling)
+* reify more parsers
+  * the other takes are easy
+  * `Or` will be a pain
+  * `Natural` will need lots, but I've done similar in type-level-show
+  * the others should be largely OK. but it's a pain
 
 ## Combinators
 None in particular. Probably a lot of easy ones though, please consider making
