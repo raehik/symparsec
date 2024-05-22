@@ -23,7 +23,6 @@ module Symparsec.Parser where
   , ReifyE(reifyE)
 
   -- * Defun symbols
-  , ParserSym(..)
   , ParserChSym
   , ParserChSym1
   , ParserEndSym
@@ -35,7 +34,7 @@ module Symparsec.Parser where
 -}
 
 import GHC.TypeLits
-import DeFun.Core ( type (~>), Lam, Lam2 )
+import DeFun.Core
 import GHC.Exts ( proxy#, withDict )
 import TypeLevelShow.Doc
 import Singleraeh.Either ( SEither )
@@ -71,6 +70,11 @@ singParser
     :: forall {s} {r} (p :: Parser s r). SingParser p
     => SParser (PS p) (PR p) p
 singParser = singParser' @_ @_ @p
+
+class SingParser1 (sa :: ak -> Type) (p :: ak ~> Parser s r) where
+    type PS1 p sa :: s -> Type
+    type PR1 p sa :: r -> Type
+    singParser1'  :: Lam sa (SParser (PS1 p sa) (PR1 p sa)) p
 
 -- | A singled version of the given type-level parser.
 --
@@ -181,3 +185,6 @@ instance Demotable SE where
 
 withSingE :: forall e r. SE e -> (SingE e => r) -> r
 withSingE = withDict @(SingE e)
+
+-- TODO
+--type family PSym (psym :: Type) :: Parser s r

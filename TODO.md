@@ -4,6 +4,10 @@
     easier. but they won't display properly in type errors... meh
 
 ## Reifying (=singling)
+* expand on the SingParser1 concept
+  * lets me perform the extra checks that assert that you've written a valid
+    parser, on the term level
+  * how do I turn a SingParser into a SingParser1 ?
 * reify more parsers
   * the other takes are easy
   * `Or` will be a pain

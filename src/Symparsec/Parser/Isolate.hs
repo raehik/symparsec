@@ -14,6 +14,7 @@ import Singleraeh.Equality ( testEqElse )
 import Singleraeh.Natural ( (%-) )
 import Unsafe.Coerce ( unsafeCoerce )
 import Data.Type.Equality
+import TypeLevelShow.Doc
 
 type SIsolateS ss = STuple2 SNat ss
 
@@ -27,6 +28,7 @@ sIsolate
 sIsolate n (SParser pCh pEnd sInit) =
     SParser (isolateChSym pCh pEnd) (isolateEndSym pEnd) (STuple2 n sInit)
 
+{-
 instance
   ( p ~ 'Parser pCh pEnd sInit
   , SingParser p
@@ -37,6 +39,14 @@ instance
     type PR (Isolate' n pCh pEnd sInit) =
         PR ('Parser pCh pEnd sInit)
     singParser' = sIsolate (SNat @n) (singParser @p)
+-}
+
+instance KnownNat n => SingParser1 (SParser ss sr) (IsolateSym n) where
+    type PS1 (IsolateSym n) (SParser ss sr) = SIsolateS ss
+    type PR1 (IsolateSym n) (SParser ss sr) = sr
+    singParser1' = isolateSym (SNat @n)
+
+--instance SingParserSym (IsolateSym n p) where
 
 -- | Run the given parser isolated to the next @n@ characters.
 --
@@ -47,6 +57,21 @@ type family Isolate n p where
         (FailChSym "Isolate" (ErrParserLimitation "cannot isolate 0"))
         (IsolateEndSym pEnd) '(0, s)
     Isolate n ('Parser pCh pEnd s) = Isolate' n pCh pEnd s
+
+type IsolateSym :: Natural -> Parser s r ~> Parser (Natural, s) r
+data IsolateSym n p
+type instance App (IsolateSym n) p = Isolate n p
+
+isolateSym
+    :: SNat n
+    -> Lam (SParser ss sr) (SParser (SIsolateS ss) sr) (IsolateSym n)
+isolateSym n = Lam $ \p@(SParser _pCh pEnd sInit) ->
+    case testEquality n (SNat @0) of
+      Just Refl -> SParser
+        (failChSym (SSymbol @"Isolate") singDoc)
+        (isolateEndSym pEnd)
+        (STuple2 (SNat @0) sInit)
+      Nothing   -> unsafeCoerce $ sIsolate n p
 
 -- | unsafe (doesn't check for bad stuck behaviour) and unwrapped for permitting
 --   instances
