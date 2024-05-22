@@ -8,16 +8,16 @@ module Symparsec.Parser.Common
   , type (~>), type (@@), type App
 
   -- * Common definitions
-  , FailChSym
-  , FailEndSym
-  , RightSym
+  , FailChSym,  failChSym
+  , FailEndSym, failEndSym
   , ErrParserLimitation
   ) where
 
 import Symparsec.Parser
-import GHC.TypeLits ( Symbol )
-import DeFun.Core ( type App, type (~>), type (@@) )
-import TypeLevelShow.Doc ( Doc(..), PDoc )
+import GHC.TypeLits hiding ( ErrorMessage(..) )
+import DeFun.Core
+import TypeLevelShow.Doc
+import Singleraeh.Either
 
 -- | Fail with the given message when given any character to parse.
 type FailChSym :: Symbol -> PDoc -> ParserChSym s r
@@ -28,17 +28,18 @@ type FailChSym1 :: Symbol -> PDoc -> ParserChSym1 s r
 data FailChSym1 name e ch s
 type instance App (FailChSym1 name e ch) s = Err (EBase name e)
 
+failChSym
+    :: SSymbol name -> SDoc e -> SParserChSym ss sr (FailChSym name e)
+failChSym name e = Lam2 $ \_ch _s -> SErr $ SEBase name e
+
 -- | Fail with the given message if we're at the end of the symbol.
 type FailEndSym :: Symbol -> PDoc -> ParserEndSym s r
 data FailEndSym name e s
 type instance App (FailEndSym name e) s = Left (EBase name e)
 
--- | Defunctionalized promoted 'Right'.
---
--- May be used as an "emit parser state on end of string" end handler.
-type RightSym :: b ~> Either a b
-data RightSym b
-type instance App RightSym b = Right b
+failEndSym
+    :: SSymbol name -> SDoc e -> SParserEndSym ss sr (FailEndSym name e)
+failEndSym name e = Lam $ \_s -> SLeft $ SEBase name e
 
 -- | Helper for writing error messages to do with parser limitations (e.g. if
 --   you tried to use a non-consuming parser like @Skip 0@).

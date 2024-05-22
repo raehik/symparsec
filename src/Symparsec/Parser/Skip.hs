@@ -18,12 +18,12 @@ type family Skip n where
 type Skip' :: Natural -> Parser Natural ()
 type Skip' n = 'Parser SkipChSym SkipEndSym n
 
-type SkipCh :: PParserCh Natural ()
+type SkipCh :: ParserCh Natural ()
 type family SkipCh ch n where
     SkipCh _ 1 = Done '()
     SkipCh _ n = Cont (n-1)
 
-type SkipEnd :: PParserEnd Natural ()
+type SkipEnd :: ParserEnd Natural ()
 type family SkipEnd n where
     SkipEnd 0 = Right '()
     SkipEnd n = Left (EBase "Skip"

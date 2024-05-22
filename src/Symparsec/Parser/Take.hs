@@ -43,7 +43,7 @@ type family Take n where
 -- | Unsafe 'Take' which doesn't check for @n=0@. May get stuck.
 type Take' n = 'Parser TakeChSym TakeEndSym (TakeSInit n)
 
-type TakeCh :: PParserCh TakeS Symbol
+type TakeCh :: ParserCh TakeS Symbol
 type family TakeCh ch s where
     TakeCh ch '(1, chs) = Done (RevCharsToSymbol (ch : chs))
     TakeCh ch '(n, chs) = Cont '(n-1, ch : chs)
@@ -62,7 +62,7 @@ type TakeChSym1 :: ParserChSym1 (Natural, [Char]) Symbol
 data TakeChSym1 ch s
 type instance App (TakeChSym1 ch) s = TakeCh ch s
 
-type TakeEnd :: PParserEnd (Natural, [Char]) Symbol
+type TakeEnd :: ParserEnd (Natural, [Char]) Symbol
 type family TakeEnd s where
     TakeEnd '(0, chs) = Right (RevCharsToSymbol chs)
     TakeEnd '(n, _)   = Left (ETakeEnd n)

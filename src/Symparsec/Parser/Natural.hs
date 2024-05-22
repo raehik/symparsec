@@ -9,6 +9,7 @@ import Symparsec.Parser.Common
 import GHC.TypeNats ( Natural, type (+), type (*) )
 import Symparsec.Internal.Digits
 import TypeLevelShow.Natural ( ShowNatDec )
+import DeFun.Core ( Con1 )
 
 -- | Parse a binary (base 2) natural.
 type NatBin = NatBase  2 ParseBinaryDigitSym
@@ -26,12 +27,12 @@ type NatHex = NatBase 16 ParseHexDigitSym
 type NatBase
     :: Natural -> (Char ~> Maybe Natural) -> Parser Natural Natural
 type NatBase base parseDigit =
-    'Parser (NatBaseChSym base parseDigit) RightSym 0
+    'Parser (NatBaseChSym base parseDigit) (Con1 Right) 0
 
 type NatBaseCh
     :: Natural
     -> (Char ~> Maybe Natural)
-    -> PParserCh Natural Natural
+    -> ParserCh Natural Natural
 type NatBaseCh base parseDigit ch n = NatBaseCh' base n (parseDigit @@ ch)
 
 type family NatBaseCh' base n mDigit where

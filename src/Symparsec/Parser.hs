@@ -29,8 +29,6 @@ module Symparsec.Parser where
   , ParserEndSym
 
   -- * Promoted types
-  , PParserCh
-  , PParserEnd
   , PResult
   , PE
   ) where
@@ -45,6 +43,9 @@ import Singleraeh.Demote
 import Data.Kind ( Type )
 
 -- | A type-level parser, containing defunctionalization symbols.
+--
+-- Only intended for promoted use. For singled term-level parsers, use
+-- 'SParser'. (Symparsec doesn't provide "regular" term-level parsers.)
 data Parser s r = Parser
   { parserCh    :: ParserChSym s r
   -- ^ A defunctionalization symbol for a character parser.
@@ -71,6 +72,9 @@ singParser
     => SParser (PS p) (PR p) p
 singParser = singParser' @_ @_ @p
 
+-- | A singled version of the given type-level parser.
+--
+-- TODO consider swapping for STuple3...? this is much easier though
 type SParser :: (s -> Type) -> (r -> Type) -> Parser s r -> Type
 data SParser ss sr p where
     SParser
@@ -81,7 +85,7 @@ data SParser ss sr p where
 
 type SParserChSym ss sr f = Lam2 SChar ss (SResult ss sr) f
 type SParserChSym1 ch ss sr f = SChar ch -> Lam ss (SResult ss sr) (f ch)
-type SParserEndSym ss sr f = Lam ss (SEither SE sr) f
+type SParserEndSym ss sr f = Lam ss (SResultEnd sr) f
 
 -- | The result of a single step of a parser.
 --
@@ -95,10 +99,14 @@ data Result str s r
   | Done r       -- ^ OK, parse successful with result @r@
   | Err  (E str) -- ^ parse error
 
+type ResultEnd = Either PE
+
 data SResult (ss :: s -> Type) (sr :: r -> Type) (res :: PResult s r) where
     SCont :: ss s -> SResult ss sr (Cont s)
     SDone :: sr r -> SResult ss sr (Done r)
     SErr  :: SE e -> SResult ss sr (Err e)
+
+type SResultEnd = SEither SE
 
 -- | Parse a 'Char' with the given state.
 --
@@ -106,7 +114,7 @@ data SResult (ss :: s -> Type) (sr :: r -> Type) (res :: PResult s r) where
 -- for the final case, so as to not consume an extra 'Char'. This prevents many
 -- zero-length parsers. It's a bit weird. See
 -- 'Data.Type.Symbol.Parser.Parser.Drop' for an example.
-type ParserCh str s r = Char -> s -> Result str s r
+type ParserCh s r = Char -> s -> PResult s r
 
 -- | A defunctionalization symbol for a 'ParserCh'.
 type ParserChSym s r = Char ~> s ~> PResult s r
@@ -115,16 +123,10 @@ type ParserChSym s r = Char ~> s ~> PResult s r
 type ParserChSym1 s r = Char -> s ~> PResult s r
 
 -- | What a parser should do at the end of a 'Symbol'.
-type ParserEnd str s r = s -> Either (E str) r
+type ParserEnd s r = s -> ResultEnd r
 
 -- | A defunctionalization symbol for a 'ParserEnd'.
-type ParserEndSym s r = s ~> Either PE r
-
--- | Promoted 'ParserCh'.
-type PParserCh s r = ParserCh Symbol s r
-
--- | Promoted 'ParserEnd'.
-type PParserEnd s r = ParserEnd Symbol s r
+type ParserEndSym s r = s ~> ResultEnd r
 
 -- | Promoted 'Result'.
 type PResult = Result Symbol
@@ -176,8 +178,6 @@ demoteSE = \case
 instance Demotable SE where
     type Demote SE = E String
     demote = demoteSE
-
-type SResultEnd = SEither SE
 
 withSingE :: forall e r. SE e -> (SingE e => r) -> r
 withSingE = withDict @(SingE e)

@@ -66,7 +66,7 @@ type ThenCh
     :: ParserChSym sl rl
     -> ParserChSym sr rr
     -> sr
-    -> PParserCh (Either sl (rl, sr)) (rl, rr)
+    -> ParserCh (Either sl (rl, sr)) (rl, rr)
 type family ThenCh plCh prCh sr ch s where
     ThenCh plCh prCh sr ch (Left  sl) =
         ThenL sr (plCh @@ ch @@ sl)

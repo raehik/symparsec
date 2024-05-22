@@ -33,7 +33,7 @@ type family LiteralCh ch s where
         (      Text "expected " :<>: Text (ShowChar ch0)
           :<>: Text    ", got " :<>: Text (ShowChar ch)))
 
-type LiteralEnd :: PParserEnd LiteralS ()
+type LiteralEnd :: ParserEnd LiteralS ()
 type family LiteralEnd s where
     LiteralEnd '(ch0, msym) = Left (EBase "Literal"
       (      Text "still parsing literal: "

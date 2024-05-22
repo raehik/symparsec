@@ -22,7 +22,7 @@ type ThenVRCh
     :: ParserChSym sl rl
     -> ParserChSym sr rr
     -> sr
-    -> PParserCh (Either sl (rl, sr)) rl
+    -> ParserCh (Either sl (rl, sr)) rl
 type family ThenVRCh plCh prCh sr ch s where
     ThenVRCh plCh prCh sr ch (Left  sl) =
         ThenVRL sr (plCh @@ ch @@ sl)

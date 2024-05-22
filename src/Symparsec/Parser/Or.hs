@@ -42,7 +42,7 @@ type OrCh
     :: ParserChSym sl rl
     -> ParserChSym sr rr
     -> sr
-    -> PParserCh (Either (sl, [Char]) sr) (Either rl rr)
+    -> ParserCh (Either (sl, [Char]) sr) (Either rl rr)
 type family OrCh plCh prCh sr ch s where
     -- | Parsing left
     OrCh plCh prCh sr ch (Left  '(sl, chs)) =
@@ -111,7 +111,7 @@ type OrEnd
     -> ParserChSym  sr rr
     -> ParserEndSym sr rr
     -> sr
-    -> PParserEnd (Either (sl, [Char]) sr) (Either rl rr)
+    -> ParserEnd (Either (sl, [Char]) sr) (Either rl rr)
 type family OrEnd plEnd prCh prEnd sr res where
     -- | Input ended on L.
     OrEnd plEnd prCh prEnd sr (Left  '(sl, chs)) =
