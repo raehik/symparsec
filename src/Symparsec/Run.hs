@@ -194,3 +194,25 @@ demoteSERun = \case
 instance Demotable SERun where
     type Demote SERun = ERun String
     demote = demoteSERun
+
+---
+
+type XRun' :: Parser' s0 s r -> Symbol -> Either PERun (r, Symbol)
+type family XRun' p str where
+    XRun' ('Parser' pCh pEnd s0 sInit) str =
+        XRunStart pCh pEnd (sInit @@ s0) (UnconsSymbol str)
+
+type family XRunStart pCh pEnd s mstr where
+    XRunStart pCh pEnd (Right s) (Just '(ch, str)) =
+        RunCh pCh pEnd 0 ch (UnconsSymbol str) (pCh @@ ch @@ s)
+
+    XRunStart pCh pEnd (Right s) Nothing =
+        RunEnd0 (pEnd @@ s)
+
+    -- | non-consuming parser on empty string: run end handler
+    XRunStart pCh pEnd (Left '(e, s)) Nothing =
+        RunEnd0 (pEnd @@ s)
+
+    -- | non-consuming parser on non-empty string: fail
+    XRunStart pCh pEnd (Left '(e, s)) (Just cstr) =
+        Left (ERun0 e)

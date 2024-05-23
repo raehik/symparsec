@@ -71,10 +71,11 @@ singParser
     => SParser (PS p) (PR p) p
 singParser = singParser' @_ @_ @p
 
-class SingParser1 (sa :: ak -> Type) (p :: ak ~> Parser s r) where
+class SingParser1 (p :: ak ~> Parser s r) (sa :: ak -> Type) where
     type PS1 p sa :: s -> Type
     type PR1 p sa :: r -> Type
-    singParser1'  :: Lam sa (SParser (PS1 p sa) (PR1 p sa)) p
+    --singParser1'  :: Lam sa (SParser (PS1 p sa) (PR1 p sa)) p
+    --singParser1'  :: sa a -> SParser (PS1 p sa) (PR1 p sa) (p @@ a)
 
 -- | A singled version of the given type-level parser.
 --
@@ -86,6 +87,16 @@ data SParser ss sr p where
         -> SParserEndSym ss sr pEnd
         -> ss sInit
         -> SParser ss sr ('Parser pCh pEnd sInit)
+
+{-
+type SParserSym
+    :: (s -> Type)
+    -> (r -> Type)
+    -> (SParser s r)
+    -> Type
+data SParserSym ss sr sa psym where
+    SParserSym :: SParser ss sr (p @@ a) -> SParserSym1 ss sr sa psym
+-}
 
 type SParserChSym ss sr f = Lam2 SChar ss (SResult ss sr) f
 type SParserChSym1 ch ss sr f = SChar ch -> Lam ss (SResult ss sr) (f ch)
@@ -186,5 +197,30 @@ instance Demotable SE where
 withSingE :: forall e r. SE e -> (SingE e => r) -> r
 withSingE = withDict @(SingE e)
 
--- TODO
---type family PSym (psym :: Type) :: Parser s r
+type SParserSym0 ss sr p sa = Lam sa (SParser ss sr) p
+type ParserSym1 a s r = a ~> Parser s r
+
+{-
+type SParser :: (s -> Type) -> (r -> Type) -> Parser s r -> Type
+data SParser ss sr p where
+    SParser
+        :: SParserChSym ss sr pCh
+        -> SParserEndSym ss sr pEnd
+        -> ss sInit
+        -> SParser ss sr ('Parser pCh pEnd sInit)
+-}
+
+data Parser' s0 s r = Parser'
+  { parser'Ch    :: ParserChSym s r
+  , parser'End   :: ParserEndSym s r
+  , parser'S0    :: s0
+  , parser'SInit :: ParserSInitSym s0 s
+  }
+
+type ParserSInit s0 s = s0 -> Either (PE, s) s
+type ParserSInitSym s0 s = s0 ~> Either (PE, s) s
+
+data ParserInit s0 s = ParserInit
+  { parserInitS0 :: s0
+  , parserInitF  :: s0 ~> Either (PE, s) s
+  }

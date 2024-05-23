@@ -1,5 +1,8 @@
 {-# LANGUAGE UndecidableInstances #-} -- for natural multiplication etc.
 
+-- TODO to handle empty input, change state to Maybe Natural.
+-- means we get error instead of 0
+
 module Symparsec.Parser.Natural
   ( NatBin, NatOct, NatDec, NatHex
   , NatBase

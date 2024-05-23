@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE AllowAmbiguousTypes #-} -- TODO for singling
 
 -- TODO complex parser with weird edge cases. needs clean up & tests
 
@@ -15,18 +16,67 @@ import Singleraeh.Natural ( (%-) )
 import Unsafe.Coerce ( unsafeCoerce )
 import Data.Type.Equality
 import TypeLevelShow.Doc
+import Data.Kind ( Type )
+
+class SingIsolate n (p :: Parser s r) where
+    singIsolate' :: SParser (SIsolateS (PS p)) (PR p) (Isolate n p)
+instance (KnownNat n, SingParser p) => SingIsolate n p where
+    singIsolate' = sIsolate (SNat @n) (singParser @p)
+
+singIsolate
+    :: forall {s} {r} n p. SingIsolate n (p :: Parser s r)
+    => SParser (SIsolateS (PS p)) (PR p) (Isolate n p)
+singIsolate = singIsolate' @_ @_ @n @p
+
+--instance SingParser (SParser ss sr sa psym) where
+
+{-
+instance SingParser1 (IsolateSym n) (SParser ss sr) where
+    type PS1 (IsolateSym n) (SParser ss sr) = SIsolateS ss
+    type PR1 (IsolateSym n) (SParser ss sr) = sr
+    singParser1' = singIsolate' @n @(Parser 
+-}
 
 type SIsolateS ss = STuple2 SNat ss
 
-type SIsolate n ss sr pCh pEnd sInit =
-    SParser (SIsolateS ss) sr (Isolate' n pCh pEnd sInit)
+type IsolateSym :: Natural -> Parser s r ~> Parser (Natural, s) r
+data IsolateSym n p
+type instance App (IsolateSym n) p = Isolate' n p
+
+-- | Run the given parser isolated to the next @n@ characters.
+--
+-- All isolated characters must be consumed.
+type Isolate n p = IsolateSym n @@ p
+
+sIsolateSym
+    :: SNat n
+    -> SParserSym0 (SIsolateS ss) sr (IsolateSym n) (SParser ss sr)
+sIsolateSym n = Lam $ \(SParser pCh pEnd sInit) ->
+    case testEquality n (SNat @0) of
+      Just Refl -> SParser
+        (failChSym (SSymbol @"Isolate") singDoc)
+        (isolateEndSym pEnd)
+        (STuple2 n sInit)
+      Nothing   -> unsafeCoerce $ SParser
+        (isolateChSym pCh pEnd)
+        (isolateEndSym pEnd)
+        (STuple2 n sInit)
+
 
 sIsolate
     :: SNat n
-    -> SParser ss sr ('Parser pCh pEnd sInit)
-    -> SIsolate n ss sr pCh pEnd sInit
+    -> SParser ss sr p
+    -> SParser (SIsolateS ss) sr (Isolate n p)
 sIsolate n (SParser pCh pEnd sInit) =
-    SParser (isolateChSym pCh pEnd) (isolateEndSym pEnd) (STuple2 n sInit)
+    case testEquality n (SNat @0) of
+      Just Refl -> SParser
+        (failChSym (SSymbol @"Isolate") singDoc)
+        (isolateEndSym pEnd)
+        (STuple2 n sInit)
+      Nothing   -> unsafeCoerce $ SParser
+        (isolateChSym pCh pEnd)
+        (isolateEndSym pEnd)
+        (STuple2 n sInit)
 
 {-
 instance
@@ -39,48 +89,19 @@ instance
     type PR (Isolate' n pCh pEnd sInit) =
         PR ('Parser pCh pEnd sInit)
     singParser' = sIsolate (SNat @n) (singParser @p)
--}
 
 instance KnownNat n => SingParser1 (SParser ss sr) (IsolateSym n) where
     type PS1 (IsolateSym n) (SParser ss sr) = SIsolateS ss
     type PR1 (IsolateSym n) (SParser ss sr) = sr
     singParser1' = isolateSym (SNat @n)
+-}
 
---instance SingParserSym (IsolateSym n p) where
-
--- | Run the given parser isolated to the next @n@ characters.
---
--- All isolated characters must be consumed.
-type Isolate :: Natural -> Parser s r -> Parser (Natural, s) r
-type family Isolate n p where
-    Isolate 0 ('Parser pCh pEnd s) = 'Parser
+type family Isolate' n p where
+    Isolate' 0 ('Parser pCh pEnd s) = 'Parser
         (FailChSym "Isolate" (ErrParserLimitation "cannot isolate 0"))
         (IsolateEndSym pEnd) '(0, s)
-    Isolate n ('Parser pCh pEnd s) = Isolate' n pCh pEnd s
-
-type IsolateSym :: Natural -> Parser s r ~> Parser (Natural, s) r
-data IsolateSym n p
-type instance App (IsolateSym n) p = Isolate n p
-
-isolateSym
-    :: SNat n
-    -> Lam (SParser ss sr) (SParser (SIsolateS ss) sr) (IsolateSym n)
-isolateSym n = Lam $ \p@(SParser _pCh pEnd sInit) ->
-    case testEquality n (SNat @0) of
-      Just Refl -> SParser
-        (failChSym (SSymbol @"Isolate") singDoc)
-        (isolateEndSym pEnd)
-        (STuple2 (SNat @0) sInit)
-      Nothing   -> unsafeCoerce $ sIsolate n p
-
--- | unsafe (doesn't check for bad stuck behaviour) and unwrapped for permitting
---   instances
-type Isolate'
-    :: Natural
-    -> ParserChSym s r -> ParserEndSym s r -> s
-    -> Parser (Natural, s) r
-type Isolate' n pCh pEnd s =
-    'Parser (IsolateChSym pCh pEnd) (IsolateEndSym pEnd) '(n, s)
+    Isolate' n ('Parser pCh pEnd s) =
+        'Parser (IsolateChSym pCh pEnd) (IsolateEndSym pEnd) '(n, s)
 
 type IsolateCh
     :: ParserChSym s r
@@ -196,3 +217,43 @@ type EIsolateRemaining n = EBase "Isolate"
 
 eIsolateRemaining :: SNat n -> SE (EIsolateRemaining n)
 eIsolateRemaining n = withKnownSymbol (sShowNatDec n) singE
+
+type IsolateSInit
+    :: ParserSInitSym s0 s
+    -> ParserSInit (Natural, s0) (Natural, s)
+type family IsolateSInit sInit s0 where
+    IsolateSInit sInit '(0, s) =
+        IsolateSInit0 (sInit @@ s)
+    IsolateSInit sInit '(n, s) =
+        IsolateSInitN n (sInit @@ s)
+
+type family IsolateSInit0 ees where
+    -- | isolating 0, wrapped parser is consuming: error
+    IsolateSInit0 (Right      s)  = Left  '(EBase "Isolate"
+        (Text "isolating 0 but wrapped parser consuming"), '(0, s))
+
+    -- | isolating 0, wrapped parser is also non-consuming: emit
+    IsolateSInit0 (Left  '(e, s)) = Left  '(e, '(0, s))
+
+type family IsolateSInitN n ees where
+    -- | isolating n, wrapped parser is consuming: OK
+    IsolateSInitN n (Right      s)  = Right '(n, s)
+
+    -- | isolating n, wrapped parser is non-consuming: error
+    -- TODO should we be wrapping here? my intuition is that the end handler
+    -- will do its job
+    IsolateSInitN n (Left  '(e, s)) = Left  '(e, '(n, s))
+
+type IsolateSInitSym
+    :: ParserSInitSym s0 s
+    -> ParserSInitSym (Natural, s0) (Natural, s)
+data IsolateSInitSym sInit s0
+type instance App (IsolateSInitSym sInit) s0 = IsolateSInit sInit s0
+
+type family XIsolate n p where
+    XIsolate n ('Parser' pCh pEnd s0 sInit) = XIsolate' n pCh pEnd s0 sInit
+type XIsolate' n pCh pEnd s0 sInit = 'Parser'
+    (IsolateChSym pCh pEnd)
+    (IsolateEndSym pEnd)
+    '(n, s0)
+    (IsolateSInitSym sInit)

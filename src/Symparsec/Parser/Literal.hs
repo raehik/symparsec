@@ -1,11 +1,27 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec.Parser.Literal ( Literal, Literal', Literal'' ) where
+module Symparsec.Parser.Literal where -- ( Literal, Literal', Literal'' ) where
 
 import Symparsec.Parser.Common
 import GHC.TypeLits ( Symbol, UnconsSymbol, ConsSymbol )
 import Singleraeh.Symbol ( ReconsSymbol )
 import TypeLevelShow.Utils ( ShowChar )
+
+type XLiteral :: Symbol -> Parser' Symbol LiteralS ()
+type XLiteral str = 'Parser' LiteralChSym LiteralEndSym str LiteralInitSym
+
+type LiteralInit :: ParserSInit Symbol LiteralS
+type LiteralInit str = LiteralInit' (UnconsSymbol str)
+
+type LiteralInit' :: ParserSInit (Maybe (Char, Symbol)) LiteralS
+type family LiteralInit' mstr where
+    LiteralInit' (Just '(ch, str)) = Right '(ch, UnconsSymbol str)
+    LiteralInit' Nothing           =
+        Left  '(EBase "TODO" (Text "TODO"), '( '\0', Nothing))
+
+type LiteralInitSym :: ParserSInitSym Symbol LiteralS
+data LiteralInitSym str
+type instance App LiteralInitSym str = LiteralInit str
 
 -- literal state (it's a mouthful)
 type LiteralS = (Char, Maybe (Char, Symbol))

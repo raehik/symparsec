@@ -118,9 +118,42 @@ For concrete examples, see the implementation of `Drop` and `Literal`.
   * Combinators such as `<|>` can emulate backtracking, but they are complex and
     hard to reason about (they may have bugs!).
 
-### Feature: Parsers may be reified to use at runtime
-See `Symparsec.Reify`. Not that this currently requires duplication of work, and
-does not guarantee matching behaviour between type- and term-levels.
+### Pitfall: Clumsy invalid parser handling
+As mentioned above, it is possible to define invalid parsers. We can catch them
+ad-hoc on the type-level, but not on the term-level when singling, and it
+complicates reflecting.
+
+We could defunctionalize a step further. Reflection would be cleaner. But parser
+syntax would have to change. We'd need something like `Run Take 1 "input"`,
+where `Take` is a defun symbol taking a single argument. More examples:
+
+  * `Isolate 1 Take 1`: isolate takes 3 args: n, a -> p, a
+  * `Then Isolate 5 Take 1`: `Isolate 5 :<|>: Take 1`
+    * can't binop `:<|>:` anymore :(
+
+It doesn't seem like a good idea at all. Instead, we must deal with some weird
+reflecting, and wonky (type) errors when you define invalid parsers.
+
+Thought: We could add another defun symbol to `Parser`, like
+`parserCheck :: s -> Maybe (E, s)`. Even so, `Literal` would need reworking
+(actually I think it needs it, I only wrote it like that to reduce equation
+count, but it's silly).
+
+That function would check that the initial state is OK. If it is, `Nothing`. If
+not, it returns a default state to use _only_ for the end handler, and an error
+to emit if it tries to consume a character.
+
+I might actually need `parserInit :: s0 -> Either (E, s1) s1`? At least, it
+would appear to help my reflecting. See `Literal''`, which is a very ugly way of
+doing things. If I could do `type Literal str = 'Parser pCh pEnd str ...`...
+
+OH do I simply replace the init state with a defun symbol?
+
+I need to consider what this changes for combinator parsers. `Or` will be
+interesting.
+
+### Feature: Parsers may be reflected to use at runtime, with guaranteed same behaviour
+TODO
 
 ## Contributing
 I would gladly accept further combinators or other suggestions. Please add an
