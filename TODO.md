@@ -1,8 +1,15 @@
 # Symparsec to-dos
-* TODO I got reify and reflect mixed up lol. fix dat
+* think I use reify vs. reflect properly but not 100% sure
 * consider binary combinator names...
   * now using infix as base, but the internals use non-infix because it's
     easier. but they won't display properly in type errors... meh
+
+## Design flaws
+### Must unwrap combinators for reifying
+See `Isolate'`. We could resolve this by defunctionalizing _again_, but it's
+actually just a style matter, since the type family has a single, non-stuckable
+equation. So for now, I think this is easiest, even if it's annoying. But if
+there's another way that doesn't add a ton more boilerplate, heck yeah.
 
 ## Reifying (=singling)
 * expand on the SingParser1 concept

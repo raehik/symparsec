@@ -29,23 +29,9 @@ source-repository head
 
 library
   exposed-modules:
-      Symparsec
       Symparsec.Internal.Digits
       Symparsec.Internal.List
       Symparsec.Parser
-      Symparsec.Parser.Common
-      Symparsec.Parser.End
-      Symparsec.Parser.Isolate
-      Symparsec.Parser.Literal
-      Symparsec.Parser.Natural
-      Symparsec.Parser.Or
-      Symparsec.Parser.Skip
-      Symparsec.Parser.Take
-      Symparsec.Parser.Then
-      Symparsec.Parser.Then.VoidLeft
-      Symparsec.Parser.Then.VoidRight
-      Symparsec.Parsers
-      Symparsec.Run
   other-modules:
       Paths_symparsec
   hs-source-dirs:

@@ -1,127 +1,93 @@
-{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE AllowAmbiguousTypes #-} -- for singling
 
 {- | Base definitions for Symparsec parsers.
 
-Types are designed to be useable on both term and type level where possible.
-Type synonyms are provided for promoted types, for saving keystrokes.
+Some types are useable both on term-level, and promoted on type-level e.g.
+'Result'. For ease of use, you can access the promoted version via type synonyms
+like 'PResult' (for promoted X). (This pattern is copied from @singletons@.)
 
-Some notes when writing parsers:
+Some definitions I use:
 
-  * No need to insert the previous character into error messages, the runner
-    does that.
+  * "defun symbol": Short for "defunctionalization symbol". A method of passing
+    type-level functions (type families) around, without applying them. We use
+    phadej's @defun@ library for the basic functionality.
+  * "consuming [parser]": A parser which must consume its input. Symparsec
+    parsers are always consuming, as it helps keep parser running simple. This
+    is problematic, as you can define non-consuming parsers e.g. @Take 0@. We
+    handle this by preprocessing initial parser state, to check for such cases.
 -}
 
-module Symparsec.Parser where
-{-
+module Symparsec.Parser
   (
-  -- * Parsers
-    Parser(..)
-  , ParserCh
-  , ParserEnd
-  , Result(..)
-  , E(..)
-  , ReifyE(reifyE)
+  -- * Parser
+    Parser(..), SParser(..)
+  , ParserCh, ParserChSym, ParserChSym1, SParserChSym, SParserChSym1
+  , ParserEnd, ParserEndSym, SParserEndSym
+  , ParserSInit, ParserSInitSym, SParserSInitSym
+  , Result(..), PResult, SResult(..)
+  , PResultEnd, SResultEnd
+  , PResultSInit, SResultSInit
 
-  -- * Defun symbols
-  , ParserChSym
-  , ParserChSym1
-  , ParserEndSym
+  -- * Error
+  , E(..), PE, SE(..), demoteSE, SingE(singE), withSingE
 
-  -- * Promoted types
-  , PResult
-  , PE
+  -- * Singling
+  , SingParser(..)
+  , singParser
   ) where
--}
 
 import GHC.TypeLits
 import DeFun.Core
-import GHC.Exts ( proxy#, withDict )
+import GHC.Exts ( withDict )
 import TypeLevelShow.Doc
 import Singleraeh.Either ( SEither )
 import Singleraeh.Demote
+import Singleraeh.Tuple ( STuple2 )
 import Data.Kind ( Type )
 
 -- | A type-level parser, containing defunctionalization symbols.
 --
 -- Only intended for promoted use. For singled term-level parsers, use
 -- 'SParser'. (Symparsec doesn't provide "regular" term-level parsers.)
-data Parser s r = Parser
+--
+-- I would make this demotable, but the defun symbols get in the way.
+data Parser s0 s r = Parser
   { parserCh    :: ParserChSym s r
-  -- ^ A defunctionalization symbol for a character parser.
+  -- ^ A consuming 'Char' parser (defun symbol).
+
   , parserEnd   :: ParserEndSym s r
-  -- ^ A defunctionalization symbol for an end handler.
-  , parserSInit :: s
-  -- ^ Initial parser state.
+  -- ^ An end handler (defun symbol).
+
+  , parserS0    :: s0
+  -- ^ Initial raw parser state.
+  --
+  -- Do not apply type families here. Instead, do so in 'parserSInit'.
+  -- That way, we can do those checks in singled parsers too.
+
+  , parserSInit :: ParserSInitSym s0 s
+  -- ^ Parser state initializer (defun symbol)
+  --
+  -- The runner passes the initial raw state at 'parserS0' to this function.
+  -- We defunctionalize state initialization in this way to better support
+  -- singling parsers.
   }
 
--- | Parsers with singled implementations.
-class SingParser (p :: Parser s r) where
-    -- | A singleton for the parser state.
-    type PS p :: s -> Type
+-- TODO provide a Parser' type synonym and helpers where s0 ~ s, and sInit is
+-- just Right
 
-    -- | A singleton for the parser return type.
-    type PR p :: r -> Type
-
-    -- | The singled parser.
-    singParser' :: SParser (PS p) (PR p) p
-
--- | 'singParser'' with better type application ergonomics.
-singParser
-    :: forall {s} {r} (p :: Parser s r). SingParser p
-    => SParser (PS p) (PR p) p
-singParser = singParser' @_ @_ @p
-
-class SingParser1 (p :: ak ~> Parser s r) (sa :: ak -> Type) where
-    type PS1 p sa :: s -> Type
-    type PR1 p sa :: r -> Type
-    --singParser1'  :: Lam sa (SParser (PS1 p sa) (PR1 p sa)) p
-    --singParser1'  :: sa a -> SParser (PS1 p sa) (PR1 p sa) (p @@ a)
-
--- | A singled version of the given type-level parser.
+-- | A singled parser.
 --
 -- TODO consider swapping for STuple3...? this is much easier though
-type SParser :: (s -> Type) -> (r -> Type) -> Parser s r -> Type
-data SParser ss sr p where
+type SParser
+    :: (s0 -> Type) -> (s -> Type) -> (r -> Type) -> Parser s0 s r
+    -> Type
+data SParser ss0 ss sr p where
     SParser
         :: SParserChSym ss sr pCh
         -> SParserEndSym ss sr pEnd
-        -> ss sInit
-        -> SParser ss sr ('Parser pCh pEnd sInit)
-
-{-
-type SParserSym
-    :: (s -> Type)
-    -> (r -> Type)
-    -> (SParser s r)
-    -> Type
-data SParserSym ss sr sa psym where
-    SParserSym :: SParser ss sr (p @@ a) -> SParserSym1 ss sr sa psym
--}
-
-type SParserChSym ss sr f = Lam2 SChar ss (SResult ss sr) f
-type SParserChSym1 ch ss sr f = SChar ch -> Lam ss (SResult ss sr) (f ch)
-type SParserEndSym ss sr f = Lam ss (SResultEnd sr) f
-
--- | The result of a single step of a parser.
---
--- Promotable. Instantiate with 'String' for term-level, 'Symbol' for
--- type-level.
---
--- No reifying provided as we have no general way to reify @s@ state and @r@
--- result types.
-data Result str s r
-  = Cont s       -- ^ OK, continue with the given state
-  | Done r       -- ^ OK, parse successful with result @r@
-  | Err  (E str) -- ^ parse error
-
-type ResultEnd = Either PE
-
-data SResult (ss :: s -> Type) (sr :: r -> Type) (res :: PResult s r) where
-    SCont :: ss s -> SResult ss sr (Cont s)
-    SDone :: sr r -> SResult ss sr (Done r)
-    SErr  :: SE e -> SResult ss sr (Err e)
-
-type SResultEnd = SEither SE
+        -> ss0 s0
+        -> SParserSInitSym ss0 ss sInit
+        -> SParser ss0 ss sr ('Parser pCh pEnd s0 sInit)
 
 -- | Parse a 'Char' with the given state.
 --
@@ -137,22 +103,48 @@ type ParserChSym s r = Char ~> s ~> PResult s r
 -- | A partially-applied defunctionalization symbol for a 'ParserCh'.
 type ParserChSym1 s r = Char -> s ~> PResult s r
 
+type SParserChSym ss sr pCh = Lam2 SChar ss (SResult ss sr) pCh
+type SParserChSym1 ch ss sr pCh = SChar ch -> Lam ss (SResult ss sr) (pCh ch)
+
 -- | What a parser should do at the end of a 'Symbol'.
-type ParserEnd s r = s -> ResultEnd r
+type ParserEnd s r = s -> PResultEnd r
 
 -- | A defunctionalization symbol for a 'ParserEnd'.
-type ParserEndSym s r = s ~> ResultEnd r
+type ParserEndSym s r = s ~> PResultEnd r
+
+type SParserEndSym ss sr pEnd = Lam ss (SResultEnd sr) pEnd
+
+type ParserSInit s0 s = s0 -> PResultSInit s
+type ParserSInitSym s0 s = s0 ~> PResultSInit s
+type SParserSInitSym ss0 ss sInit = Lam ss0 (SResultSInit ss) sInit
+
+-- | The result of a single step of a parser.
+--
+-- Promotable. Instantiate with 'String' for term-level, 'Symbol' for
+-- type-level.
+data Result str s r
+  = Cont s       -- ^ OK, continue with the given state
+  | Done r       -- ^ OK, parse successful with result @r@
+  | Err  (E str) -- ^ parse error
 
 -- | Promoted 'Result'.
 type PResult = Result Symbol
+
+data SResult (ss :: s -> Type) (sr :: r -> Type) (res :: PResult s r) where
+    SCont :: ss s -> SResult ss sr (Cont s)
+    SDone :: sr r -> SResult ss sr (Done r)
+    SErr  :: SE e -> SResult ss sr (Err e)
+
+type PResultEnd = Either PE
+type SResultEnd = SEither SE
+
+type PResultSInit s = Either (PE, s) s
+type SResultSInit ss = SEither (STuple2 SE ss) ss
 
 -- | Parser error.
 --
 -- Promotable. Instantiate with 'String' for term-level, 'Symbol' for
 -- type-level.
---
--- Reifiable (see 'ReifyE'). Also easily singleton-d, if you like that sort of
--- thing.
 data E str
   -- | Base parser error.
   = EBase
@@ -168,22 +160,9 @@ data E str
 -- | Promoted 'E'.
 type PE = E Symbol
 
--- | Reify a promoted 'E' to its term-level equivalent.
-class ReifyE (e :: E Symbol) where reifyE :: E String
-instance (SingDoc doc, KnownSymbol name) => ReifyE (EBase name doc) where
-    reifyE = EBase (symbolVal' (proxy# @name)) (reifyDoc @doc)
-instance (ReifyE e, KnownSymbol name) => ReifyE (EIn name e) where
-    reifyE = EIn (symbolVal' (proxy# @name)) (reifyE @e)
-
 data SE (e :: PE) where
     SEBase :: SSymbol name -> SDoc doc -> SE (EBase name doc)
     SEIn   :: SSymbol name -> SE   e   -> SE (EIn name e)
-
-class SingE (e :: PE) where singE :: SE e
-instance (KnownSymbol name, SingDoc doc) => SingE (EBase name doc) where
-    singE = SEBase (SSymbol @name) (singDoc @doc)
-instance (KnownSymbol name, SingE e) => SingE (EIn name e) where
-    singE = SEIn   (SSymbol @name) (singE   @e)
 
 demoteSE :: SE e -> E String
 demoteSE = \case
@@ -194,33 +173,33 @@ instance Demotable SE where
     type Demote SE = E String
     demote = demoteSE
 
+class SingE (e :: PE) where singE :: SE e
+instance (KnownSymbol name, SingDoc doc) => SingE (EBase name doc) where
+    singE = SEBase (SSymbol @name) (singDoc @doc)
+instance (KnownSymbol name, SingE e) => SingE (EIn name e) where
+    singE = SEIn   (SSymbol @name) (singE   @e)
+
 withSingE :: forall e r. SE e -> (SingE e => r) -> r
 withSingE = withDict @(SingE e)
 
-type SParserSym0 ss sr p sa = Lam sa (SParser ss sr) p
-type ParserSym1 a s r = a ~> Parser s r
+-- | Parsers with singled implementations.
+class SingParser (p :: Parser s0 s r) where
+    -- | A singleton for the parser's raw initial state.
+    type PS0 p :: s0 -> Type
 
-{-
-type SParser :: (s -> Type) -> (r -> Type) -> Parser s r -> Type
-data SParser ss sr p where
-    SParser
-        :: SParserChSym ss sr pCh
-        -> SParserEndSym ss sr pEnd
-        -> ss sInit
-        -> SParser ss sr ('Parser pCh pEnd sInit)
--}
+    -- | A singleton for the parser state.
+    type PS  p :: s -> Type
 
-data Parser' s0 s r = Parser'
-  { parser'Ch    :: ParserChSym s r
-  , parser'End   :: ParserEndSym s r
-  , parser'S0    :: s0
-  , parser'SInit :: ParserSInitSym s0 s
-  }
+    -- | A singleton for the parser return type.
+    type PR  p :: r -> Type
 
-type ParserSInit s0 s = s0 -> Either (PE, s) s
-type ParserSInitSym s0 s = s0 ~> Either (PE, s) s
+    -- | The singled parser.
+    singParser' :: SParser (PS0 p) (PS p) (PR p) p
 
-data ParserInit s0 s = ParserInit
-  { parserInitS0 :: s0
-  , parserInitF  :: s0 ~> Either (PE, s) s
-  }
+-- | Get the singled version of the requested parser.
+--
+-- 'singParser'' with better type application ergonomics.
+singParser
+    :: forall {s0} {s} {r} (p :: Parser s0 s r). SingParser p
+    => SParser (PS0 p) (PS p) (PR p) p
+singParser = singParser' @_ @_ @_ @p

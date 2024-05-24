@@ -55,6 +55,7 @@ type family OrCh plCh prCh sr ch s where
 -- TODO [Char] is actually nonempty, but it's awkward because we need to reverse
 -- it and place the known char at the end. we _can_ fix this, but it's just
 -- annoying lol
+-- note that we can promote NonEmpty without issue!! fking wow!!!!!
 type OrChL
     :: ParserChSym sr rr
     -> sr
@@ -98,6 +99,10 @@ type family OrChLReplay prCh chs resr where
     -- characters are lost. This _should_ break certain parses. Or, maybe it
     -- only breaks return symbol..? In which case, we can fix by returning
     -- the extra replayed chars in our return type???? TODO
+    --
+    -- TODO more specifically, this should fail if Or isn't the outermost
+    -- parser. then if we hit this equation internally, we will skip a bunch of
+    -- characters.
     OrChLReplay prCh chs        (Done rr) = Done (Right rr)
         -- (EBase "Or" (ErrParserLimitation "cannot parse less on right of Or"))
 
