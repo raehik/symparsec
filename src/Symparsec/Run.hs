@@ -14,13 +14,14 @@ import TypeLevelShow.Natural ( ShowNatDec )
 import Singleraeh.Tuple ( STuple2(..) )
 import Singleraeh.Maybe ( SMaybe(..) )
 import Singleraeh.Either ( SEither(..) )
-import Singleraeh.Symbol ( ReconsSymbol, sReconsSymbol, sUnconsSymbol )
+import Singleraeh.Symbol
+    ( sConsSymbol, sUnconsSymbol, ReconsSymbol, sReconsSymbol )
 import Singleraeh.Natural ( (%+) )
 import Singleraeh.Demote
 
 -- | Run the given parser on the given 'Symbol', returning an 'TE.ErrorMessage'
 --   on failure.
-type Run :: Parser s0 s r -> Symbol -> Either TE.ErrorMessage (r, Symbol)
+type Run :: PParser s r -> Symbol -> Either TE.ErrorMessage (r, Symbol)
 type Run p sym = MapLeftRender (Run' p sym)
 
 type MapLeftRender :: Either PERun r -> Either TE.ErrorMessage r
@@ -29,10 +30,10 @@ type family MapLeftRender eer where
     MapLeftRender (Left  e) = Left (RenderPDoc (PrettyERun e))
 
 -- | Run the given parser on the given 'Symbol', returning a 'PERun' on failure.
-type Run' :: Parser s0 s r -> Symbol -> Either PERun (r, Symbol)
+type Run' :: PParser s r -> Symbol -> Either PERun (r, Symbol)
 type family Run' p str where
-    Run' ('Parser pCh pEnd s0 sInit) str =
-        RunStart pCh pEnd (sInit @@ s0) (UnconsSymbol str)
+    Run' ('PParser pCh pEnd s0) str =
+        RunStart pCh pEnd s0 (UnconsSymbol str)
 
 -- | Run the singled version of type-level parser on the given 'String',
 --   returning an 'ERun' on failure.
@@ -40,7 +41,7 @@ type family Run' p str where
 -- You must provide a function for demoting the singled return type.
 -- ('Singleraeh.Demote.demote' can do this for you automatically.)
 run'
-    :: forall {s0} {s} {r} (p :: Parser s0 s r) r'. SingParser p
+    :: forall {s} {r} (p :: PParser s r) r'. SingParser p
     => (forall a. PR p a -> r') -> String -> Either (ERun String) (r', String)
 run' demotePR str = withSomeSSymbol str $ \sstr ->
     case sRun' (singParser @p) sstr of
@@ -48,43 +49,29 @@ run' demotePR str = withSomeSSymbol str $ \sstr ->
       SLeft  e                  -> Left $ demoteSERun e
 
 sRun'
-    :: SParser ss0 ss sr p
+    :: SParser ss sr p
     -> SSymbol str
     -> SEither SERun (STuple2 sr SSymbol) (Run' p str)
-sRun' (SParser pCh pEnd s0 sInit) str =
-    sRunStart pCh pEnd (sInit @@ s0) (sUnconsSymbol str)
+sRun' (SParser pCh pEnd s0) str =
+    sRunStart pCh pEnd s0 (sUnconsSymbol str)
 
-type family RunStart pCh pEnd ees mstr where
-    RunStart pCh pEnd (Right s) (Just '(ch, str)) =
-        RunCh pCh pEnd 0 ch (UnconsSymbol str) (pCh @@ ch @@ s)
+type family RunStart pCh pEnd s0 mstr where
+    RunStart pCh pEnd s0 (Just '(ch, str)) =
+        RunCh pCh pEnd 0 ch (UnconsSymbol str) (pCh @@ ch @@ s0)
 
-    RunStart pCh pEnd (Right s) Nothing =
-        RunEnd0 (pEnd @@ s)
-
-    -- | non-consuming parser on empty string: run end handler
-    RunStart pCh pEnd (Left '(e, s)) Nothing =
-        RunEnd0 (pEnd @@ s)
-
-    -- | non-consuming parser on non-empty string: fail
-    RunStart pCh pEnd (Left '(e, s)) (Just cstr) =
-        Left (ERun0 e)
+    RunStart pCh pEnd s0 Nothing =
+        RunEnd0 (pEnd @@ s0)
 
 sRunStart
     :: SParserChSym  ss sr pCh
     -> SParserEndSym ss sr pEnd
-    -> SResultSInit  ss ees
+    -> ss s0
     -> SMaybe (STuple2 SChar SSymbol) mstr
-    -> SEither SERun (STuple2 sr SSymbol) (RunStart pCh pEnd ees mstr)
-sRunStart pCh pEnd ees = \case
+    -> SEither SERun (STuple2 sr SSymbol) (RunStart pCh pEnd s0 mstr)
+sRunStart pCh pEnd s0 = \case
   SJust (STuple2 ch str) ->
-    case ees of
-      SRight              s  ->
-        sRunCh pCh pEnd (SNat @0) ch (sUnconsSymbol str) (pCh @@ ch @@ s)
-      SLeft  (STuple2  e _s) -> SLeft (SERun0 e)
-  SNothing ->
-    case ees of
-      SRight              s  -> sRunEnd0 (pEnd @@ s)
-      SLeft  (STuple2 _e  s) -> sRunEnd0 (pEnd @@ s)
+    sRunCh pCh pEnd (SNat @0) ch (sUnconsSymbol str) (pCh @@ ch @@ s0)
+  SNothing -> sRunEnd0 (pEnd @@ s0)
 
 -- | Run the given parser on the given 'Symbol', emitting a type error on
 --   failure.
@@ -92,7 +79,7 @@ sRunStart pCh pEnd ees = \case
 -- This /would/ be useful for @:k!@ runs, but it doesn't work properly with
 -- 'TE.TypeError's, printing @= (TypeError ...)@ instead of the error message.
 -- Alas! Instead, do something like @> Proxy \@(RunTest ...)@.
-type RunTest :: Parser s0 s r -> Symbol -> (r, Symbol)
+type RunTest :: PParser s r -> Symbol -> (r, Symbol)
 type RunTest p sym = MapLeftTypeError (Run p sym)
 
 type MapLeftTypeError :: Either TE.ErrorMessage a -> a
@@ -116,7 +103,7 @@ type family RunCh pCh pEnd idx ch' mstr res where
 
     -- | OK, and we're finished early: return value and remaining string
     RunCh pCh pEnd idx ch' mstr              (Done r) =
-        Right '(r, ReconsSymbol mstr)
+        Right '(r, ConsSymbol ch' (ReconsSymbol mstr))
 
     -- | Parse error: return error
     RunCh pCh pEnd idx ch' mstr              (Err  e) =
@@ -138,7 +125,7 @@ sRunCh pCh pEnd idx chPrev mstr = \case
             (pCh @@ ch @@ s)
       SNothing ->
         sRunEnd idx chPrev (pEnd @@ s)
-  SDone r -> SRight (STuple2 r (sReconsSymbol mstr))
+  SDone r -> SRight (STuple2 r (sConsSymbol chPrev (sReconsSymbol mstr)))
   SErr  e -> SLeft (SERun idx chPrev e)
 
 -- | Inspect end parser result.
