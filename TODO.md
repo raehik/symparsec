@@ -11,16 +11,14 @@ actually just a style matter, since the type family has a single, non-stuckable
 equation. So for now, I think this is easiest, even if it's annoying. But if
 there's another way that doesn't add a ton more boilerplate, heck yeah.
 
-## Reifying (=singling)
-* expand on the SingParser1 concept
-  * lets me perform the extra checks that assert that you've written a valid
-    parser, on the term level
-  * how do I turn a SingParser into a SingParser1 ?
-* reify more parsers
-  * the other takes are easy
-  * `Or` will be a pain
-  * `Natural` will need lots, but I've done similar in type-level-show
-  * the others should be largely OK. but it's a pain
+### Don't character parsers and end handlers look kind of similar now...?
+Perhaps all I need to provide is a `s -> E` for if we get a `Cont` at the end.
+
+Ahh, but then at the end of the string, we would need to call `pCh` with a fake
+character like `\0`. Then we have to ignore the result state if it ends up being
+`Cont`. And it doesn't even work for `Natural`, which relies on its end handler
+to emit. I think the end handler stays, even though `Done` now has special
+behaviour and some parsers have pretty same-y definitions.
 
 ## Combinators
 None in particular. Probably a lot of easy ones though, please consider making

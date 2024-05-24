@@ -1,4 +1,4 @@
-{-# LANGUAGE UndecidableInstances #-} -- for natural subtraction
+{-# LANGUAGE UndecidableInstances #-}
 
 module Symparsec.Parser.Skip where
 
