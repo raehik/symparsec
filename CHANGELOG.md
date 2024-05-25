@@ -1,6 +1,7 @@
-## 0.5.0 (2024-05-16)
-* lots of tweaks
-* add parser reifying at `Symparsec.Reify`
+## 1.0.0 (2024-05-25)
+* small rewrite, changing how `Done` works (now non-consuming)
+* single all parsers
+  * ...except `:<|>:`, which is disabled for now due to complexity
 
 ## 0.4.0 (2024-05-12)
 * rebrand from symbol-parser to Symparsec

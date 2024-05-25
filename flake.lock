@@ -79,11 +79,11 @@
     "singleraeh": {
       "flake": false,
       "locked": {
-        "lastModified": 1716580395,
-        "narHash": "sha256-bfDdmh4Ad6ccHOr2tGGATa1vkEpMj5Uu8QIoDkbgC64=",
+        "lastModified": 1716608531,
+        "narHash": "sha256-gQSgFfSu2jl9QqYSGgcrLwJJdsWpLGWrfTf2dqLu8Bo=",
         "owner": "raehik",
         "repo": "singleraeh",
-        "rev": "eb043a6c7a9fc9343d4218fc08e4cc73deb8a3c8",
+        "rev": "e0e95b2ab1191666ad82442698b7a9197337e6c5",
         "type": "github"
       },
       "original": {
@@ -95,11 +95,11 @@
     "type-level-show": {
       "flake": false,
       "locked": {
-        "lastModified": 1716574802,
-        "narHash": "sha256-BQ9CpCCHQzniqYtPyD4Jno5cI2d5cv26UAVWHd2nK9w=",
+        "lastModified": 1716608804,
+        "narHash": "sha256-f4669jXl2cn86sD7ioHRcVM+1dUUcGVroe8BegG2MvE=",
         "owner": "raehik",
         "repo": "type-level-show",
-        "rev": "6065fee05311d511ff2657a6530cbcf8c3d67ddc",
+        "rev": "bceacff1e944625fc7c56f9df31bdb7d04d07efe",
         "type": "github"
       },
       "original": {
