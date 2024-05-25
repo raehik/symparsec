@@ -35,6 +35,15 @@ type family Run' p str where
     Run' ('PParser pCh pEnd s0) str =
         RunStart pCh pEnd s0 (UnconsSymbol str)
 
+-- | Run the given parser on the given 'Symbol', emitting a type error on
+--   failure.
+--
+-- This /would/ be useful for @:k!@ runs, but it doesn't work properly with
+-- 'TE.TypeError's, printing @= (TypeError ...)@ instead of the error message.
+-- Alas! Instead, do something like @> Proxy \@(RunTest ...)@.
+type RunTest :: PParser s r -> Symbol -> (r, Symbol)
+type RunTest p sym = MapLeftTypeError (Run p sym)
+
 -- | Run the singled version of type-level parser on the given 'String',
 --   returning an 'ERun' on failure.
 --
@@ -47,6 +56,15 @@ run' demotePR str = withSomeSSymbol str $ \sstr ->
     case sRun' (singParser @p) sstr of
       SRight (STuple2 pr sstr') -> Right (demotePR pr, fromSSymbol sstr')
       SLeft  e                  -> Left $ demoteSERun e
+
+-- TODO prettify error. actually run' needs an error demoter :| such a pain
+runTest
+    :: forall {s} {r} (p :: PParser s r). (SingParser p, Demotable (PR p))
+    => String -> (Demote (PR p), String)
+runTest str =
+    case run' @p demote str of
+      Right r -> r
+      Left  e -> error $ show e
 
 sRun'
     :: SParser ss sr p
@@ -72,15 +90,6 @@ sRunStart pCh pEnd s0 = \case
   SJust (STuple2 ch str) ->
     sRunCh pCh pEnd (SNat @0) ch (sUnconsSymbol str) (pCh @@ ch @@ s0)
   SNothing -> sRunEnd0 (pEnd @@ s0)
-
--- | Run the given parser on the given 'Symbol', emitting a type error on
---   failure.
---
--- This /would/ be useful for @:k!@ runs, but it doesn't work properly with
--- 'TE.TypeError's, printing @= (TypeError ...)@ instead of the error message.
--- Alas! Instead, do something like @> Proxy \@(RunTest ...)@.
-type RunTest :: PParser s r -> Symbol -> (r, Symbol)
-type RunTest p sym = MapLeftTypeError (Run p sym)
 
 type MapLeftTypeError :: Either TE.ErrorMessage a -> a
 type family MapLeftTypeError eea where

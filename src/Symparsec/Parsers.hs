@@ -1,4 +1,4 @@
--- | Re-exported type-level symbol parsers.
+-- | Type-level string parsers.
 --
 -- You may ignore the equations that Haddock displays: they are internal and
 -- irrelevant to library usage.
@@ -10,7 +10,7 @@ module Symparsec.Parsers
     (:<*>:)
   ,  (:*>:)
   , (:<*:)
-  , (:<|>:)
+  -- , (:<|>:)
 
   -- * Positional
   -- $positional
@@ -40,7 +40,7 @@ import Symparsec.Parser.Then.VoidRight
 import Symparsec.Parser.Literal
 import Symparsec.Parser.End
 import Symparsec.Parser.Take
-import Symparsec.Parser.Or
+--import Symparsec.Parser.Or
 
 -- $binary-combinators
 -- Parsers that combine two parsers. Any parsers that have term-level parallels
