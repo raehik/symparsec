@@ -17,15 +17,24 @@ Requires GHC >= 9.6.
 Define a type-level parser:
 
 ```haskell
-type PNumbers = Skip 1 :*>: Isolate 2 NatHex :<*>: (Literal "_" :*>: TakeRest))
+import Symparsec
+type PExample = Skip 1 :*>: Isolate 2 NatHex :<*>: (Literal "_" :*>: TakeRest)
+```
 
-ghci> :k! Run (Skip 3 :*>: Isolate 2 NatDec :<*>: (Skip 3 :*>: NatHex)) "10_FF"
+Use it to parse a type-level string (in a GHCi session):
 
 ```haskell
-ghci> import Symparsec
-ghci> :k! Run (Skip 3 :*>: Isolate 2 NatDec :<*>: (Skip 3 :*>: NatHex)) "___10___FF"
-...
-= Right '( '(10, 255), "")
+ghci> :k! Run PExample "xFF_"
+Run ...
+= Right '( '(255, "etc"), "")
+```
+
+Use it to parse a different, term-level string:
+
+```haskell
+ghci> import Singleraeh.Demote ( demote )
+ghci> run' @PExample demote "abc_123"
+Right ((188,"123"),"")
 ```
 
 ## Why?
@@ -34,54 +43,30 @@ Constructor names are `Symbols`. Ever reify these, then perform some sort of
 checking or parsing on the term level? Symparsec does the parsing on the type
 level instead. Catch bugs earlier, get faster runtime.
 
+Also type-level Haskell authors deserve fun libraries too!!
+
 ## Design
 ### The parser
-TODO nope back to 3-tuple, but `Done` is non-consuming
+A parser is a 3-tuple of:
 
-A parser is a 4-tuple of:
-
-* a consuming character parser; given a character and a state, returns
+* a character parser; given a character and a state, returns
   * `Cont s`: keep going, here's the next state `s`
-  * `Done r`: parse successful with value `r`
+  * `Done r`: parse successful with value `r`, _do not consume character_
   * `Err  E`: parse error, details in the `E` (a structured error)
 * an end handler, which takes only a state, and can only return `Done` or `Err`
-* an initial "raw" state
-* a state initializer, which turns the initial "raw" state into the first state
-  value (the indirection here assists singling)
+* an initial state
 
-Running a parser is simple:
+Running such a parser is very simple:
 
 * initialize state
 * parse character by character until end of input, or `Done`/`Err`
 
 Parsers may not communicate with the runner any other way. This means no
 backtracking, chunking etc. This is a conscious decision, made for simplicity.
+We're still able to implement a good handful of parser combinators regardless,
+including a limited form of backtracking.
 
-Note that due to character parsers being consuming, we often need to do a bit of
-"internal lookahead", where we check if we expect to consume any more
-characters, and if not then emit a `Done`. It also means that non-consuming
-parsers such as `Take 0` are invalid for non-empty strings. The state
-initializer should be used to catch such cases.
-
-This is a rough overview of parser design. See the code and/or Haddock
-documentation for precise details.
-
-### Pitfall: Character parsers always consume
-There is no backtracking or lookahead, that you do not implement yourself. This
-keeps the parser execution extremely simple, but breaks null parsers such as
-`Drop 0`, so these must be handled specially (unless you don't getting mind
-stuck type families on misuse).
-
-For concrete examples, see the implementation of `Drop` and `Literal`.
-
-### Pitfall: Not all parsers are definable
-* No changing parser state. Thus, parsers such as `Try :: Parser s r -> Parser
-  (s, [Char]) r` are not definable. _Parsers may not backtrack._
-  * Combinators such as `<|>` can emulate backtracking, but they are complex and
-    hard to reason about (they may have bugs!).
-
-### Feature: Parsers may be reified to use at runtime, with guaranteed same behaviour
-TODO
+This is a rough overview. See the code & Haddocks for precise details.
 
 ## Contributing
 I would gladly accept further combinators or other suggestions. Please add an

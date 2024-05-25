@@ -1,43 +1,21 @@
 # Symparsec to-dos
-* fix readme (didn't finish)
-* think I use reify vs. reflect properly but not 100% sure
 * consider binary combinator names...
   * now using infix as base, but the internals use non-infix because it's
     easier. but they won't display properly in type errors... meh
-
-## Design flaws
-### Must unwrap combinators for reifying
-See `Isolate'`. We could resolve this by defunctionalizing _again_, but it's
-actually just a style matter, since the type family has a single, non-stuckable
-equation. So for now, I think this is easiest, even if it's annoying. But if
-there's another way that doesn't add a ton more boilerplate, heck yeah.
-
-### Don't character parsers and end handlers look kind of similar now...?
-Perhaps all I need to provide is a `s -> E` for if we get a `Cont` at the end.
-
-Ahh, but then at the end of the string, we would need to call `pCh` with a fake
-character like `\0`. Then we have to ignore the result state if it ends up being
-`Cont`. And it doesn't even work for `Natural`, which relies on its end handler
-to emit. I think the end handler stays, even though `Done` now has special
-behaviour and some parsers have pretty same-y definitions.
+  * oh and the parse errors aren't superb here too. kinda meh though
 
 ## Combinators
 None in particular. Probably a lot of easy ones though, please consider making
 an issue or PR if you have one in mind.
 
 ## Examples
-### aeson
-Big but real world. Write some new aeson generics which do type-level
-constructor name parsing, instead of using `constructorTagModifier`. Daunting
-because aeson has complex generics.
+### This StackOverflow one from 2022-06
+https://stackoverflow.com/questions/72762890/simplest-way-to-do-type-level-symbol-formatting-in-haskell
 
 ### generic-data-functions
 Fiddly and awfully abstract. WIP.
 
-## Assorted
-* TODO can we replace ParserEnd parts with an enforced Eot??!!! lmao maybe
-  * hmmm idk. I think the ParserEnd separation just makes it safer, like we
-    can't ever return a Cont at the end now which just makes things easier to
-    track.
-* implement this parser (2022-06)
-  https://stackoverflow.com/questions/72762890/simplest-way-to-do-type-level-symbol-formatting-in-haskell
+### aeson
+Big but real world. Write some new aeson generics which do type-level
+constructor name parsing, instead of using `constructorTagModifier`. Daunting
+because aeson has complex generics.
