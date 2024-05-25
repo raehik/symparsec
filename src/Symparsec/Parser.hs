@@ -77,11 +77,6 @@ data SParser ss sr p where
         -> SParser ss sr ('PParser pCh pEnd s0)
 
 -- | Parse a 'Char' with the given state.
---
--- The action is always consuming. For this reason, you may need to look ahead
--- for the final case, so as to not consume an extra 'Char'. This prevents many
--- zero-length parsers. It's a bit weird. See
--- 'Data.Type.Symbol.Parser.Parser.Drop' for an example.
 type  ParserCh str s r = Char -> s -> Result str s r
 type PParserCh     s r = ParserCh Symbol s r
 

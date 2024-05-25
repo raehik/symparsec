@@ -15,6 +15,7 @@ module Symparsec.Parsers
   -- * Positional
   -- $positional
   , Take
+  , TakeRest
   , Skip
   , End
   , Isolate
@@ -40,6 +41,7 @@ import Symparsec.Parser.Then.VoidRight
 import Symparsec.Parser.Literal
 import Symparsec.Parser.End
 import Symparsec.Parser.Take
+import Symparsec.Parser.TakeRest
 --import Symparsec.Parser.Or
 
 -- $binary-combinators

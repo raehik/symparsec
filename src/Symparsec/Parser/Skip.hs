@@ -50,7 +50,7 @@ type family SkipEnd n where
     SkipEnd n = Left (ESkipPastEnd n)
 
 type ESkipPastEnd n = EBase "Skip"
-    (      Text "tried to drop "
+    (      Text "tried to skip "
       :<>: Text (ShowNatDec n) :<>: Text " chars from empty string")
 eSkipPastEnd :: SNat n -> SE (ESkipPastEnd n)
 eSkipPastEnd n = withKnownSymbol (sShowNatDec n) singE

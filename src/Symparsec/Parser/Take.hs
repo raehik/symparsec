@@ -21,7 +21,7 @@ type STakeS = STuple2 SNat (SList SChar)
 type  TakeS = (Natural, [Char])
 
 sTake :: SNat n -> SParser STakeS SSymbol (Take n)
-sTake n = SParser takeChSym takeEndSym (STuple2 n SNil)
+sTake n = SParser sTakeChSym sTakeEndSym (STuple2 n SNil)
 
 instance KnownNat n => SingParser (Take n) where
     type PS (Take n) = STakeS
@@ -37,8 +37,8 @@ type TakeChSym :: ParserChSym TakeS Symbol
 data TakeChSym f
 type instance App TakeChSym f = TakeChSym1 f
 
-takeChSym :: SParserChSym STakeS SSymbol TakeChSym
-takeChSym = Lam2 $ \ch (STuple2 n chs) ->
+sTakeChSym :: SParserChSym STakeS SSymbol TakeChSym
+sTakeChSym = Lam2 $ \ch (STuple2 n chs) ->
     case testEquality n (SNat @0) of
       Just Refl -> SDone $ revCharsToSymbol chs
       Nothing   ->
@@ -64,8 +64,8 @@ type TakeEndSym :: ParserEndSym TakeS Symbol
 data TakeEndSym s
 type instance App TakeEndSym s = TakeEnd s
 
-takeEndSym :: SParserEndSym STakeS SSymbol TakeEndSym
-takeEndSym = Lam $ \(STuple2 n chs) ->
+sTakeEndSym :: SParserEndSym STakeS SSymbol TakeEndSym
+sTakeEndSym = Lam $ \(STuple2 n chs) ->
     case testEquality n (SNat @0) of
       Just Refl -> SRight $ revCharsToSymbol chs
       Nothing   -> unsafeCoerce $ SLeft $ eTakeEnd n

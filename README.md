@@ -1,24 +1,29 @@
 # Symparsec
-Type level string (`Symbol`) parser combinators. Reify to runtime parsers with
-guaranteed identical behaviour.
+[hackage-parsec]: https://hackage.haskell.org/package/parsec
 
-It's a Parsec-like for `Symbol`s; thus, Symparsec.
+Type level string (`Symbol`) parser combinators. A [Parsec][hackage-parsec]-like
+for `Symbol`s; thus, Symparsec! With all the features you'd expect:
 
-Previously named symbol-parser.
+* define parsers compositionally, largely as you would on the term level
+* pretty, detailed parse errors
+* decent performance (for simple parsers)
 
-Requires GHC 9.6 for singling parsers.
+Parsers may also be reified and used at runtime with _guaranteed identical
+behaviour_ via a healthy dose of singletons.
 
-## Features
-* Define parsers compositionally, largely as you would on the term level.
-* Pretty parse errors.
-* Hopefully decent performance.
-* Reify parsers to term level with guaranteed identical behaviour via a
-  healthy dose of singletons.
+Requires GHC >= 9.6.
 
 ## Examples
+Define a type-level parser:
+
+```haskell
+type PNumbers = Skip 1 :*>: Isolate 2 NatHex :<*>: (Literal "_" :*>: TakeRest))
+
+ghci> :k! Run (Skip 3 :*>: Isolate 2 NatDec :<*>: (Skip 3 :*>: NatHex)) "10_FF"
+
 ```haskell
 ghci> import Symparsec
-ghci> :k! Run (Drop 3 :*>: Isolate 2 NatDec :<*>: (Drop 3 :*>: NatHex)) "___10___FF"
+ghci> :k! Run (Skip 3 :*>: Isolate 2 NatDec :<*>: (Skip 3 :*>: NatHex)) "___10___FF"
 ...
 = Right '( '(10, 255), "")
 ```
@@ -31,6 +36,8 @@ level instead. Catch bugs earlier, get faster runtime.
 
 ## Design
 ### The parser
+TODO nope back to 3-tuple, but `Done` is non-consuming
+
 A parser is a 4-tuple of:
 
 * a consuming character parser; given a character and a state, returns

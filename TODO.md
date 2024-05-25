@@ -1,4 +1,5 @@
 # Symparsec to-dos
+* fix readme (didn't finish)
 * think I use reify vs. reflect properly but not 100% sure
 * consider binary combinator names...
   * now using infix as base, but the internals use non-infix because it's

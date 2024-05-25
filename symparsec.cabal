@@ -40,6 +40,7 @@ library
       Symparsec.Parser.Natural.Digits
       Symparsec.Parser.Skip
       Symparsec.Parser.Take
+      Symparsec.Parser.TakeRest
       Symparsec.Parser.Then
       Symparsec.Parser.Then.VoidLeft
       Symparsec.Parser.Then.VoidRight

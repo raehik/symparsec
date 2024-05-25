@@ -20,13 +20,15 @@ import TypeLevelShow.Doc
 import Singleraeh.Either
 
 -- | Fail with the given message when given any character to parse.
+type FailCh name e = Err (EBase name e)
+
 type FailChSym :: Symbol -> PDoc -> ParserChSym s r
 data FailChSym name e f
 type instance App (FailChSym name e) f = FailChSym1 name e f
 
 type FailChSym1 :: Symbol -> PDoc -> ParserChSym1 s r
 data FailChSym1 name e ch s
-type instance App (FailChSym1 name e ch) s = Err (EBase name e)
+type instance App (FailChSym1 name e ch) s = FailCh name e
 
 failChSym
     :: SSymbol name -> SDoc e -> SParserChSym ss sr (FailChSym name e)
