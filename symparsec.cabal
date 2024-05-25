@@ -41,6 +41,7 @@ library
       Symparsec.Parser.Take
       Symparsec.Parser.Then
       Symparsec.Parser.Then.VoidLeft
+      Symparsec.Parser.Then.VoidRight
       Symparsec.Run
   other-modules:
       Paths_symparsec

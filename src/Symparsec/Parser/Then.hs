@@ -159,7 +159,7 @@ type family ThenEndL prEnd s0r res where
     -- | EOT during L, L end succeeds: call R end on initial R state
     ThenEndL prEnd s0r (Right rl) = ThenEndR rl (prEnd @@ s0r)
     -- | EOT during L, L end fails: error
-    ThenEndL prEnd s0r (Left  el) = Left  (EThenEndL el)
+    ThenEndL prEnd s0r (Left  el) = Left (EThenEndL el)
 
 type EThenEndL er = EIn "Then(L) end" er
 eThenEndL :: SE er -> SE (EThenEndL er)
