@@ -37,13 +37,13 @@ type family ThenVLR resr where
     ThenVLR (Done rr) = Done rr
 
 type family ThenVLEnd prEnd s where
+    ThenVLEnd prEnd (Right sr) = ThenVLEnd' (prEnd @@ sr)
     ThenVLEnd prEnd (Left  sl) =
         Left (EBase "ThenVL" (Text "ended during left"))
-    ThenVLEnd prEnd (Right sr) = ThenVLEnd' (prEnd @@ sr)
 
 type family ThenVLEnd' s where
-    ThenVLEnd' (Left  er) = Left  (EIn "ThenVL(R)" er)
     ThenVLEnd' (Right rr) = Right rr
+    ThenVLEnd' (Left  er) = Left  (EIn "ThenVL(R)" er)
 
 type ThenVLChSym
     :: ParserChSym sl rl

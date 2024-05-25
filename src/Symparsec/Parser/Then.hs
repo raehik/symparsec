@@ -68,7 +68,7 @@ type ThenCh
 type family ThenCh plCh prCh s0r ch s where
     ThenCh plCh prCh s0r ch (Left  sl) =
         ThenChL prCh s0r ch (plCh @@ ch @@ sl)
-    ThenCh plCh prCh _  ch (Right '(rl, sr)) =
+    ThenCh plCh prCh s0r ch (Right '(rl, sr)) =
         ThenChR rl (prCh @@ ch @@ sr)
 
 type family ThenChL prCh s0r ch resl where
@@ -113,27 +113,23 @@ sThenChSym plCh prCh s0r = Lam2 $ \ch -> \case
       SCont sl' -> SCont $ SLeft sl'
       SDone rl  -> sThenChR rl (prCh @@ ch @@ s0r)
       SErr  el  -> SErr  $ eThenChL el
-  SRight (STuple2 rl sr) ->
-    case prCh @@ ch @@ sr of
-      SCont sr' -> SCont $ SRight $ STuple2 rl sr'
-      SDone rr  -> SDone $ STuple2 rl rr
-      SErr  er  -> SErr  $ eThenChR er
+  SRight (STuple2 rl sr) -> sThenChR rl (prCh @@ ch @@ sr)
 
 type ThenChSym
     :: ParserChSym sl rl
     -> ParserChSym sr rr
     -> sr
     -> ParserChSym (Either sl (rl, sr)) (rl, rr)
-data ThenChSym plCh prCh sr f
-type instance App (ThenChSym plCh prCh sr) f = ThenChSym1 plCh prCh sr f
+data ThenChSym plCh prCh s0r f
+type instance App (ThenChSym plCh prCh s0r) f = ThenChSym1 plCh prCh s0r f
 
 type ThenChSym1
     :: ParserChSym sl rl
     -> ParserChSym sr rr
     -> sr
-    -> Char -> Either sl (rl, sr) ~> PResult (Either sl (rl, sr)) (rl, rr)
-data ThenChSym1 plCh prCh sr ch s
-type instance App (ThenChSym1 plCh prCh sr ch) s = ThenCh plCh prCh sr ch s
+    -> ParserChSym1 (Either sl (rl, sr)) (rl, rr)
+data ThenChSym1 plCh prCh s0r ch s
+type instance App (ThenChSym1 plCh prCh s0r ch) s = ThenCh plCh prCh s0r ch s
 
 type family ThenEnd plEnd prEnd s0r s where
     -- | EOT during R: call R end
