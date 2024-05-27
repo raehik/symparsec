@@ -1,3 +1,7 @@
+## 1.0.1 (2024-05-27)
+* add `TakeRest` combinator
+* re-add `:<|>:` combinator with more accurate behaviour clarification
+
 ## 1.0.0 (2024-05-25)
 * small rewrite, changing how `Done` works (now non-consuming)
 * single all parsers

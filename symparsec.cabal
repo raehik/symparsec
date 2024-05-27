@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           symparsec
-version:        1.0.0
+version:        1.0.1
 synopsis:       Type level string parser combinators
 description:    Please see README.md.
 category:       Types, Data
