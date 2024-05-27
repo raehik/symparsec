@@ -30,7 +30,6 @@ source-repository head
 library
   exposed-modules:
       Symparsec
-      Symparsec.Internal.List
       Symparsec.Parser
       Symparsec.Parser.Common
       Symparsec.Parser.End
@@ -38,6 +37,7 @@ library
       Symparsec.Parser.Literal
       Symparsec.Parser.Natural
       Symparsec.Parser.Natural.Digits
+      Symparsec.Parser.Or
       Symparsec.Parser.Skip
       Symparsec.Parser.Take
       Symparsec.Parser.TakeRest

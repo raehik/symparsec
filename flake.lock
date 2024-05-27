@@ -79,11 +79,11 @@
     "singleraeh": {
       "flake": false,
       "locked": {
-        "lastModified": 1716608531,
-        "narHash": "sha256-gQSgFfSu2jl9QqYSGgcrLwJJdsWpLGWrfTf2dqLu8Bo=",
+        "lastModified": 1716792301,
+        "narHash": "sha256-P1bXk0s+RpeXokl7IYQHmmJbI2YMVT7ZOqz6z6Yepsg=",
         "owner": "raehik",
         "repo": "singleraeh",
-        "rev": "e0e95b2ab1191666ad82442698b7a9197337e6c5",
+        "rev": "54add55e4792527ccfd11d36afa2b61d62c07b54",
         "type": "github"
       },
       "original": {
