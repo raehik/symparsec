@@ -24,6 +24,9 @@ module Symparsec.Parsers
   -- $predicated
   , While, TakeWhile
 
+  -- * TODO unsorted
+  , Count
+
   -- * Basic
   -- $basic
   , Literal
@@ -48,6 +51,7 @@ import Symparsec.Parser.Take
 import Symparsec.Parser.TakeRest
 import Symparsec.Parser.Or
 import Symparsec.Parser.While
+import Symparsec.Parser.Count
 
 -- $binary-combinators
 -- Parsers that combine two parsers. Any parsers that have term-level parallels
