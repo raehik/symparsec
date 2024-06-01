@@ -18,15 +18,12 @@ choice (`MonadPlus`/`Alternative`). Even those ones we might be able to define a
 limited version, but only if it seems helpful.
 
 ### Various from parser-combinators, megaparsec
-* `TakeWhile :: (Char ~> Bool) -> PParser [Char] Symbol`
-  * `type TakeTill ch = TakeWhile (_ ch)`
-  * (?) `While :: (Char ~> Bool) -> PParser s r -> PParser s r`
-    * then seemingly `type TakeWhile p = While p TakeRest`...?
-    * `While IsHex NatHex` seems obvious
-    * similarly `While (IsNot "_") NatHex` (both useful, depends on your schema)
-    * `Until` would just be an inverted character predicate so probs ignore
-  * seems if we define this, we could implement a lot of megaparsec parsers
-* `Count :: Natural -> PParser s r -> PParser _ [r]
+* Helpers for writing `Count` with separators
+  * We can't do `sepBy` exactly because it uses backtracking.
+  * Maybe we have to write another combinator here :(
+  * We need to parse `p` once first, then repeatedly parse `sep :*>: p`. That's
+    what parser-combinators does. Not hard to make a fresh combinator that does
+    this, but a bit disappointing if I can't define it with other combinators.
 
 ## Examples
 ### This StackOverflow one from 2022-06

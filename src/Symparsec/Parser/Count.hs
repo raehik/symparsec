@@ -88,7 +88,8 @@ sCountChSym
 sCountChSym pCh s0 = Lam2 $ \ch (STuple3 n rs s) ->
     case testEquality n (SNat @0) of
       Just Refl -> SDone $ sReverse rs
-      Nothing   -> undefined -- unsafeCoerce $ sCountChN n rs s0 (pCh @@ ch @@ s)
+      -- TODO cba..................
+      Nothing   -> error "not implemented" -- unsafeCoerce $ sCountChN n rs s0 (pCh @@ ch @@ s)
 
 type family CountEnd pEnd s0 s where
     CountEnd pEnd s0 '(n, rs, s) = CountEnd' pEnd s0 n rs s
