@@ -1,3 +1,7 @@
+## Unreleased
+* add `While` combinator
+* re-add `:<|>:` re-export in `Symparsec.Parsers`
+
 ## 1.0.1 (2024-05-27)
 * add `TakeRest` combinator
 * re-add `:<|>:` combinator with more accurate behaviour clarification

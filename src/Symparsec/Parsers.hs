@@ -10,7 +10,7 @@ module Symparsec.Parsers
     (:<*>:)
   ,  (:*>:)
   , (:<*:)
-  -- , (:<|>:)
+  , (:<|>:)
 
   -- * Positional
   -- $positional
@@ -19,6 +19,10 @@ module Symparsec.Parsers
   , Skip
   , End
   , Isolate
+
+  -- * Predicated
+  -- $predicated
+  , While, TakeWhile
 
   -- * Basic
   -- $basic
@@ -42,7 +46,8 @@ import Symparsec.Parser.Literal
 import Symparsec.Parser.End
 import Symparsec.Parser.Take
 import Symparsec.Parser.TakeRest
---import Symparsec.Parser.Or
+import Symparsec.Parser.Or
+import Symparsec.Parser.While
 
 -- $binary-combinators
 -- Parsers that combine two parsers. Any parsers that have term-level parallels
@@ -51,6 +56,11 @@ import Symparsec.Parser.TakeRest
 -- $positional
 -- Parsers that relate to symbol position e.g. length, end of symbol.
 
+-- $predicated
+-- Parsers that include character predicates.
+
 -- $basic
 -- Simple non-combinator parsers. Probably fundamental in some way e.g. very
 -- general or common.
+
+type TakeWhile chPred = While chPred TakeRest

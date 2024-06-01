@@ -44,6 +44,8 @@ library
       Symparsec.Parser.Then
       Symparsec.Parser.Then.VoidLeft
       Symparsec.Parser.Then.VoidRight
+      Symparsec.Parser.While
+      Symparsec.Parser.While.Predicates
       Symparsec.Parsers
       Symparsec.Run
   other-modules:
