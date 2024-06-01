@@ -1,7 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
 
--- TODO not using end parser yet. maybe don't in ch parser?
-
 module Symparsec.Parser.Count where
 
 import Symparsec.Parser.Common
@@ -41,27 +39,47 @@ instance
 type family CountCh pCh s0 ch s where
     CountCh pCh s0 ch '(n, rs, s) = CountCh' pCh s0 ch n rs s
 
+sCountChSym
+    :: SParserChSym  ss sr pCh
+    -> ss s0
+    -> SParserChSym (SCountS ss sr) (SList sr) (CountChSym pCh s0)
+sCountChSym pCh s0 = Lam2 $ \ch (STuple3 n rs s) ->
+    sCountCh' pCh s0 ch n rs s
+
 type family CountCh' pCh s0 ch n rs s where
     CountCh' pCh s0 ch 0 rs s = Done (Reverse rs)
     CountCh' pCh s0 ch n rs s = CountChN pCh ch n rs s0 (pCh @@ ch @@ s)
+
+sCountCh'
+    :: SParserChSym ss sr pCh
+    -> ss s0
+    -> SChar ch
+    -> SNat n
+    -> SList sr rs
+    -> ss s
+    -> SResult (SCountS ss sr) (SList sr) (CountCh' pCh s0 ch n rs s)
+sCountCh' pCh s0 ch n rs s =
+    case testEquality n (SNat @0) of
+      Just Refl -> SDone $ sReverse rs
+      Nothing   -> unsafeCoerce $ sCountChN pCh ch n rs s0 (pCh @@ ch @@ s)
 
 type family CountChN pCh ch n rs s0 res where
     CountChN pCh ch n rs s0 (Cont s) = Cont '(n, rs, s)
     CountChN pCh ch n rs s0 (Done r) = CountCh' pCh s0 ch (n-1) (r:rs) s0
     CountChN pCh ch n rs s0 (Err  e) = Err (ECount e)
 
-{-
 sCountChN
-    :: SNat n
+    :: SParserChSym ss sr pCh
+    -> SChar ch
+    -> SNat n
     -> SList sr rs
     -> ss s0
     -> SResult ss sr res
-    -> SResult (SCountS ss sr) (SList sr) (CountChN n rs s0 res)
-sCountChN n rs s0 = \case
-  SCont s -> SCont $ STuple3 n           rs           s
-  SDone r -> SCont $ STuple3 (n %- SNat) (SCons r rs) s0
+    -> SResult (SCountS ss sr) (SList sr) (CountChN pCh ch n rs s0 res)
+sCountChN pCh ch n rs s0 = \case
+  SCont s -> SCont $ STuple3 n rs s
+  SDone r -> sCountCh' pCh s0 ch (n %- SNat @1) (SCons r rs) s0
   SErr  e -> SErr  $ eCount e
--}
 
 type ECount e = EIn "Count" e
 eCount :: SE e -> SE (ECount e)
@@ -80,16 +98,6 @@ type CountChSym1
     -> ParserChSym1 (CountS s r) [r]
 data CountChSym1 pCh s0 ch s
 type instance App (CountChSym1 pCh s0 ch) s = CountCh pCh s0 ch s
-
-sCountChSym
-    :: SParserChSym  ss sr pCh
-    -> ss s0
-    -> SParserChSym (SCountS ss sr) (SList sr) (CountChSym pCh s0)
-sCountChSym pCh s0 = Lam2 $ \ch (STuple3 n rs s) ->
-    case testEquality n (SNat @0) of
-      Just Refl -> SDone $ sReverse rs
-      -- TODO cba..................
-      Nothing   -> error "not implemented" -- unsafeCoerce $ sCountChN n rs s0 (pCh @@ ch @@ s)
 
 type family CountEnd pEnd s0 s where
     CountEnd pEnd s0 '(n, rs, s) = CountEnd' pEnd s0 n rs s

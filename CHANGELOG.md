@@ -1,5 +1,6 @@
 ## Unreleased
 * add `While` combinator
+* add `Count` combinator
 * re-add `:<|>:` re-export in `Symparsec.Parsers`
 
 ## 1.0.1 (2024-05-27)
