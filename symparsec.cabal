@@ -30,6 +30,7 @@ source-repository head
 library
   exposed-modules:
       Symparsec
+      Symparsec.Example.Expr
       Symparsec.Parser
       Symparsec.Parser.Apply
       Symparsec.Parser.Common
