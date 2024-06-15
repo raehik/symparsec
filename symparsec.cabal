@@ -31,6 +31,7 @@ library
   exposed-modules:
       Symparsec
       Symparsec.Parser
+      Symparsec.Parser.Apply
       Symparsec.Parser.Common
       Symparsec.Parser.Count
       Symparsec.Parser.End
