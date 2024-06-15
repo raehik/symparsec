@@ -2,7 +2,7 @@
 [hackage-parsec]: https://hackage.haskell.org/package/parsec
 
 Type level string (`Symbol`) parser combinators. A [Parsec][hackage-parsec]-like
-for `Symbol`s; thus, Symparsec! With all the features you'd expect:
+for `Symbol`s; thus, Symparsec! With many of the features you'd expect:
 
 * define parsers compositionally, largely as you would on the term level
 * pretty, detailed parse errors
