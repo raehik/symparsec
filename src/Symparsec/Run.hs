@@ -44,6 +44,16 @@ type family Run' p str where
 type RunTest :: PParser s r -> Symbol -> (r, Symbol)
 type RunTest p sym = MapLeftTypeError (Run p sym)
 
+-- | Run the given parser on the given 'Symbol', returning a 'PERun' on failure,
+--   and ignoring any remaining non-consumed characters.
+type Run'_ :: PParser s r -> Symbol -> Either TE.ErrorMessage r
+type Run'_ p str = Run'_Inner (Run' p str)
+
+type Run'_Inner :: Either PERun (a, b) -> Either TE.ErrorMessage a
+type family Run'_Inner eeab where
+    Run'_Inner (Right '(a, b)) = Right a
+    Run'_Inner (Left  e)       = Left (RenderPDoc (PrettyERun e))
+
 -- | Run the singled version of type-level parser on the given 'String',
 --   returning an 'ERun' on failure.
 --

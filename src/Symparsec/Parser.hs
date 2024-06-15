@@ -20,7 +20,7 @@ Some definitions I use:
 module Symparsec.Parser
   (
   -- * Parser
-    Parser(..), PParser(..), SParser(..)
+    Parser(..), PParser(..), ResultOf, SParser(..)
   , ParserCh, PParserCh, ParserChSym, ParserChSym1, SParserChSym, SParserChSym1
   , ParserEnd, PParserEnd, ParserEndSym, SParserEndSym
   , ParserSInit, ParserSInitSym, SParserSInitSym
@@ -62,6 +62,9 @@ data PParser s r = PParser
   , pparserEnd :: ParserEndSym s r
   , pparserS0  :: s
   }
+
+-- | The result type of a type-level parser. (Sometimes handy.)
+type ResultOf (p :: PParser s r) = r
 
 -- | A singled parser.
 --
