@@ -1,3 +1,7 @@
+## 1.1.1 (2024-06-15)
+* add `Apply` combinator (effectively `fmap`)
+* add some more runners and utils (handy for generic-data-functions)
+
 ## 1.1.0 (2024-06-01)
 * add `While` combinator
 * add `Count` combinator
