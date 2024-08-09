@@ -24,9 +24,9 @@ type PExample = Skip 1 :*>: Isolate 2 NatHex :<*>: (Literal "_" :*>: TakeRest)
 Use it to parse a type-level string (in a GHCi session):
 
 ```haskell
-ghci> :k! Run PExample "xFF_"
+ghci> :k! Run PExample "xFF_etc"
 Run ...
-= Right '( '(255, ""), "")
+= Right '( '(255, "etc"), "")
 ```
 
 Use it to parse a different, term-level string:
