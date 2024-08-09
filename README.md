@@ -26,7 +26,7 @@ Use it to parse a type-level string (in a GHCi session):
 ```haskell
 ghci> :k! Run PExample "xFF_"
 Run ...
-= Right '( '(255, "etc"), "")
+= Right '( '(255, ""), "")
 ```
 
 Use it to parse a different, term-level string:
