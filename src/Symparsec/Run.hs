@@ -44,8 +44,8 @@ type family Run' p str where
 type RunTest :: PParser s r -> Symbol -> (r, Symbol)
 type RunTest p sym = MapLeftTypeError (Run p sym)
 
--- | Run the given parser on the given 'Symbol', returning a 'PERun' on failure,
---   and ignoring any remaining non-consumed characters.
+-- | Run the given parser on the given 'Symbol', returning a 'TE.ErrorMessage'
+--   on failure, and ignoring any remaining non-consumed characters.
 type Run'_ :: PParser s r -> Symbol -> Either TE.ErrorMessage r
 type Run'_ p str = Run'_Inner (Run' p str)
 
