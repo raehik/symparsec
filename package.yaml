@@ -51,11 +51,8 @@ default-extensions:
 #   may need to enable if you're working with old code that uses `Int :: *`
 
 ghc-options:
+- -fhide-source-paths # hides module filepaths when compiling (bit neater)
 - -Wall
-
-# omitting ticks is good; see https://gitlab.haskell.org/ghc/ghc/-/issues/20531
-# (off by default since GHC 9.4)
-- -Wno-unticked-promoted-constructors
 
 dependencies:
 - base >= 4.18 && < 5
