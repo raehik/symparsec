@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.36.1.
+-- This file has been generated from package.yaml by hpack version 0.37.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -51,6 +51,18 @@ library
       Symparsec.Parser.While.Predicates
       Symparsec.Parsers
       Symparsec.Run
+      Symparsec2.Example.Expr
+      Symparsec2.Parser
+      Symparsec2.Parser.Common
+      Symparsec2.Parser.Isolate
+      Symparsec2.Parser.Lit
+      Symparsec2.Parser.Natural
+      Symparsec2.Parser.Natural.Digits
+      Symparsec2.Parser.Then
+      Symparsec2.Parser.While
+      Symparsec2.Parser.While.Predicates
+      Symparsec2.Run
+      Symparsec2.Utils
   other-modules:
       Paths_symparsec
   hs-source-dirs:
