@@ -1,11 +1,11 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.37.0.
+-- This file has been generated from package.yaml by hpack version 0.38.2.
 --
 -- see: https://github.com/sol/hpack
 
 name:           symparsec
-version:        1.1.1
+version:        2.0.0
 synopsis:       Type level string parser combinators
 description:    Please see README.md.
 category:       Types, Data
@@ -17,8 +17,7 @@ license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 tested-with:
-    GHC==9.8
-  , GHC==9.6
+    GHC==9.12
 extra-source-files:
     README.md
     CHANGELOG.md
@@ -29,6 +28,7 @@ source-repository head
 
 library
   exposed-modules:
+      Data.Type.Symbol
       Symparsec
       Symparsec.Example.Expr
       Symparsec.Parser
@@ -54,6 +54,7 @@ library
       Symparsec2.Example.Expr
       Symparsec2.Parser
       Symparsec2.Parser.Common
+      Symparsec2.Parser.End
       Symparsec2.Parser.Isolate
       Symparsec2.Parser.Lit
       Symparsec2.Parser.Natural
@@ -80,10 +81,10 @@ library
       MagicHash
   ghc-options: -fhide-source-paths -Wall
   build-depends:
-      base >=4.18 && <5
-    , defun-core ==0.1.*
-    , singleraeh >=0.4.0 && <0.5
-    , type-level-show >=0.3.0 && <0.4
+      base
+    , defun-core
+    , singleraeh
+    , type-level-show
   default-language: GHC2021
 
 test-suite spec
@@ -106,10 +107,10 @@ test-suite spec
       MagicHash
   ghc-options: -fhide-source-paths -Wall
   build-depends:
-      base >=4.18 && <5
-    , defun-core ==0.1.*
-    , singleraeh >=0.4.0 && <0.5
+      base
+    , defun-core
+    , singleraeh
     , symparsec
-    , type-level-show >=0.3.0 && <0.4
-    , type-spec >=0.4.0.0 && <0.5
+    , type-level-show
+    , type-spec
   default-language: GHC2021

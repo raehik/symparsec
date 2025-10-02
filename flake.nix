@@ -21,7 +21,7 @@
       systems = inputs.nixpkgs.lib.systems.flakeExposed;
       imports = [ inputs.haskell-flake.flakeModule ];
       perSystem = { self', pkgs, config, ... }: {
-        packages.default  = self'.packages.ghc912-symparsec2;
+        packages.default  = self'.packages.ghc912-symparsec;
         devShells.default = self'.devShells.ghc912;
         haskellProjects.ghc912 = {
           basePackages = pkgs.haskell.packages.ghc912;
