@@ -1,5 +1,5 @@
 name: symparsec
-version: 1.1.1
+version: 2.0.0
 synopsis: Type level string parser combinators
 description: Please see README.md.
 extra-source-files:
@@ -9,8 +9,7 @@ category: Types, Data
 license: MIT
 license-file: LICENSE
 tested-with:
-- GHC==9.8
-- GHC==9.6
+- GHC==9.12
 
 github: raehik/symparsec
 maintainer: Ben Orchard <thefirstmuffinman@gmail.com>
@@ -55,10 +54,10 @@ ghc-options:
 - -Wall
 
 dependencies:
-- base >= 4.18 && < 5
-- defun-core ^>= 0.1
-- singleraeh ^>= 0.4.0
-- type-level-show ^>= 0.3.0
+- base
+- defun-core
+- singleraeh
+- type-level-show
 
 library:
   source-dirs: src
@@ -69,4 +68,4 @@ tests:
     main: Main.hs
     dependencies:
     - symparsec
-    - type-spec ^>= 0.4.0.0
+    - type-spec

@@ -23,9 +23,10 @@ import GHC.TypeError qualified as TE
 type Err  s e = 'Result (Left  e) s
 type Done s r = 'Result (Right r) s
 
--- | Get the next character in the string and update the parser bookkeeping.
+-- | Get the next character in the string and update the parser state.
 --
--- If at end of the string, the index is _not_ updated, and @len@ is always 0.
+-- If at end of the string, the state is returned untouched, and @len@ is
+-- guaranteed to be 0.
 type UnconsState :: PState -> (Maybe Char, PState)
 type family UnconsState s where
     UnconsState ('State rem 0   idx) = '(Nothing, 'State rem 0 idx)
