@@ -53,6 +53,7 @@ library
       Symparsec.Run
       Symparsec2.Example.Expr
       Symparsec2.Parser
+      Symparsec2.Parser.Apply
       Symparsec2.Parser.Common
       Symparsec2.Parser.End
       Symparsec2.Parser.Isolate
