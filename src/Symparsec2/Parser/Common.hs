@@ -1,22 +1,37 @@
 {-# LANGUAGE UndecidableInstances #-}
 
+-- | Common definitions used by parsers.
+
 module Symparsec2.Parser.Common
   (
+  -- * Common definitions
+    type UnconsState
+  , type Err, type Done
+
   -- * Re-exports
-    module Symparsec2.Parser
+  , module Symparsec2.Parser
   , Doc(..)
   , type App
 
-  -- * Common definitions
-  , type UnconsState
-  , type Err, type Done
+  -- ** Common imports
+  -- $common-imports
+  , type Symbol, type UnconsSymbol, ConsSymbol
+  , type Natural, type (+), type (-), type (*)
+  , type ShowNatDec, type ShowChar
+  , type (@@), type (~>)
   ) where
+
+-- $common-imports
+-- TODO idk syntax
+-- Not used by all parsers, but common enough that we'll export them here.
 
 import Symparsec2.Parser
 import DeFun.Core
-import GHC.TypeLits ( type Symbol, type UnconsSymbol )
-import GHC.TypeNats ( type Natural, type (+), type (-) )
+import GHC.TypeLits ( type Symbol, type UnconsSymbol, type ConsSymbol )
+import GHC.TypeNats ( type Natural, type (+), type (-), type (*) )
 import TypeLevelShow.Doc
+import TypeLevelShow.Natural ( type ShowNatDec )
+import TypeLevelShow.Utils ( type ShowChar )
 import GHC.TypeError qualified as TE
 
 -- idk which order is nicer here. @s@ first means "out of the way" for error.

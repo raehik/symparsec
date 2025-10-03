@@ -4,6 +4,7 @@
 module Data.Type.Symbol
   ( type Length
   , type Take, type TakeNoTailRec
+  , type Drop
   , type Replicate
   ) where
 
@@ -29,6 +30,9 @@ type family TakeLoop chs n mstr where
     TakeLoop chs n (Just '(ch, str)) = TakeLoop (ch:chs) (n-1) (UnconsSymbol str)
     TakeLoop chs n Nothing           = RevCharsToSymbol chs
 
+-- TODO move RevCharsToSymbol here!
+-- TODO then move this, to singleraeh! lmao
+
 -- | Take the prefix of the given 'Symbol' of the given length.
 --
 -- Returns less than requested if the 'Symbol' is too short.
@@ -41,6 +45,14 @@ type family TakeNoTailRec' n mstr where
   TakeNoTailRec' 0 _                 = ""
   TakeNoTailRec' n (Just '(ch, str)) = ConsSymbol ch (TakeNoTailRec' (n-1) (UnconsSymbol str))
   TakeNoTailRec' _ Nothing           = ""
+
+-- | Drop the prefix of the given 'Symbol' of the given length.
+type Drop :: Natural -> Symbol -> Symbol
+type Drop n str = Drop' n (UnconsSymbol str)
+type family Drop' n mstr where
+    Drop' 0 (Just '(ch, str)) = ConsSymbol ch str
+    Drop' n (Just '(ch, str)) = Drop' (n-1) (UnconsSymbol str)
+    Drop' _ Nothing           = ""
 
 type Replicate :: Natural -> Char -> Symbol
 type Replicate n ch = ReplicateLoop ch '[] n

@@ -4,12 +4,10 @@ module Symparsec2.Example.Expr where
 
 import Symparsec2.Parser.Common
 import Symparsec2.Utils ( type IfNatLte )
-import DeFun.Core ( type (@@) )
 import Symparsec2.Parser.Natural
 import Symparsec2.Parser.Natural.Digits
 import Symparsec2.Parser.While ( type While )
 import Symparsec2.Parser.While.Predicates ( type IsDecDigitSym )
-import GHC.TypeNats ( type Natural )
 
 type PExpr :: PParserSym (Expr Natural)
 data PExpr s

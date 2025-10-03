@@ -3,7 +3,6 @@
 module Symparsec2.Parser.Apply where
 
 import Symparsec2.Parser.Common
-import DeFun.Core ( type (@@), type (~>) )
 
 -- | Apply the given type function to the result.
 --

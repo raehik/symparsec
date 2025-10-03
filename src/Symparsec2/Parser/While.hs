@@ -3,9 +3,6 @@
 module Symparsec2.Parser.While where
 
 import Symparsec2.Parser.Common
-import DeFun.Core ( type (~>), type (@@) )
-import GHC.TypeNats ( Natural, type (+), type (-) )
-import GHC.TypeLits ( type UnconsSymbol )
 
 type While :: (Char ~> Bool) -> PParserSym r -> PParserSym Natural
 data While chPred p s
@@ -25,7 +22,7 @@ type family WhileCount len rem idx chPred p n mstr res where
         WhileCount len rem idx chPred p (n+1) (UnconsSymbol str) (chPred @@ ch)
     WhileCount len rem idx chPred p n (Just '(ch, str)) False =
         WhileEnd (len-n)   (p @@ ('State rem n     idx))
-    WhileCount len rem idx chPred p n Nothing           True =
+    WhileCount len rem idx chPred p n Nothing           True  =
         WhileEnd (len-(n+1)) (p @@ ('State rem (n+1) idx))
     WhileCount len rem idx chPred p n Nothing           False =
         WhileEnd (len-n)   (p @@ ('State rem n     idx))
