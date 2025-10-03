@@ -3,10 +3,6 @@
 module Symparsec2.Parser.Natural where
 
 import Symparsec2.Parser.Common
-import GHC.TypeNats ( type Natural, type (+), type (*) )
-import DeFun.Core ( type (~>), type (@@) )
-import TypeLevelShow.Natural ( type ShowNatDec )
-import TypeLevelShow.Utils ( type ShowChar )
 
 type NatBase :: Natural -> (Char ~> Maybe Natural) -> PParserSym Natural
 data NatBase base parseDigit s

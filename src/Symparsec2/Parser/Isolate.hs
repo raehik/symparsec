@@ -4,9 +4,6 @@ module Symparsec2.Parser.Isolate where
 
 import Symparsec2.Parser.Common
 import Symparsec2.Utils ( type IfNatLte )
-import GHC.TypeNats ( type Natural, type (-), type (+) )
-import DeFun.Core ( type (@@) )
-import TypeLevelShow.Natural ( ShowNatDec )
 
 type Isolate :: Natural -> PParserSym r -> PParserSym r
 data Isolate n p s

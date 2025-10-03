@@ -3,8 +3,6 @@
 module Symparsec2.Parser.Count where
 
 import Symparsec2.Parser.Common
-import DeFun.Core ( type (@@) )
-import GHC.TypeNats ( type Natural, type (-) )
 import qualified Singleraeh.List as List
 
 -- TODO Could possibly make more efficient.
