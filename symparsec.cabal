@@ -55,6 +55,7 @@ library
       Symparsec2.Parser
       Symparsec2.Parser.Apply
       Symparsec2.Parser.Common
+      Symparsec2.Parser.Count
       Symparsec2.Parser.End
       Symparsec2.Parser.Isolate
       Symparsec2.Parser.Lit
