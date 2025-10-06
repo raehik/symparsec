@@ -9,7 +9,7 @@ import Symparsec2.Parser.Natural.Digits
 import Symparsec2.Parser.While ( type While )
 import Symparsec2.Parser.While.Predicates ( type IsDecDigitSym )
 
-type PExpr :: PParserSym (Expr Natural)
+type PExpr :: PParser (Expr Natural)
 data PExpr s
 type instance App PExpr s = PExprNext '[] '[] (UnconsState s)
 type PExprNext

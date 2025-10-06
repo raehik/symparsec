@@ -5,7 +5,7 @@ module Symparsec2.Parser.End where
 import Symparsec2.Parser.Common
 
 -- | Assert end of input, or fail.
-type End :: PParserSym ()
+type End :: PParser ()
 data End s
 type instance App End s = End' (UnconsState s)
 type family End' ms where

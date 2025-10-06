@@ -19,7 +19,7 @@ type EWrongChar lit chExpect chGot =
 
 type EEof lit = EDuringLit lit "EOF while still parsing literal"
 
-type Literal :: Symbol -> PParserSym ()
+type Literal :: Symbol -> PParser ()
 data Literal lit s
 type instance App (Literal lit) s = LiteralCheckLen lit s (Symbol.Length lit)
 

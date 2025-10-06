@@ -6,7 +6,7 @@ import Symparsec2.Parser.Common
 import Symparsec2.Utils ( type IfNatLte )
 
 -- | Assert that there are at least @n@ characters remaining. Non-consuming.
-type Ensure :: Natural -> PParserSym ()
+type Ensure :: Natural -> PParser ()
 data Ensure n s
 type instance App (Ensure n) s = Ensure' n s
 type family Ensure' n s where

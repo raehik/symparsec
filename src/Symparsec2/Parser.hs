@@ -29,7 +29,7 @@ data State str n = State
   , index :: n
   }
 
--- | Promoted 'State', for type-level use.
+-- | Promoted 'State'
 type PState = State Symbol Natural
 
 {-
@@ -65,7 +65,9 @@ data Result str n a = OK a            -- | Parser succeeded.
 -- | Promoted 'Result'.
 type PResult = Result Symbol Natural
 
-type  Parser str n a = State str n -> Reply str n a
-type PParser       a = Parser Symbol Natural a
-type  ParserSym str n a = State str n ~> Reply str n a
-type PParserSym       a = ParserSym Symbol Natural a
+-- | A parser is a function on parser state.
+type Parser str n a = State str n -> Reply str n a
+
+-- | Promoted 'Parser': a defunctionalization symbol to a function on promoted
+--   parser state.
+type PParser a = PState ~> PReply a
