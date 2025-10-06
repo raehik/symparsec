@@ -2,9 +2,9 @@
 
 -- | Type-level string parsers shaped like 'Alternative' functions.
 
-module Symparsec2.Parser.Try where
+module Symparsec.Parser.Try where
 
-import Symparsec2.Parser.Common
+import Symparsec.Parser.Common
 
 -- | Run the given parser, backtracking on error.
 type Try :: PParser a -> PParser a

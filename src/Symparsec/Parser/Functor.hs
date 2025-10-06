@@ -2,11 +2,11 @@
 
 -- | Type-level string parsers shaped like 'Functor' functions.
 
-module Symparsec2.Parser.Functor
+module Symparsec.Parser.Functor
   ( type (<$>), type (<$), type ($>)
   ) where
 
-import Symparsec2.Parser.Common
+import Symparsec.Parser.Common
 import DeFun.Function ( type ConstSym1 )
 
 -- | '<$>' for parsers. Apply the given type function to the result.
@@ -24,7 +24,7 @@ type (<$) :: a -> PParser b -> PParser a
 infixl 4 <$
 type a <$ p = ConstSym1 a <$> p
 
--- | 'Data.Functor.$>' for parsers. Flipped t'Symparsec2.Parser.Functor.<$'.
+-- | 'Data.Functor.$>' for parsers. Flipped t'Symparsec.Parser.Functor.<$'.
 type ($>) :: PParser a -> b -> PParser b
 infixl 4 $>
 type p $> a = ConstSym1 a <$> p

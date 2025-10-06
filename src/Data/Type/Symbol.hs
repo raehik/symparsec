@@ -1,5 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 
+-- TODO move this to singleraeh!
+
 -- | Type families on 'Symbol's.
 module Data.Type.Symbol
   ( type Length
@@ -29,9 +31,6 @@ type family TakeLoop chs n mstr where
     TakeLoop chs 0 _                 = RevCharsToSymbol chs
     TakeLoop chs n (Just '(ch, str)) = TakeLoop (ch:chs) (n-1) (UnconsSymbol str)
     TakeLoop chs n Nothing           = RevCharsToSymbol chs
-
--- TODO move RevCharsToSymbol here!
--- TODO then move this, to singleraeh! lmao
 
 -- | Take the prefix of the given 'Symbol' of the given length.
 --

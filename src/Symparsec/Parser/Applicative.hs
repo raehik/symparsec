@@ -2,14 +2,14 @@
 
 -- | Type-level string parsers shaped like 'Applicative' functions.
 
-module Symparsec2.Parser.Applicative
+module Symparsec.Parser.Applicative
   ( type (<*>), type Pure
   , type LiftA2
   , type (*>), type (<*)
   ) where
 
-import Symparsec2.Parser.Common
-import Symparsec2.Parser.Functor
+import Symparsec.Parser.Common
+import Symparsec.Parser.Functor
 import DeFun.Function ( type IdSym, type ConstSym )
 
 -- | '<*>' for parsers. Sequence two parsers, left to right.

@@ -3,78 +3,48 @@
 module Symparsec.Parser.Literal where
 
 import Symparsec.Parser.Common
-import GHC.TypeLits hiding ( ErrorMessage(..) )
-import TypeLevelShow.Utils ( ShowChar, sShowChar )
-import Data.Type.Equality
-import DeFun.Core
-import Singleraeh.Tuple
-import Singleraeh.Either
-import Singleraeh.Maybe
-import Singleraeh.Symbol
-import Unsafe.Coerce
-import TypeLevelShow.Doc
+import Symparsec.Utils ( type IfNatLte )
+import Data.Type.Symbol qualified as Symbol
 
--- | Parse the given 'Symbol'.
-type Literal :: Symbol -> PParser Symbol ()
-type Literal str = 'PParser LiteralChSym LiteralEndSym str
+-- TODO megaparsec auto-backtracks its similar primitive.
+-- confusingly they write it on the type class method Haddock, even though it
+-- doesn't seem enforced (the backtracking is done internally).
+-- idk why. but should we also?
+-- (similarly to megaparsec, it doesn't really change performance.)
 
-sLiteral :: SSymbol str -> SParser SSymbol SUnit (Literal str)
-sLiteral str = SParser sLiteralChSym sLiteralEndSym str
+type EDuringLit :: Symbol -> Symbol -> PError
+type EDuringLit lit detail = 'Error
+    [ "while parsing literal '" ++ lit ++ "':"
+    , detail ]
 
-instance KnownSymbol str => SingParser (Literal str) where
-    type PS (Literal str) = SSymbol
-    type PR (Literal str) = SUnit
-    singParser' = sLiteral SSymbol
+type ETooShort lit nNeed nGot =
+    EDuringLit lit (EStrInputTooShort nNeed nGot)
 
-type LiteralCh ch str = LiteralCh' ch (UnconsSymbol str)
-type family LiteralCh' ch str where
-    LiteralCh' ch (Just '(ch, str))     = Cont str
-    LiteralCh' ch (Just '(chNext, str)) = Err (EWrongChar chNext ch)
-    LiteralCh' ch Nothing               = Done '()
+type EWrongChar lit chExpect chGot =
+    EDuringLit lit (EStrWrongChar chExpect chGot)
 
-type EWrongChar chNext ch = EBase "Literal"
-    (      Text "expected " :<>: Text (ShowChar chNext)
-      :<>: Text    ", got " :<>: Text (ShowChar ch))
+type EEof lit = EDuringLit lit "EOF while still parsing literal"
 
-eWrongChar :: SChar chNext -> SChar ch -> SE (EWrongChar chNext ch)
-eWrongChar chNext ch = SEBase symbolSing $
-          SText symbolSing :$<>: SText (sShowChar chNext)
-    :$<>: SText symbolSing :$<>: SText (sShowChar ch)
+type Literal :: Symbol -> PParser ()
+data Literal lit s
+type instance App (Literal lit) s = LiteralCheckLen lit s (Symbol.Length lit)
 
-type LiteralChSym :: ParserChSym Symbol ()
-data LiteralChSym f
-type instance App LiteralChSym f = LiteralChSym1 f
+type family LiteralCheckLen lit s n where
+    LiteralCheckLen lit ('State rem len idx) litLen =
+        IfNatLte litLen len
+            (LiteralStep lit ('State rem len idx))
+            ('Reply (Err (ETooShort lit litLen len)) ('State rem len idx))
 
-type LiteralChSym1 :: ParserChSym1 Symbol ()
-data LiteralChSym1 ch s
-type instance App (LiteralChSym1 ch) s = LiteralCh ch s
-
-sLiteralChSym :: SParserChSym SSymbol SUnit LiteralChSym
-sLiteralChSym = Lam2 $ \ch str ->
-    case sUnconsSymbol str of
-      SJust (STuple2 chNext str') ->
-        case testEquality ch chNext of
-          Just Refl -> SCont str'
-          Nothing   -> unsafeCoerce $ SErr $ eWrongChar chNext ch
-      SNothing -> SDone SUnit
-
-type LiteralEnd :: PParserEnd Symbol ()
-type family LiteralEnd str where
-    LiteralEnd ""  = Right '()
-    LiteralEnd str = Left (EStillParsing str)
-
-type EStillParsing str =
-    EBase "Literal" (Text "still parsing literal: " :<>: Text str)
-
-eStillParsing :: SSymbol str -> SE (EStillParsing str)
-eStillParsing str = withKnownSymbol str singE
-
-type LiteralEndSym :: ParserEndSym Symbol ()
-data LiteralEndSym s
-type instance App LiteralEndSym s = LiteralEnd s
-
-sLiteralEndSym :: SParserEndSym SSymbol SUnit LiteralEndSym
-sLiteralEndSym = Lam $ \str ->
-    case testEquality str (SSymbol @"") of
-      Just Refl -> SRight SUnit
-      Nothing   -> unsafeCoerce $ SLeft $ eStillParsing str
+type LiteralStep lit s = Literal' lit s (UnconsSymbol lit) (UnconsState s)
+type family Literal' lit sPrev ch ms where
+    Literal'  lit sPrev (Just '(litCh, litStr)) '(Just litCh,  s) =
+        Literal' lit s (UnconsSymbol litStr) (UnconsState s)
+    Literal' _lit sPrev Nothing                 _                 =
+        'Reply (OK '()) sPrev
+    Literal'  lit sPrev (Just '(litCh, litStr)) '(Just    ch, _s) =
+        -- TODO which state to pass back here?
+        'Reply (Err (EWrongChar lit litCh ch)) sPrev
+    Literal'  lit sPrev (Just '(litCh, litStr)) '(Nothing,    _s) =
+        -- note that this equation is impossible providing length is checked
+        -- both states are guaranteed the same here, but prev is morally better
+        'Reply (Err (EEof lit)) sPrev

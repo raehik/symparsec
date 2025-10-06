@@ -32,49 +32,27 @@ library
       Symparsec
       Symparsec.Example.Expr
       Symparsec.Parser
-      Symparsec.Parser.Apply
+      Symparsec.Parser.Alternative
+      Symparsec.Parser.Applicative
       Symparsec.Parser.Common
       Symparsec.Parser.Count
       Symparsec.Parser.End
+      Symparsec.Parser.Ensure
+      Symparsec.Parser.Functor
       Symparsec.Parser.Isolate
       Symparsec.Parser.Literal
+      Symparsec.Parser.Monad
       Symparsec.Parser.Natural
       Symparsec.Parser.Natural.Digits
-      Symparsec.Parser.Or
       Symparsec.Parser.Skip
       Symparsec.Parser.Take
       Symparsec.Parser.TakeRest
-      Symparsec.Parser.Then
-      Symparsec.Parser.Then.VoidLeft
-      Symparsec.Parser.Then.VoidRight
+      Symparsec.Parser.Try
       Symparsec.Parser.While
       Symparsec.Parser.While.Predicates
       Symparsec.Parsers
       Symparsec.Run
-      Symparsec2
-      Symparsec2.Example.Expr
-      Symparsec2.Parser
-      Symparsec2.Parser.Alternative
-      Symparsec2.Parser.Applicative
-      Symparsec2.Parser.Common
-      Symparsec2.Parser.Count
-      Symparsec2.Parser.End
-      Symparsec2.Parser.Ensure
-      Symparsec2.Parser.Functor
-      Symparsec2.Parser.Isolate
-      Symparsec2.Parser.Literal
-      Symparsec2.Parser.Monad
-      Symparsec2.Parser.Natural
-      Symparsec2.Parser.Natural.Digits
-      Symparsec2.Parser.Skip
-      Symparsec2.Parser.Take
-      Symparsec2.Parser.TakeRest
-      Symparsec2.Parser.Try
-      Symparsec2.Parser.While
-      Symparsec2.Parser.While.Predicates
-      Symparsec2.Parsers
-      Symparsec2.Run
-      Symparsec2.Utils
+      Symparsec.Utils
   other-modules:
       Paths_symparsec
   hs-source-dirs:

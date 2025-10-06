@@ -1,9 +1,9 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec2.Parser.Ensure ( type Ensure ) where
+module Symparsec.Parser.Ensure ( type Ensure ) where
 
-import Symparsec2.Parser.Common
-import Symparsec2.Utils ( type IfNatLte )
+import Symparsec.Parser.Common
+import Symparsec.Utils ( type IfNatLte )
 
 -- | Assert that there are at least @n@ characters remaining. Non-consuming.
 type Ensure :: Natural -> PParser ()

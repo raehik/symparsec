@@ -1,66 +1,21 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec.Parser.Skip where
+module Symparsec.Parser.Skip ( type Skip, type SkipUnsafe ) where
 
 import Symparsec.Parser.Common
-import GHC.TypeLits hiding ( ErrorMessage(..) )
-import TypeLevelShow.Natural ( ShowNatDec, sShowNatDec )
-import Data.Type.Equality
-import Singleraeh.Tuple
-import Singleraeh.Either
-import Singleraeh.Natural
-import DeFun.Core
-import Unsafe.Coerce ( unsafeCoerce )
+import Symparsec.Parser.Ensure
+import Symparsec.Parser.Applicative
+import Data.Type.Symbol qualified as Symbol
 
--- | Skip forward @n@ characters. Fails if fewer than @n@ characters are
---   available'.
-type Skip :: Natural -> PParser Natural ()
-type Skip n = 'PParser SkipChSym SkipEndSym n
+-- | Skip forward @n@ characters. Fails if fewer than @n@ characters remain.
+type Skip :: Natural -> PParser ()
+type Skip n = Ensure n *> SkipUnsafe n
 
-sSkip :: SNat n -> SParser SNat SUnit (Skip n)
-sSkip n = SParser sSkipChSym sSkipEndSym n
-
-instance KnownNat n => SingParser (Skip n) where
-    type PS (Skip n) = SNat
-    type PR (Skip n) = SUnit
-    singParser' = sSkip SNat
-
-type SkipCh :: PParserCh Natural ()
-type family SkipCh ch n where
-    SkipCh _ 0 = Done '()
-    SkipCh _ n = Cont (n-1)
-
-type SkipChSym :: ParserChSym Natural ()
-data SkipChSym f
-type instance App SkipChSym f = SkipChSym1 f
-
-type SkipChSym1 :: ParserChSym1 Natural ()
-data SkipChSym1 ch n
-type instance App (SkipChSym1 ch) n = SkipCh ch n
-
-sSkipChSym :: SParserChSym SNat SUnit SkipChSym
-sSkipChSym = Lam2 $ \_ n ->
-    case testEquality n (SNat @0) of
-      Just Refl -> SDone SUnit
-      Nothing   -> unsafeCoerce $ SCont $ n %- (SNat @1)
-
-type SkipEnd :: PParserEnd Natural ()
-type family SkipEnd n where
-    SkipEnd 0 = Right '()
-    SkipEnd n = Left (ESkipPastEnd n)
-
-type ESkipPastEnd n = EBase "Skip"
-    (      Text "tried to skip "
-      :<>: Text (ShowNatDec n) :<>: Text " chars from empty string")
-eSkipPastEnd :: SNat n -> SE (ESkipPastEnd n)
-eSkipPastEnd n = withKnownSymbol (sShowNatDec n) singE
-
-type SkipEndSym :: ParserEndSym Natural ()
-data SkipEndSym n
-type instance App SkipEndSym n = SkipEnd n
-
-sSkipEndSym :: SParserEndSym SNat SUnit SkipEndSym
-sSkipEndSym = Lam $ \n ->
-    case testEquality n (SNat @0) of
-      Just Refl -> SRight SUnit
-      Nothing   -> unsafeCoerce $ SLeft $ eSkipPastEnd n
+-- | Skip forward @n@ characters. @n@ must be less than or equal to the number
+--   of remaining characters. (Fairly unhelpful; use 'Skip' instead.)
+type SkipUnsafe :: Natural -> PParser ()
+data SkipUnsafe n s
+type instance App (SkipUnsafe n) s = SkipUnsafe' n s
+type family SkipUnsafe' n s where
+    SkipUnsafe' n ('State rem len idx) =
+        'Reply (OK '()) ('State (Symbol.Drop n rem) (len-n) (idx+n))
