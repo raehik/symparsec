@@ -33,12 +33,10 @@ module Symparsec2.Parsers
 
   -- ** Naturals
   , type NatBase
-{- TODO add these man
   , type NatDec
   , type NatHex
   , type NatBin
   , type NatOct
--}
 
   -- * Missing parsers
   -- $missing

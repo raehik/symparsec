@@ -1,8 +1,27 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec2.Parser.Natural where
+module Symparsec2.Parser.Natural
+  ( type NatBase, type NatBase1
+  , type NatDec
+  , type NatHex
+  , type NatBin
+  , type NatOct
+  ) where
 
 import Symparsec2.Parser.Common
+import Symparsec2.Parser.Natural.Digits
+
+-- | Parse a binary (base 2) 'Natural'.
+type NatBin = NatBase  2 ParseDigitBinSym
+
+-- | Parse an octal (base 8) 'Natural'.
+type NatOct = NatBase  8 ParseDigitOctSym
+
+-- | Parse a decimal (base 10) 'Natural'.
+type NatDec = NatBase 10 ParseDigitDecSym
+
+-- | Parse a hexadecimal (base 16) 'Natural'. Permits mixed-case (@0-9A-Fa-f@).
+type NatHex = NatBase 16 ParseDigitHexSym
 
 type NatBase :: Natural -> (Char ~> Maybe Natural) -> PParser Natural
 data NatBase base parseDigit s
