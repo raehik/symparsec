@@ -1,11 +1,9 @@
 {- | Parse digits from type-level 'Char's.
 
 A 'Nothing' indicates the given 'Char' was not a valid digit for the given base.
-
-raehik copied this directly from his own Symparsec library.
 -}
 
-module Symparsec2.Parser.Natural.Digits where
+module Symparsec.Parser.Natural.Digits where
 
 import GHC.TypeLits
 import DeFun.Core

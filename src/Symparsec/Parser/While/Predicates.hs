@@ -1,18 +1,10 @@
 -- | Character predicates.
-
--- TODO for singling, I could cheat by inspecting the char value. should be
--- faster and better. but would need a bit more checking so cba for now.
+--
+-- raehik copied his module from Symparsec.
 
 module Symparsec.Parser.While.Predicates where
 
 import DeFun.Core
-import GHC.TypeLits
-import Singleraeh.Bool
-import Singleraeh.Equality ( testEqElse )
-import Unsafe.Coerce ( unsafeCoerce )
-
-class SingChPred chPred where
-    singChPred :: Lam SChar SBool chPred
 
 -- | @A-Za-z@
 type IsAlpha :: Char -> Bool
@@ -75,64 +67,6 @@ type IsAlphaSym :: Char ~> Bool
 data IsAlphaSym ch
 type instance App IsAlphaSym ch = IsAlpha ch
 
-sIsAlphaSym :: Lam SChar SBool IsAlphaSym
-sIsAlphaSym = Lam $ \ch ->
-      testEqElse ch (SChar @'a') STrue
-    $ testEqElse ch (SChar @'A') STrue
-    $ testEqElse ch (SChar @'b') STrue
-    $ testEqElse ch (SChar @'B') STrue
-    $ testEqElse ch (SChar @'c') STrue
-    $ testEqElse ch (SChar @'C') STrue
-    $ testEqElse ch (SChar @'d') STrue
-    $ testEqElse ch (SChar @'D') STrue
-    $ testEqElse ch (SChar @'e') STrue
-    $ testEqElse ch (SChar @'E') STrue
-    $ testEqElse ch (SChar @'f') STrue
-    $ testEqElse ch (SChar @'F') STrue
-    $ testEqElse ch (SChar @'g') STrue
-    $ testEqElse ch (SChar @'G') STrue
-    $ testEqElse ch (SChar @'h') STrue
-    $ testEqElse ch (SChar @'H') STrue
-    $ testEqElse ch (SChar @'i') STrue
-    $ testEqElse ch (SChar @'I') STrue
-    $ testEqElse ch (SChar @'j') STrue
-    $ testEqElse ch (SChar @'J') STrue
-    $ testEqElse ch (SChar @'k') STrue
-    $ testEqElse ch (SChar @'K') STrue
-    $ testEqElse ch (SChar @'l') STrue
-    $ testEqElse ch (SChar @'L') STrue
-    $ testEqElse ch (SChar @'m') STrue
-    $ testEqElse ch (SChar @'M') STrue
-    $ testEqElse ch (SChar @'n') STrue
-    $ testEqElse ch (SChar @'N') STrue
-    $ testEqElse ch (SChar @'o') STrue
-    $ testEqElse ch (SChar @'O') STrue
-    $ testEqElse ch (SChar @'p') STrue
-    $ testEqElse ch (SChar @'P') STrue
-    $ testEqElse ch (SChar @'q') STrue
-    $ testEqElse ch (SChar @'Q') STrue
-    $ testEqElse ch (SChar @'r') STrue
-    $ testEqElse ch (SChar @'R') STrue
-    $ testEqElse ch (SChar @'s') STrue
-    $ testEqElse ch (SChar @'S') STrue
-    $ testEqElse ch (SChar @'t') STrue
-    $ testEqElse ch (SChar @'T') STrue
-    $ testEqElse ch (SChar @'u') STrue
-    $ testEqElse ch (SChar @'U') STrue
-    $ testEqElse ch (SChar @'v') STrue
-    $ testEqElse ch (SChar @'V') STrue
-    $ testEqElse ch (SChar @'w') STrue
-    $ testEqElse ch (SChar @'W') STrue
-    $ testEqElse ch (SChar @'x') STrue
-    $ testEqElse ch (SChar @'X') STrue
-    $ testEqElse ch (SChar @'y') STrue
-    $ testEqElse ch (SChar @'Y') STrue
-    $ testEqElse ch (SChar @'z') STrue
-    $ testEqElse ch (SChar @'Z') STrue
-    $ unsafeCoerce SFalse
-
-instance SingChPred IsAlphaSym where singChPred = sIsAlphaSym
-
 -- | @0-9A-Fa-f@
 type IsHexDigit :: Char -> Bool
 type family IsHexDigit ch where
@@ -164,30 +98,21 @@ type IsHexDigitSym :: Char ~> Bool
 data IsHexDigitSym ch
 type instance App IsHexDigitSym ch = IsHexDigit ch
 
-sIsHexDigitSym :: Lam SChar SBool IsHexDigitSym
-sIsHexDigitSym = Lam $ \ch ->
-      testEqElse ch (SChar @'0') STrue
-    $ testEqElse ch (SChar @'1') STrue
-    $ testEqElse ch (SChar @'2') STrue
-    $ testEqElse ch (SChar @'3') STrue
-    $ testEqElse ch (SChar @'4') STrue
-    $ testEqElse ch (SChar @'5') STrue
-    $ testEqElse ch (SChar @'6') STrue
-    $ testEqElse ch (SChar @'7') STrue
-    $ testEqElse ch (SChar @'8') STrue
-    $ testEqElse ch (SChar @'9') STrue
-    $ testEqElse ch (SChar @'a') STrue
-    $ testEqElse ch (SChar @'A') STrue
-    $ testEqElse ch (SChar @'b') STrue
-    $ testEqElse ch (SChar @'B') STrue
-    $ testEqElse ch (SChar @'c') STrue
-    $ testEqElse ch (SChar @'C') STrue
-    $ testEqElse ch (SChar @'d') STrue
-    $ testEqElse ch (SChar @'D') STrue
-    $ testEqElse ch (SChar @'e') STrue
-    $ testEqElse ch (SChar @'E') STrue
-    $ testEqElse ch (SChar @'f') STrue
-    $ testEqElse ch (SChar @'F') STrue
-    $ unsafeCoerce SFalse
+-- | @0-9@
+type IsDecDigit :: Char -> Bool
+type family IsDecDigit ch where
+    IsDecDigit '0' = True
+    IsDecDigit '1' = True
+    IsDecDigit '2' = True
+    IsDecDigit '3' = True
+    IsDecDigit '4' = True
+    IsDecDigit '5' = True
+    IsDecDigit '6' = True
+    IsDecDigit '7' = True
+    IsDecDigit '8' = True
+    IsDecDigit '9' = True
+    IsDecDigit _   = False
 
-instance SingChPred IsHexDigitSym where singChPred = sIsHexDigitSym
+type IsDecDigitSym :: Char ~> Bool
+data IsDecDigitSym ch
+type instance App IsDecDigitSym ch = IsDecDigit ch

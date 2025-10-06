@@ -2,9 +2,9 @@
 
 -- | Type-level string parsers shaped like 'Monad' functions.
 
-module Symparsec2.Parser.Monad ( type (>>=) ) where
+module Symparsec.Parser.Monad ( type (>>=) ) where
 
-import Symparsec2.Parser.Common
+import Symparsec.Parser.Common
 
 -- | '>>=' for parsers. Sequentially compose two parsers, passing the value from
 -- the left parser as an argument to the second.

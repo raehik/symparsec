@@ -1,4 +1,4 @@
-module Symparsec2.Utils where
+module Symparsec.Utils where
 
 import GHC.TypeNats ( type CmpNat )
 import Data.Type.Ord ( type OrdCond )

@@ -1,195 +1,152 @@
-{-# LANGUAGE AllowAmbiguousTypes #-} -- for singling
+{-# LANGUAGE UndecidableInstances #-}
 
-{- | Base definitions for Symparsec parsers.
+module Symparsec.Parser where
 
-Some types are useable both on term-level, and promoted on type-level e.g.
-'Result'. For ease of use, you can access the promoted version via type synonyms
-like 'PResult' (for promoted X). (This pattern is copied from @singletons@.)
+import DeFun.Core
+import GHC.TypeLits ( type Symbol )
+import GHC.TypeNats ( type Natural )
 
-Some definitions I use:
+import Singleraeh.Demote
+import Data.Kind ( type Type )
+import GHC.TypeLits ( type SSymbol, fromSSymbol )
+import GHC.TypeNats ( type SNat, fromSNat )
+import Singleraeh.List
+--import Singleraeh.Symbol
 
-  * "defun symbol": Short for "defunctionalization symbol". A method of passing
-    type-level functions (type families) around, without applying them. We use
-    phadej's @defun@ library for the basic functionality.
-  * "consuming [parser]": A parser which must consume its input. Symparsec
-    parsers are always consuming, as it helps keep parser running simple. This
-    is problematic, as you can define non-consuming parsers e.g. @Take 0@. We
-    handle this by preprocessing initial parser state, to check for such cases.
+-- | Parser state.
+data State str n = State
+  -- | Remaining input.
+  { remaining :: str
+
+  -- | Remaining permitted length.
+  --
+  -- Must be less than or equal to the actual length of the remaining input.
+  -- Parsers must use this field when reading from input:
+  --
+  -- * if ==0, treat as end of input.
+  -- * if  >0 but remaining input is empty, unrecoverable parser error
+  --
+  -- This extra bookkeeping permits much simpler parser design, specifically for
+  -- parsers that act on a substring of the input.
+  , length :: n
+
+  -- | Index in the input string.
+  --
+  -- Overall index. Used for nicer error reporting after parse completion.
+  , index :: n
+  } deriving stock Show
+
+-- | Promoted 'State'.
+type PState = State Symbol Natural
+
+-- | Singled 'State'.
+data SState (s :: PState) where
+    SState :: SSymbol rem -> SNat len -> SNat idx -> SState ('State rem len idx)
+
+-- | Demote an 'SState'.
+demoteSState :: SState s -> State String Natural
+demoteSState (SState srem slen sidx) =
+    State (fromSSymbol srem) (fromSNat slen) (fromSNat sidx)
+
+instance Demotable SState where
+    type Demote SState = State String Natural
+    demote = demoteSState
+
+{-
+data Span n = Span
+  { start :: n
+  , end   :: n
+  } deriving stock Show
 -}
 
-module Symparsec.Parser
-  (
-  -- * Parser
-    Parser(..), PParser(..), ResultOf, SParser(..)
-  , ParserCh, PParserCh, ParserChSym, ParserChSym1, SParserChSym, SParserChSym1
-  , ParserEnd, PParserEnd, ParserEndSym, SParserEndSym
-  , ParserSInit, ParserSInitSym, SParserSInitSym
-  , Result(..), PResult, SResult(..)
-  , PResultEnd, SResultEnd
-  , PResultSInit, SResultSInit
+data Error str = Error
+  { detail :: [str]
+  } deriving stock Show
 
-  -- * Error
-  , E(..), PE, SE(..), demoteSE, SingE(singE), withSingE
+-- | Promoted 'Error'.
+type PError = Error Symbol
 
-  -- * Singling
-  , SingParser(..)
-  , singParser
-  ) where
+-- | Singled 'Error'.
+data SError (e :: PError) where
+    SError :: SList SSymbol detail -> SError ('Error detail)
 
-import GHC.TypeLits
-import DeFun.Core
-import GHC.Exts ( withDict )
-import TypeLevelShow.Doc
-import Singleraeh.Either ( SEither )
-import Singleraeh.Demote
-import Singleraeh.Tuple ( STuple2 )
-import Data.Kind ( Type )
+-- | Demote an 'SError'.
+demoteSError :: SError e -> Error String
+demoteSError (SError sdetail) = Error $ demoteSList fromSSymbol sdetail
 
-data Parser str s r = Parser
-  { parserCh  :: ParserCh  str s r
-  , parserEnd :: ParserEnd str s r
-  , parserS0  :: s
-  }
+instance Demotable SError where
+    type Demote SError = Error String
+    demote = demoteSError
 
--- | A type-level parser, containing defunctionalization symbols.
+-- | Parser completion: result, and final state.
 --
--- Only intended for promoted use. For singled term-level parsers, use
--- 'SParser'. (Symparsec doesn't provide "regular" term-level parsers.)
---
--- I would make this demotable, but the defun symbols get in the way.
-data PParser s r = PParser
-  { pparserCh  :: ParserChSym s r
-  , pparserEnd :: ParserEndSym s r
-  , pparserS0  :: s
-  }
+-- TODO: megaparsec also returns a bool indicating if any input was consumed.
+-- Unsure what it's used for.
+data Reply str n a = Reply
+  { result :: Result str n a -- ^ Parse result.
+  , state  :: State str n    -- ^ Final parser state.
+  } deriving stock Show
 
--- | The result type of a type-level parser. (Sometimes handy.)
-type ResultOf (p :: PParser s r) = r
+-- | Promoted 'Reply'.
+type PReply = Reply Symbol Natural
 
--- | A singled parser.
---
--- TODO consider swapping for STuple3...? this is much easier though
-type SParser
-    :: (s -> Type) -> (r -> Type) -> PParser s r
-    -> Type
-data SParser ss sr p where
-    SParser
-        :: SParserChSym  ss sr pCh
-        -> SParserEndSym ss sr pEnd
-        -> ss s0
-        -> SParser ss sr ('PParser pCh pEnd s0)
+-- | Singled 'Reply'.
+data SReply (sa :: a -> Type) (rep :: PReply a) where
+    SReply :: SResult sa result -> SState state -> SReply sa ('Reply result state)
 
--- | Parse a 'Char' with the given state.
-type  ParserCh str s r = Char -> s -> Result str s r
-type PParserCh     s r = ParserCh Symbol s r
+-- | Demote an 'SReply.
+demoteSReply
+    :: (forall a. sa a -> da)
+    -> SReply sa rep
+    -> Reply String Natural da
+demoteSReply demoteSA (SReply sresult sstate) =
+    Reply (demoteSResult demoteSA sresult) (demoteSState sstate)
 
--- | A defunctionalization symbol for a 'ParserCh'.
-type ParserChSym s r = Char ~> s ~> PResult s r
+instance Demotable sa => Demotable (SReply sa) where
+    type Demote (SReply sa) = Reply String Natural (Demote sa)
+    demote = demoteSReply demote
 
--- | A partially-applied defunctionalization symbol for a 'ParserCh'.
-type ParserChSym1 s r = Char -> s ~> PResult s r
-
-type SParserChSym ss sr pCh = Lam2 SChar ss (SResult ss sr) pCh
-type SParserChSym1 ch ss sr pCh = SChar ch -> Lam ss (SResult ss sr) (pCh ch)
-
--- | What a parser should do at the end of a 'Symbol'.
-type  ParserEnd str s r = s -> ResultEnd str r
-type PParserEnd     s r = ParserEnd Symbol s r
-
--- | A defunctionalization symbol for a 'ParserEnd'.
-type ParserEndSym s r = s ~> PResultEnd r
-
-type SParserEndSym ss sr pEnd = Lam ss (SResultEnd sr) pEnd
-
-type ParserSInit s0 s = s0 -> PResultSInit s
-type ParserSInitSym s0 s = s0 ~> PResultSInit s
-type SParserSInitSym ss0 ss sInit = Lam ss0 (SResultSInit ss) sInit
-
--- | The result of a single step of a parser.
---
--- Promotable. Instantiate with 'String' for term-level, 'Symbol' for
--- type-level.
---
--- Note that a 'Done' indicates the parser has not consumed the character. In
--- the original design, it did consume it, and parsers did their own "lookahead"
--- to handle this. The non-consuming behaviour simplifies permitting
--- non-consuming parsers such as @Take 0@.
-data Result str s r
-  = Cont s       -- ^ OK,     consumed, continue with state @s@
-  | Done r       -- ^ OK, not consumed, parse succeeded with result @r@
-  | Err  (E str) -- ^ parse error
-
--- | Promoted 'Result'.
-type PResult = Result Symbol
-
-data SResult (ss :: s -> Type) (sr :: r -> Type) (res :: PResult s r) where
-    SCont :: ss s -> SResult ss sr (Cont s)
-    SDone :: sr r -> SResult ss sr (Done r)
-    SErr  :: SE e -> SResult ss sr (Err e)
-
-type  ResultEnd str =  Either (E str)
-type PResultEnd     =  Either PE
-type SResultEnd     = SEither SE
-
-type PResultSInit s = Either (PE, s) s
-type SResultSInit ss = SEither (STuple2 SE ss) ss
-
--- | Parser error.
---
--- Promotable. Instantiate with 'String' for term-level, 'Symbol' for
--- type-level.
-data E str
-  -- | Base parser error.
-  = EBase
-        str       -- ^ parser name
-        (Doc str) -- ^ error message
-
-  -- | Inner parser error inside combinator.
-  | EIn
-        str     -- ^ combinator name
-        (E str) -- ^ inner error
+-- | Parse result: a value, or an error.
+data Result str n a = OK a            -- ^ Parser succeeded.
+                    | Err (Error str) -- ^ Parser failed.
     deriving stock Show
 
--- | Promoted 'E'.
-type PE = E Symbol
+-- | Promoted 'Result'.
+type PResult = Result Symbol Natural
 
-data SE (e :: PE) where
-    SEBase :: SSymbol name -> SDoc doc -> SE (EBase name doc)
-    SEIn   :: SSymbol name -> SE   e   -> SE (EIn name e)
+--type SState = State 
+--type SResult :: _ -> Type
+-- TODO ^ how to do explicit kind signature for GADT?
 
-demoteSE :: SE e -> E String
-demoteSE = \case
-  SEBase sname sdoc -> EBase (fromSSymbol sname) (demoteDoc sdoc)
-  SEIn   sname se   -> EIn   (fromSSymbol sname) (demoteSE  se)
+-- | Singled 'Result'.
+data SResult (sa :: a -> Type) (res :: PResult a) where
+    SOK  :: sa a     -> SResult sa (OK a)
+    SErr :: SError e -> SResult sa (Err e)
 
-instance Demotable SE where
-    type Demote SE = E String
-    demote = demoteSE
+-- | Demote an 'SResult'.
+demoteSResult
+    :: (forall a. sa a -> da)
+    -> SResult sa res
+    -> Result String Natural da
+demoteSResult demoteSA = \case
+  SOK  sa -> OK  $ demoteSA sa
+  SErr se -> Err $ demoteSError se
 
-class SingE (e :: PE) where singE :: SE e
-instance (KnownSymbol name, SingDoc doc) => SingE (EBase name doc) where
-    singE = SEBase (SSymbol @name) (singDoc @doc)
-instance (KnownSymbol name, SingE e) => SingE (EIn name e) where
-    singE = SEIn   (SSymbol @name) (singE   @e)
+instance Demotable sa => Demotable (SResult sa) where
+    type Demote (SResult sa) = Result String Natural (Demote sa)
+    demote = demoteSResult demote
 
-withSingE :: forall e r. SE e -> (SingE e => r) -> r
-withSingE = withDict @(SingE e)
+-- | A parser is a function on parser state.
+type Parser str n a = State str n -> Reply str n a
 
--- | Promoted parsers with singled implementations.
-class SingParser (p :: PParser s r) where
-    -- | A singleton for the parser state.
-    type PS  p :: s -> Type
+-- | Promoted 'Parser': a defunctionalization symbol to a function on promoted
+--   parser state.
+type PParser a = PState ~> PReply a
 
-    -- | A singleton for the parser return type.
-    type PR  p :: r -> Type
+-- | Singled 'Parser'.
+type SParser sa p = Lam SState (SReply sa) p
+--data SParser (sa :: a -> Type) (p :: PParser a) where
+ --   SParser :: Lam SState (SReply sa) (PParser a)
 
-    -- | The singled parser.
-    singParser' :: SParser (PS p) (PR p) p
-
--- | Get the singled version of the requested parser.
---
--- 'singParser'' with better type application ergonomics.
-singParser
-    :: forall {s} {r} (p :: PParser s r). SingParser p
-    => SParser (PS p) (PR p) p
-singParser = singParser' @_ @_ @p
+--class SingParser (p :: PParser a) where
+--    singParser :: SParser sa p

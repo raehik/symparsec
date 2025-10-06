@@ -1,70 +1,87 @@
--- | Type-level string parsers.
+-- | Common type-level string parsers.
 --
--- You may ignore the equations that Haddock displays: they are internal and
--- irrelevant to library usage.
+-- Many parsers reuse term-level names, which can cause ambiguity issues.
+-- Consider importing qualified.
 
 module Symparsec.Parsers
   (
-  -- * Binary combinators
-  -- $binary-combinators
-    (:<*>:)
-  ,  (:*>:)
-  , (:<*:)
-  , (:<|>:)
+  -- * Type class-esque
+  -- $type-classes
+    type (<$>)
+  , type (<*>), type Pure, type LiftA2, type (*>), type (<*)
+  , type (>>=)
+  , type (<|>), type Empty
 
   -- * Positional
   -- $positional
-  , Take
-  , TakeRest
-  , Skip
-  , End
-  , Isolate
+  , type Ensure
+  , type Isolate
+  , type Take
+  , type TakeRest
+  , type Skip
+  , type End
 
-  -- * Predicated
-  -- $predicated
-  , While, TakeWhile
+  -- * Other combinators
+  -- $comb-etc
+  , type Try
+  , type While
+  , type Count
 
-  -- * TODO unsorted
-  , Count
-
-  -- * Basic
-  -- $basic
-  , Literal
+  -- * Common non-combinator
+  -- $noncomb-common
+  , type Literal
 
   -- ** Naturals
-  , NatDec
-  , NatHex
-  , NatBin
-  , NatOct
-  , NatBase
+  , type NatBase
+  , type NatDec
+  , type NatHex
+  , type NatBin
+  , type NatOct
+
+  -- * Missing parsers
+  -- $missing
   ) where
 
-import Symparsec.Parser.Isolate
-import Symparsec.Parser.Skip
-import Symparsec.Parser.Natural
-import Symparsec.Parser.Then
-import Symparsec.Parser.Then.VoidLeft
-import Symparsec.Parser.Then.VoidRight
-import Symparsec.Parser.Literal
+import Symparsec.Parser.Alternative
+import Symparsec.Parser.Applicative
+import Symparsec.Parser.Count
 import Symparsec.Parser.End
+import Symparsec.Parser.Ensure
+import Symparsec.Parser.Functor
+import Symparsec.Parser.Isolate
+import Symparsec.Parser.Literal
+import Symparsec.Parser.Monad
+import Symparsec.Parser.Natural
+import Symparsec.Parser.Skip
 import Symparsec.Parser.Take
 import Symparsec.Parser.TakeRest
-import Symparsec.Parser.Or
+import Symparsec.Parser.Try
 import Symparsec.Parser.While
-import Symparsec.Parser.Count
 
--- $binary-combinators
--- Parsers that combine two parsers. Any parsers that have term-level parallels
--- will use the same fixity e.g. ':<*>:' is @infixl 4@, same as '<*>'.
+{- $type-classes
+Parsers which mirror functions from type classes (specifically 'Functor',
+'Applicative', 'Monad' and 'Control.Alternative.Alternative'. These primitive
+combinators are powerful, but can be tough to use without type-level binders or
+do-notation, and force interacting with defunctionalization.
+-}
 
--- $positional
--- Parsers that relate to symbol position e.g. length, end of symbol.
+{- $positional
+Parsers that relate to input position e.g. length, end of input.
+-}
 
--- $predicated
--- Parsers that include character predicates.
+{- $comb-etc
+Assorted parser combinators (that wrap other parsers).
+-}
 
--- $basic
--- Simple non-combinator parsers. Probably fundamental in some way e.g. very
--- general or common.
+{- $noncomb-common
+Simple non-combinator parser. Probably fundamental in some way e.g. very general
+or common.
+-}
 
-type TakeWhile chPred = While chPred TakeRest
+{- $missing
+Certain term-level parsers you may be used to you will /not/ see in Symparsec:
+
+* Parsers that rely on underlying instances
+  * e.g. no @'Semigroup' a => Semigroup (parser a)@ because we'd have to pass
+    @Semigroup a@ manually, which defeats the purpose
+-}

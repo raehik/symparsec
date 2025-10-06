@@ -2,14 +2,14 @@
 
 -- | Type-level string parsers shaped like 'Alternative' functions.
 
-module Symparsec2.Parser.Alternative ( type (<|>), type Empty ) where
+module Symparsec.Parser.Alternative ( type (<|>), type Empty ) where
 
-import Symparsec2.Parser.Common
+import Symparsec.Parser.Common
 
 -- | 'Control.Alternative.<|>' for parsers. Try the left parser; if it succeeds, return the result,
 -- else try the right parser with the left parser's output state.
 --
--- Does not backtrack. Wrap parsers with 'Symparsec2.Parser.Try' as needed.
+-- Does not backtrack. Wrap parsers with 'Symparsec.Parser.Try' as needed.
 --
 -- TODO shitty errors
 type (<|>) :: PParser a -> PParser a -> PParser a

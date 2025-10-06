@@ -1,7 +1,7 @@
 module Symparsec
   (
   -- * Base definitions
-    type Run
+    Run, run'
 
   -- * Parsers
   , module Symparsec.Parsers
