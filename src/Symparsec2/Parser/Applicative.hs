@@ -2,7 +2,10 @@
 
 -- | Type-level string parsers shaped like 'Applicative' functions.
 
-module Symparsec2.Parser.Applicative where
+module Symparsec2.Parser.Applicative
+  ( type (<*>), type LiftA2, type (*>), type (<*)
+  , type Pure
+  ) where
 
 import Symparsec2.Parser.Common
 import Symparsec2.Parser.Functor
@@ -34,3 +37,8 @@ type l *> r = (IdSym <$ l) <*> r
 type (<*) :: PParserSym a -> PParserSym b -> PParserSym a
 infixl 4 <*
 type l <* r = LiftA2 ConstSym l r
+
+-- | 'pure' for parsers. Non-consuming parser that just returns the given value.
+type Pure :: a -> PParserSym a
+data Pure a s
+type instance App (Pure a) s = 'Reply (OK a) s
