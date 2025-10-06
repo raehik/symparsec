@@ -1,6 +1,9 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec.Run where
+module Symparsec.Run
+  ( type Run
+  , type RunTest
+  ) where
 
 import Symparsec.Parser
 import Data.Type.Symbol qualified as Symbol
@@ -16,7 +19,7 @@ import TypeLevelShow.Natural ( type ShowNatDec )
 -- * On success, returns a tuple of @(result :: a, remaining :: 'Symbol')@.
 -- * On failure, returns an 'TE.ErrorMessage'.
 type Run :: PParser a -> Symbol -> Either TE.ErrorMessage (a, Symbol)
-type Run p str = RunEnd str (p @@ ('State str (Symbol.Length str) 0))
+type Run p str = RunEnd str (p @@ StateInit str)
 
 type family RunEnd str rep where
     RunEnd str ('Reply (OK  a) ('State  rem _len _idx)) =
@@ -26,6 +29,19 @@ type family RunEnd str rep where
         Right '(a, rem)
     RunEnd str ('Reply (Err e) ('State _rem _len  idx)) =
         Left (RenderPDoc (PrettyErrorTop idx str e))
+
+-- | TODO
+type RunTest :: PParser a -> Symbol -> (a, Symbol)
+type RunTest p str = RunTestEnd (Run p str)
+
+type RunTestEnd :: Either TE.ErrorMessage (a, Symbol) -> (a, Symbol)
+type family RunTestEnd res where
+    RunTestEnd (Right a) = a
+    RunTestEnd (Left  e) = TE.TypeError e
+
+-- | Initial parser state for the given 'Symbol'.
+type StateInit :: Symbol -> PState
+type StateInit str = 'State str (Symbol.Length str) 0
 
 -- | Pretty print a top-level parser error.
 --
@@ -59,12 +75,3 @@ type family ConcatSymbol doc strs where
     -- TODO get ordering right
     ConcatSymbol doc (str:strs) = ConcatSymbol (doc :$$: Text str) strs
     ConcatSymbol doc '[]        = doc
-
--- | TODO
-type RunTest :: PParser r -> Symbol -> (r, Symbol)
-type RunTest p str = RunTestEnd (Run p str)
-
-type RunTestEnd :: Either TE.ErrorMessage (r, Symbol) -> (r, Symbol)
-type family RunTestEnd res where
-    RunTestEnd (Right a) = a
-    RunTestEnd (Left  e) = TE.TypeError e
