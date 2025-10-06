@@ -6,11 +6,15 @@ module Symparsec2.Parser.Common
   (
   -- * Common definitions
     type UnconsState
-  , type Err, type Done
+  , type Error1
+  --, type Err1
+  , type EStrInputTooShort, type EStrWrongChar
+  --, type Err, type Done
+  , type Impossible
 
   -- * Re-exports
   , module Symparsec2.Parser
-  , Doc(..)
+  , Doc(..), type (++)
   , type App
 
   -- ** Common imports
@@ -27,16 +31,20 @@ module Symparsec2.Parser.Common
 
 import Symparsec2.Parser
 import DeFun.Core
-import GHC.TypeLits ( type Symbol, type UnconsSymbol, type ConsSymbol )
+import GHC.TypeLits ( type Symbol, type UnconsSymbol, type ConsSymbol, type AppendSymbol )
 import GHC.TypeNats ( type Natural, type (+), type (-), type (*) )
 import TypeLevelShow.Doc
 import TypeLevelShow.Natural ( type ShowNatDec )
-import TypeLevelShow.Utils ( type ShowChar )
+import TypeLevelShow.Utils ( type ShowChar, type (++) )
+-- TODO clean up (++) stuff, probably just export my own one
 import GHC.TypeError qualified as TE
 
 -- idk which order is nicer here. @s@ first means "out of the way" for error.
-type Err  s e = 'Result (Left  e) s
-type Done s r = 'Result (Right r) s
+--type Err  s e = 'Reply (Err e) s
+--type Done s a = 'Reply (OK  a) s
+
+-- TODO this is pre-spans
+--type EBase parserName = 'Error '[(Text parserName) ('Span 0 0) '[]
 
 -- | Get the next character in the string and update the parser state.
 --
@@ -57,3 +65,23 @@ type family UnconsState' mstr len idx where
         TE.TypeError (TE.Text "unrecoverable parser error: got to end of input string before len=0")
 
 -- TODO: add type synonym for @(Maybe Char, PState) -> PResult res@
+
+-- TODO
+type Error1 str = 'Error '[str]
+--type Err1 str = Err (Error1 str)
+--type OK' a s = 'Reply (OK a) s
+
+type EStrInputTooShort :: Natural -> Natural -> Symbol
+type EStrInputTooShort nNeed nGot =
+         "needed " ++ ShowNatDec nNeed
+      ++ " chars, but only " ++ ShowNatDec nGot ++ " remain"
+
+type EStrWrongChar :: Char -> Char -> Symbol
+type EStrWrongChar chExpect chGot =
+         "expected '" ++ ShowChar chExpect
+      ++  "', got '"  ++ ShowChar chGot ++ "'"
+
+-- | Impossible parser state.
+--
+-- Use when you can prove that an equation is impossible.
+type Impossible = TE.TypeError (TE.Text "impossible parser state")

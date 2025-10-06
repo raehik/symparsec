@@ -1,30 +1,15 @@
 # Symparsec to-dos
+* check Haddocks, especially for overloaded binders like `<$>`
 * `type TakeWhile chPred = While chPred TakeRest`, but a custom parser would be
   faster (we could track output `rem`)
-* parser result kind binder: `r`, or `a`?
-  * do we want to use `a` elsewhere?
 * parser type binders: `res :: PResult r`? what about `UnconsState`? etc.
 * consider binary combinator names...
   * now using infix as base, but the internals use non-infix because it's
     easier. but they won't display properly in type errors... meh
   * oh and the parse errors aren't superb here too. kinda meh though
 
-## Tweak error type structure
-The recursive trick is neat... but this type is simpler, and isomorphic:
-
-```haskell
-data E str = E [str] (Doc str)
-```
-
-This also looks more like the shape I tend to use for my error types! Lovely.
-
 ## Proofs (tests?)
 * `Isolate n TakeRest` is equivalent to `Take n`
-
-## How to wrap complicated parser results into nicer ones??
-Relevant for e.g. expression parsing.
-
-`Apply` (or inline `:@@:`) does an OK job for this.
 
 ## No instances on parsers due to "Illegal type synonym family application"
 I had to work around this in the singletons. But it also impacts other design. I
@@ -35,9 +20,7 @@ the reifying requires a type family instance on that parser, which we can't do.
 simplicity.)
 
 ## Combinators
-In general, we should be able to implement any parser we see that doesn't use
-choice (`MonadPlus`/`Alternative`). Even those ones we might be able to define a
-limited version, but only if it seems helpful.
+* `Choice :: [PParserSym a] -> PParserSym a`
 
 ### Various from parser-combinators, megaparsec
 * Helpers for writing `Count` with separators
