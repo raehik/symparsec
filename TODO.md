@@ -3,41 +3,19 @@
 * `type TakeWhile chPred = While chPred TakeRest`, but a custom parser would be
   faster (we could track output `rem`)
 
-## Monadic parsers require even _more_ defunctionalisation
-It kinda sucks. I'd like to provide non-defun parsers in general. I think I can
-make it work: defun parsers are suffixed with `Sym`, as normal. Seems fine?
-
-    > type PDec = NatBase 10 ParseDigitDecSym
-    > :k! Run ((Isolate 1 PDec <* Literal "_") >>= TakeSym) "3_abcdefg"
-
-We obviously can't use `Take` here, since `>>=` is applying the left parsed
-value to it. `TakeSym` reads just fine to me.
+## Pre-2.0 release
+* check the various `Run` functions available
+* check my uses could move easily (binrep, gtvm-hs)
+* check exports (should be hiding internals)
 
 ## Proofs (tests?)
 * `Isolate n TakeRest` is equivalent to `Take n`
 
-## No instances on parsers due to "Illegal type synonym family application"
-I had to work around this in the singletons. But it also impacts other design. I
-wanted to write a special generic-data-functions sum tag handler that uses the
-Symparsec parser you provide and fills out all the info. But we can't, because
-the reifying requires a type family instance on that parser, which we can't do.
-(I couldn't figure out a workaround here, but it's only a very minor loss of
-simplicity.)
-
 ## Combinators
 * `Choice :: [PParser a] -> PParser a`
-* `(<>) :: (a ~> a ~> a) -> PParser a -> PParser a -> PParser a`
-  * note that have to pass the inner semigroup operation manually. still worth
+* various from parser-combinators, megaparsec (e.g. `sepBy`)
 
-### Various from parser-combinators, megaparsec
-* Helpers for writing `Count` with separators
-  * We can't do `sepBy` exactly because it uses backtracking.
-  * Maybe we have to write another combinator here :(
-  * We need to parse `p` once first, then repeatedly parse `sep :*>: p`. That's
-    what parser-combinators does. Not hard to make a fresh combinator that does
-    this, but a bit disappointing if I can't define it with other combinators.
-
-## Examples
+## Example uses of Symparsec to write, present
 ### This StackOverflow one from 2022-06
 https://stackoverflow.com/questions/72762890/simplest-way-to-do-type-level-symbol-formatting-in-haskell
 
