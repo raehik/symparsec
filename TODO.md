@@ -30,7 +30,9 @@ the reifying requires a type family instance on that parser, which we can't do.
 simplicity.)
 
 ## Combinators
-* `Choice :: [PParserSym a] -> PParserSym a`
+* `Choice :: [PParser a] -> PParser a`
+* `(<>) :: (a ~> a ~> a) -> PParser a -> PParser a -> PParser a`
+  * note that have to pass the inner semigroup operation manually. still worth
 
 ### Various from parser-combinators, megaparsec
 * Helpers for writing `Count` with separators

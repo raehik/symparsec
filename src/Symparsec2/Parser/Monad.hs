@@ -13,6 +13,6 @@ infixl 1 >>=
 data (>>=) l r s
 type instance App (l >>= r) s = BindL r (l @@ s)
 type BindL :: (a ~> PParser b) -> PReply a -> PReply b
-type family BindL r res where
+type family BindL r rep where
     BindL r ('Reply (OK  a) s) = r @@ a @@ s
     BindL r ('Reply (Err e) s) = 'Reply (Err e) s
