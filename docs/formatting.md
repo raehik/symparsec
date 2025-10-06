@@ -7,8 +7,7 @@ for return kind when used in type-level code.
 * parser reply type binder: `rep`
   * ? `r` is fine, but it's often used for continuations. `rep` sounds like
     `representation` but that's it, so I consider it fairly unambiguous
-* parser state type binder: `st`
-  * ? reminds of `state token`, but otherwise sensible
+* parser state type binder: `s`
 * parser state index type binder: `idx`
   * simple, obvious
 * parser state number kind binder: `n`
