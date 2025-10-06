@@ -6,6 +6,12 @@ import Symparsec2.Parser.Common
 import Symparsec2.Utils ( type IfNatLte )
 import Data.Type.Symbol qualified as Symbol
 
+-- TODO megaparsec auto-backtracks its similar primitive.
+-- confusingly they write it on the type class method Haddock, even though it
+-- doesn't seem enforced (the backtracking is done internally).
+-- idk why. but should we also?
+-- (similarly to megaparsec, it doesn't really change performance.)
+
 type EDuringLit :: Symbol -> Symbol -> PError
 type EDuringLit lit detail = 'Error
     [ "while parsing literal '" ++ lit ++ "':"

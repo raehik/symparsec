@@ -19,7 +19,7 @@ type family Isolate' n p s where
 
 --type IsolateEnd :: Natural -> ? -> ?
 -- TODO are lenRem/lenConsumed actually good names?
-type family IsolateEnd lenOrig n res where
+type family IsolateEnd lenOrig n rep where
     -- isolated parser succeeded and consumed all input:
     -- return success with state updated to have actual remaining length
     IsolateEnd lenOrig n ('Reply (OK  a) ('State rem 0   idx)) =

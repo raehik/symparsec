@@ -53,6 +53,7 @@ library
       Symparsec.Run
       Symparsec2.Example.Expr
       Symparsec2.Parser
+      Symparsec2.Parser.Alternative
       Symparsec2.Parser.Applicative
       Symparsec2.Parser.Common
       Symparsec2.Parser.Count
@@ -67,6 +68,7 @@ library
       Symparsec2.Parser.Skip
       Symparsec2.Parser.Take
       Symparsec2.Parser.TakeRest
+      Symparsec2.Parser.Try
       Symparsec2.Parser.While
       Symparsec2.Parser.While.Predicates
       Symparsec2.Run

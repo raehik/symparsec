@@ -15,7 +15,7 @@ infixl 4 <$>
 data (<$>) f p s
 type instance App (f <$> p) s = FmapEnd f (p @@ s)
 
-type family FmapEnd f res where
+type family FmapEnd f rep where
     FmapEnd f ('Reply (OK  a) s) = 'Reply (OK  (f @@ a)) s
     FmapEnd f ('Reply (Err e) s) = 'Reply (Err e)        s
 

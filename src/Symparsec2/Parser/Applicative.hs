@@ -17,7 +17,7 @@ infixl 4 <*>
 data (<*>) l r s
 type instance App (l <*> r) s = ApL r (l @@ s)
 type ApL :: PParser a -> PReply (a ~> b) -> PReply b
-type family ApL r res where
+type family ApL r rep where
     ApL r ('Reply (OK  fa) s) = (fa <$> r) @@ s
     ApL r ('Reply (Err e)  s) = 'Reply (Err e) s
 

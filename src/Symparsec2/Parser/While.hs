@@ -27,6 +27,6 @@ type family WhileCount len rem idx chPred p n mstr res where
     WhileCount len rem idx chPred p n Nothing           False =
         WhileEnd (len-n)     (p @@ ('State rem n     idx))
 
-type family WhileEnd lenRest res where
+type family WhileEnd lenRest rep where
     WhileEnd lenRest ('Reply res ('State rem len idx)) =
         'Reply res ('State rem (lenRest+len) idx)
