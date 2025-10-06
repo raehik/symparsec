@@ -144,9 +144,9 @@ type Parser str n a = State str n -> Reply str n a
 type PParser a = PState ~> PReply a
 
 -- | Singled 'Parser'.
---type SParser p s = Lam SState SReply (p @@ s)
+type SParser sa p = Lam SState (SReply sa) p
+--data SParser (sa :: a -> Type) (p :: PParser a) where
+ --   SParser :: Lam SState (SReply sa) (PParser a)
 
----
-
-class SingParser (p :: PParser a) where
---    singParser :: SParser a
+--class SingParser (p :: PParser a) where
+--    singParser :: SParser sa p
