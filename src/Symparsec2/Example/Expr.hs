@@ -16,7 +16,7 @@ type PExprNext
     :: [BOp]
     -> [Expr Natural]
     -> (Maybe Char, PState)
-    -> PResult (Expr Natural)
+    -> PReply (Expr Natural)
 type family PExprNext ops exprs s where
     PExprNext ops exprs '(Just ch, s) =
         PExprCh s ops exprs ch
@@ -24,9 +24,9 @@ type family PExprNext ops exprs s where
 
 type family PExprEnd s ops exprs where
     PExprEnd s (op:ops) exprs      = PExprEndPopOp s ops exprs op
-    PExprEnd s '[]      (expr:'[]) = Done s expr
+    PExprEnd s '[]      (expr:'[]) = 'Reply (OK expr) s
     PExprEnd s '[]      _          =
-        Err s (EBase "Expr" (Text "badly formed expression"))
+        'Reply (Err (Error1 "badly formed expression")) s
 
 type family PExprEndPopOp s ops exprs op where
     PExprEndPopOp s ops (r:l:exprs) bop =
@@ -44,10 +44,10 @@ type family PExprELit s ops exprs ch mDigit where
         PExprEBOp s ops exprs ch
 
 type family PExprELitEnd ops exprs res where
-    PExprELitEnd ops exprs ('Result (Right n) s) =
+    PExprELitEnd ops exprs ('Reply (OK  n) s) =
         PExprNext ops (ELit n : exprs) (UnconsState s)
-    PExprELitEnd ops exprs ('Result (Left  e) s) =
-        Err s (EIn "Expr" e)
+    PExprELitEnd ops exprs ('Reply (Err e) s) =
+        'Reply (Err e) s
 
 type family PExprEBOp s ops exprs ch where
     PExprEBOp s ops exprs '+' =

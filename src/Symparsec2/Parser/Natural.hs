@@ -11,7 +11,7 @@ type instance App (NatBase base parseDigit) s =
 type family NatBaseStart base parseDigit sCh s where
     NatBaseStart base parseDigit sCh '(Just ch, s) =
         NatBaseLoop base parseDigit sCh s 0 ch (parseDigit @@ ch) (UnconsState s)
-    NatBaseStart base parseDigit sCh '(Nothing, s) = Err s EEmpty
+    NatBaseStart base parseDigit sCh '(Nothing, s) = 'Reply (Err EEmpty) sCh
 
 -- | Parse a non-empty 'Natural'.
 --
@@ -24,11 +24,13 @@ type family NatBase1' base parseDigit sCh digit s where
     NatBase1' base parseDigit sCh digit '(Just ch, s) =
         NatBaseLoop base parseDigit sCh s digit ch (parseDigit @@ ch) (UnconsState s)
     NatBase1' base parseDigit sCh digit '(Nothing, s) =
-        Done s digit
+        'Reply (OK digit) s
 
-type EEmpty = EBase "NatBase" (Text "no digits parsed")
-type EInvalidDigit ch base = EBase "NatBase"
-    (Text "not a base " :<>: Text (ShowNatDec base) :<>: Text " digit: " :<>: Text (ShowChar ch))
+type EEmpty = Error1 "no digits parsed" -- TODO not great eh
+--type EInvalidDigit ch base = EBase "NatBase"
+--    (Text "not a base " :<>: Text (ShowNatDec base) :<>: Text " digit: " :<>: Text (ShowChar ch))
+type EInvalidDigit ch base =
+    Error1 ( "not a base " ++ ShowNatDec base ++ " digit: " ++ ShowChar ch)
 
 -- consumes greedily to hopefully speed up evaluation-- means we have to
 -- backtrack on failure
@@ -43,16 +45,14 @@ type NatBaseLoop
     -> Char
     -> Maybe Natural
     -> (Maybe Char, PState)
-    -> PResult Natural
+    -> PReply Natural
 type family NatBaseLoop base parseDigit sCh s n chCur mDigit ms where
     -- parsed digit and have next char
     NatBaseLoop base parseDigit sCh s n chCur (Just digit) '(Just ch, sNext) =
         NatBaseLoop base parseDigit s sNext (n * base + digit) ch (parseDigit @@ ch) (UnconsState sNext)
     NatBaseLoop base parseDigit sCh s n chCur (Just digit) '(Nothing, sNext) =
-        Done sNext (n * base + digit)
-    NatBaseLoop base parseDigit sCh s n chCur Nothing      '(Just ch, sNext) =
+        'Reply (OK (n * base + digit)) sNext
+    NatBaseLoop base parseDigit sCh s n chCur Nothing      '(_, sNext) =
         -- we've consumed the next character, but digit parse failed:
         -- backtrack and return error
-        Err  sCh (EInvalidDigit chCur base)
-    NatBaseLoop base parseDigit sCh s n chCur Nothing      '(Nothing, sNext) =
-        Err  sCh (EInvalidDigit chCur base)
+        'Reply (Err (EInvalidDigit chCur base)) sCh
