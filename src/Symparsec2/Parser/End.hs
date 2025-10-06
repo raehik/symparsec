@@ -9,5 +9,7 @@ type End :: PParserSym ()
 data End s
 type instance App End s = End' (UnconsState s)
 type family End' ms where
-    End' '(Nothing,  s) = Done s '()
-    End' '(Just _ch, s) = Err  s (EBase "End" (Text "expected end of string"))
+    End' '(Nothing,  s) = 'Reply (OK '()) s
+    End' '(Just _ch, s) = 'Reply (Err EEof) s
+
+type EEof = Error1 "expected end of string"

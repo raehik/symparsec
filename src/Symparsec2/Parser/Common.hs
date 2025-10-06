@@ -31,7 +31,7 @@ module Symparsec2.Parser.Common
 
 import Symparsec2.Parser
 import DeFun.Core
-import GHC.TypeLits ( type Symbol, type UnconsSymbol, type ConsSymbol, type AppendSymbol )
+import GHC.TypeLits ( type Symbol, type UnconsSymbol, type ConsSymbol )
 import GHC.TypeNats ( type Natural, type (+), type (-), type (*) )
 import TypeLevelShow.Doc
 import TypeLevelShow.Natural ( type ShowNatDec )
