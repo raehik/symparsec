@@ -29,7 +29,7 @@ data State str n = State
   , index :: n
   }
 
--- | Promoted 'State'
+-- | Promoted 'State'.
 type PState = State Symbol Natural
 
 {-
@@ -51,16 +51,16 @@ type PError = Error Symbol
 -- TODO: megaparsec also returns a bool indicating if any input was consumed.
 -- Unsure what it's used for.
 data Reply str n a = Reply
-  { result :: Result str n a -- | Parse result.
-  , state  :: State str n    -- | Final parser state.
+  { result :: Result str n a -- ^ Parse result.
+  , state  :: State str n    -- ^ Final parser state.
   }
 
 -- | Promoted 'Reply'.
 type PReply = Reply Symbol Natural
 
 -- | Parse result: a value, or an error.
-data Result str n a = OK a            -- | Parser succeeded.
-                    | Err (Error str) -- | Parser failed.
+data Result str n a = OK a            -- ^ Parser succeeded.
+                    | Err (Error str) -- ^ Parser failed.
 
 -- | Promoted 'Result'.
 type PResult = Result Symbol Natural
