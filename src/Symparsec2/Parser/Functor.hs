@@ -24,7 +24,7 @@ type (<$) :: a -> PParser b -> PParser a
 infixl 4 <$
 type a <$ p = ConstSym1 a <$> p
 
--- | '$>' for parsers. Flipped 'Symparsec2.Parser.Functor.<$'.
+-- | 'Data.Functor.$>' for parsers. Flipped t'Symparsec2.Parser.Functor.<$'.
 type ($>) :: PParser a -> b -> PParser b
 infixl 4 $>
 type p $> a = ConstSym1 a <$> p
