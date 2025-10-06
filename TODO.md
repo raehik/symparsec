@@ -8,6 +8,16 @@
     easier. but they won't display properly in type errors... meh
   * oh and the parse errors aren't superb here too. kinda meh though
 
+## Monadic parsers require even _more_ defunctionalisation
+It kinda sucks. I'd like to provide non-defun parsers in general. I think I can
+make it work: defun parsers are suffixed with `Sym`, as normal. Seems fine?
+
+    > type PDec = NatBase 10 ParseDigitDecSym
+    > :k! Run ((Isolate 1 PDec <* Literal "_") >>= TakeSym) "3_abcdefg"
+
+We obviously can't use `Take` here, since `>>=` is applying the left parsed
+value to it. `TakeSym` reads just fine to me.
+
 ## Proofs (tests?)
 * `Isolate n TakeRest` is equivalent to `Take n`
 

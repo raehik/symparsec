@@ -61,6 +61,7 @@ library
       Symparsec2.Parser.Functor
       Symparsec2.Parser.Isolate
       Symparsec2.Parser.Literal
+      Symparsec2.Parser.Monad
       Symparsec2.Parser.Natural
       Symparsec2.Parser.Natural.Digits
       Symparsec2.Parser.Skip
