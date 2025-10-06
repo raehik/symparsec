@@ -6,7 +6,7 @@ import Symparsec2.Parser.Common
 import Symparsec2.Utils ( type IfNatLte )
 
 -- TODO can use 'Ensure' to help define this
-type Isolate :: Natural -> PParserSym r -> PParserSym r
+type Isolate :: Natural -> PParser r -> PParser r
 data Isolate n p s
 type instance App (Isolate n p) s = Isolate' n p s
 type family Isolate' n p s where
@@ -39,6 +39,6 @@ type EIsolateIncomplete n = Error1
       ++ ShowNatDec n ++ " remaining)" )
 
 -- TODO testing
-type IsolateSym :: PParserSym r -> Natural ~> PParserSym r
+type IsolateSym :: PParser r -> Natural ~> PParser r
 data IsolateSym p x
 type instance App (IsolateSym p) n = Isolate n p

@@ -4,7 +4,7 @@ module Symparsec2.Parser.Natural where
 
 import Symparsec2.Parser.Common
 
-type NatBase :: Natural -> (Char ~> Maybe Natural) -> PParserSym Natural
+type NatBase :: Natural -> (Char ~> Maybe Natural) -> PParser Natural
 data NatBase base parseDigit s
 type instance App (NatBase base parseDigit) s =
     NatBaseStart base parseDigit s (UnconsState s)
@@ -16,7 +16,7 @@ type family NatBaseStart base parseDigit sCh s where
 -- | Parse a non-empty 'Natural'.
 --
 -- Skips some extra work. May be handy for hand-written parsers.
-type NatBase1 :: Natural -> (Char ~> Maybe Natural) -> Natural -> PParserSym Natural
+type NatBase1 :: Natural -> (Char ~> Maybe Natural) -> Natural -> PParser Natural
 data NatBase1 base parseDigit digit s
 type instance App (NatBase1 base parseDigit digit) s =
     NatBase1' base parseDigit s digit (UnconsState s)

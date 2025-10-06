@@ -8,7 +8,7 @@ import qualified Singleraeh.List as List
 -- TODO Could possibly make more efficient.
 
 -- | @'Count' n p@ parses @n@ occurrences of @p@.
-type Count :: Natural -> PParserSym a -> PParserSym [a]
+type Count :: Natural -> PParser a -> PParser [a]
 data Count n p s
 type instance App (Count n p) s = CountLoop p '[] n s
 

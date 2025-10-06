@@ -8,7 +8,7 @@ import qualified Data.Type.Symbol as Symbol
 -- | Consume and return the rest of the input string.
 --
 -- Never fails. May return the empty string.
-type TakeRest :: PParserSym Symbol
+type TakeRest :: PParser Symbol
 data TakeRest s
 type instance App TakeRest s = TakeRest' s
 type family TakeRest' s where

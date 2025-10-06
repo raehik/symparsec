@@ -15,7 +15,7 @@ import TypeLevelShow.Natural ( type ShowNatDec )
 --
 -- * On success, returns a tuple of @(result :: a, remaining :: 'Symbol')@.
 -- * On failure, returns an 'TE.ErrorMessage'.
-type Run :: PParserSym a -> Symbol -> Either TE.ErrorMessage (a, Symbol)
+type Run :: PParser a -> Symbol -> Either TE.ErrorMessage (a, Symbol)
 type Run p str = RunEnd str (p @@ ('State str (Symbol.Length str) 0))
 
 type family RunEnd str rep where
@@ -61,7 +61,7 @@ type family ConcatSymbol doc strs where
     ConcatSymbol doc '[]        = doc
 
 -- | TODO
-type RunTest :: PParserSym r -> Symbol -> (r, Symbol)
+type RunTest :: PParser r -> Symbol -> (r, Symbol)
 type RunTest p str = RunTestEnd (Run p str)
 
 type RunTestEnd :: Either TE.ErrorMessage (r, Symbol) -> (r, Symbol)

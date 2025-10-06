@@ -8,12 +8,12 @@ import Symparsec2.Parser.Applicative
 import Data.Type.Symbol qualified as Symbol
 
 -- | Skip forward @n@ characters. Fails if fewer than @n@ characters remain.
-type Skip :: Natural -> PParserSym ()
+type Skip :: Natural -> PParser ()
 type Skip n = Ensure n *> SkipUnsafe n
 
 -- | Skip forward @n@ characters. @n@ must be less than or equal to the number
 --   of remaining characters. (Fairly unhelpful; use 'Skip' instead.)
-type SkipUnsafe :: Natural -> PParserSym ()
+type SkipUnsafe :: Natural -> PParser ()
 data SkipUnsafe n s
 type instance App (SkipUnsafe n) s = SkipUnsafe' n s
 type family SkipUnsafe' n s where

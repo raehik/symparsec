@@ -1,3 +1,13 @@
+## 2.0 (Unreleased)
+Full rewrite.
+
+* parsers are now much more general: mutually-recursive parsers are game
+  * added an example parser for a simple expression AST
+* added parsers matching `Functor`, `Applicative`, `Monad` type class methods
+
+Simple parsers written with the provided combinators should still function the
+same, or with minimal changes.
+
 ## 1.1.1 (2024-06-15)
 * add `Apply` combinator (effectively `fmap`)
 * add some more runners and utils (handy for generic-data-functions)
