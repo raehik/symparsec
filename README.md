@@ -5,8 +5,10 @@ Type level string parser combinators. A [Parsec][hackage-parsec]-like for
 `Symbol`s; thus, Symparsec! With many of the features you'd expect:
 
 * define parsers compositionally, largely as you would on the term level
+* define complex parsers, including mutually recursive ones (e.g. expression
+  parsers!)
 * pretty, detailed parse errors
-* good performance (probably-- please help me benchmark!)
+* good performance (probably? please help me benchmark!)
 
 Requires GHC >= 9.6.
 
@@ -26,13 +28,7 @@ Run ...
 = Right '( '(255, "etc"), "")
 ```
 
-Use it to parse a different, term-level string:
-
-```haskell
-ghci> import Singleraeh.Demote ( demote )
-ghci> run' @PExample demote "abc_123"
-Right ((188,"123"),"")
-```
+See the `Symparsec.Example` namespace for further examples.
 
 ## Why?
 Via `GHC.Generics`, we may inspect Haskell data types on the type level.
@@ -43,8 +39,9 @@ level instead. Catch bugs earlier, get faster runtime.
 Also type-level Haskell authors deserve fun libraries too!!
 
 ## Limitations
-The key limitation Symparsec grapples with is having __no binders on the type
-level.__ This means:
+Symparsec defines a lot of low-level parsers you would expect on the term level,
+even monadic (bind) and applicative (ap) parser combinators. The key limitation
+Symparsec grapples with is Haskell having _no type-level binders_. This means:
 
 * no `let`s, no `where`s
 * no `do` notation
