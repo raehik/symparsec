@@ -51,6 +51,7 @@ library
       Symparsec.Parser.While.Predicates
       Symparsec.Parsers
       Symparsec.Run
+      Symparsec2
       Symparsec2.Example.Expr
       Symparsec2.Parser
       Symparsec2.Parser.Alternative
