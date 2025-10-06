@@ -21,16 +21,12 @@ type family WhileCount len rem idx chPred p n mstr res where
     WhileCount len rem idx chPred p n (Just '(ch, str)) True  =
         WhileCount len rem idx chPred p (n+1) (UnconsSymbol str) (chPred @@ ch)
     WhileCount len rem idx chPred p n (Just '(ch, str)) False =
-        WhileEnd (len-n)   (p @@ ('State rem n     idx))
+        WhileEnd (len-n)     (p @@ ('State rem n     idx))
     WhileCount len rem idx chPred p n Nothing           True  =
         WhileEnd (len-(n+1)) (p @@ ('State rem (n+1) idx))
     WhileCount len rem idx chPred p n Nothing           False =
-        WhileEnd (len-n)   (p @@ ('State rem n     idx))
+        WhileEnd (len-n)     (p @@ ('State rem n     idx))
 
 type family WhileEnd lenRest res where
-    WhileEnd lenRest ('Result res ('State rem len idx)) =
-        WhileEnd' ('State rem (lenRest+len) idx) res
-
-type family WhileEnd' s res where
-    WhileEnd' s (Left  e) = Err s (EIn "While" e)
-    WhileEnd' s (Right r) = Done s r
+    WhileEnd lenRest ('Reply res ('State rem len idx)) =
+        'Reply res ('State rem (lenRest+len) idx)

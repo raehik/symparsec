@@ -5,53 +5,67 @@ module Symparsec2.Parser where
 import DeFun.Core
 import GHC.TypeLits ( type Symbol )
 import GHC.TypeNats ( type Natural )
-import TypeLevelShow.Doc
 
+-- | Parser state.
 data State str n = State
   -- | Remaining input.
   { remaining :: str
 
-  -- | Input length.
+  -- | Remaining permitted length.
   --
-  -- Permitted to be less than actual remaining input. This is fine.
-  -- It means parsers can act on a substring of the input.
+  -- Must be less than or equal to the actual length of the remaining input.
+  -- Parsers must use this field when reading from input:
+  --
+  -- * if ==0, treat as end of input.
+  -- * if  >0 but remaining input is empty, unrecoverable parser error
+  --
+  -- This extra bookkeeping permits much simpler parser design, specifically for
+  -- parsers that act on a substring of the input.
   , length :: n
 
   -- | Index in the input string.
   --
-  -- Should be "overall" index, and only for errors.
+  -- Overall index. Used for nicer error reporting after parse completion.
   , index :: n
   }
 
 -- | Promoted 'State', for type-level use.
 type PState = State Symbol Natural
 
--- | TODO
-data E str
-  = EBase
-        str
-        (Doc str)
-  | EIn
-        str
-        (E str)
-    deriving stock Show
+{-
+data Span n = Span
+  { start :: n
+  , end   :: n
+  } deriving stock Show
+-}
 
--- | Promoted 'E'.
-type PE = E Symbol
+data Error str = Error
+  { detail :: [str]
+  } deriving stock Show
 
--- | Parser result.
-data Result str n r = Result
-  -- | Parsed value, or failure.
-  { result :: Either (E str) r
+-- | Promoted 'Error'.
+type PError = Error Symbol
 
-  -- | Final parser state.
-  , state :: State str n
+-- | Parser completion: result, and final state.
+--
+-- TODO: megaparsec also returns a bool indicating if any input was consumed.
+-- Unsure what it's used for.
+data Reply str n a = Reply
+  { result :: Result str n a -- | Parse result.
+  , state  :: State str n    -- | Final parser state.
   }
+
+-- | Promoted 'Reply'.
+type PReply = Reply Symbol Natural
+
+-- | Parse result: a value, or an error.
+data Result str n a = OK a            -- | Parser succeeded.
+                    | Err (Error str) -- | Parser failed.
 
 -- | Promoted 'Result'.
 type PResult = Result Symbol Natural
 
-type  Parser str n r = State str n -> Result str n r
-type PParser       r = Parser Symbol Natural r
-type  ParserSym str n r = State str n ~> Result str n r
-type PParserSym       r = ParserSym Symbol Natural r
+type  Parser str n a = State str n -> Reply str n a
+type PParser       a = Parser Symbol Natural a
+type  ParserSym str n a = State str n ~> Reply str n a
+type PParserSym       a = ParserSym Symbol Natural a

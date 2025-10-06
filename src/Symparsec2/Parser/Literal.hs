@@ -3,28 +3,42 @@
 module Symparsec2.Parser.Literal where
 
 import Symparsec2.Parser.Common
+import Symparsec2.Utils ( type IfNatLte )
+import Data.Type.Symbol qualified as Symbol
 
-type EWrongChar lit chExpect chGot = EBase "Literal"
-    (      Text "while parsing literal '" :<>: Text lit
-      :<>: Text "': expected '" :<>: Text (ShowChar chExpect)
-      :<>: Text "', got '"   :<>: Text (ShowChar chGot) :<>: Text "'")
+type EDuringLit :: Symbol -> Symbol -> PError
+type EDuringLit lit detail = 'Error
+    [ "while parsing literal '" ++ lit ++ "':"
+    , detail ]
 
-type EStillParsing lit rem = EBase "Literal"
-    (      Text "while parsing literal '" :<>: Text lit
-      :<>: Text "': end of input, still parsing '" :<>: Text rem :<>: Text "'")
+type ETooShort lit nNeed nGot =
+    EDuringLit lit (EStrInputTooShort nNeed nGot)
+
+type EWrongChar lit chExpect chGot =
+    EDuringLit lit (EStrWrongChar chExpect chGot)
+
+type EEof lit = EDuringLit lit "EOF while still parsing literal"
 
 type Literal :: Symbol -> PParserSym ()
 data Literal lit s
-type instance App (Literal lit) s = LiteralStep lit s
+type instance App (Literal lit) s = LiteralCheckLen lit s (Symbol.Length lit)
+
+type family LiteralCheckLen lit s n where
+    LiteralCheckLen lit ('State rem len idx) litLen =
+        IfNatLte litLen len
+            (LiteralStep lit ('State rem len idx))
+            ('Reply (Err (ETooShort lit litLen len)) ('State rem len idx))
+
 type LiteralStep lit s = Literal' lit s (UnconsSymbol lit) (UnconsState s)
 type family Literal' lit sPrev ch ms where
     Literal'  lit sPrev (Just '(litCh, litStr)) '(Just litCh,  s) =
         Literal' lit s (UnconsSymbol litStr) (UnconsState s)
     Literal' _lit sPrev Nothing                 _                 =
-        Done sPrev '()
+        'Reply (OK '()) sPrev
     Literal'  lit sPrev (Just '(litCh, litStr)) '(Just    ch, _s) =
         -- TODO which state to pass back here?
-        Err sPrev (EWrongChar lit litCh ch)
+        'Reply (Err (EWrongChar lit litCh ch)) sPrev
     Literal'  lit sPrev (Just '(litCh, litStr)) '(Nothing,    _s) =
+        -- note that this equation is impossible providing length is checked
         -- both states are guaranteed the same here, but prev is morally better
-        Err sPrev (EStillParsing lit (ConsSymbol litCh litStr))
+        'Reply (Err (EEof lit)) sPrev
