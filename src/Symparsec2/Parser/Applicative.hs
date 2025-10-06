@@ -13,13 +13,13 @@ import DeFun.Function ( type IdSym, type ConstSym )
 
 -- | '<*>' for parsers. Sequence two parsers, left to right.
 type (<*>) :: PParserSym (a ~> b) -> PParserSym a -> PParserSym b
-infixl 4  <*>
+infixl 4 <*>
 data (<*>) l r s
-type instance App (l <*> r) s = ThenL r (l @@ s)
-type ThenL :: PParserSym a -> PReply (a ~> b) -> PReply b
-type family ThenL r res where
-    ThenL r ('Reply (OK  fa) s) = (fa <$> r) @@ s
-    ThenL r ('Reply (Err e)  s) = 'Reply (Err e) s
+type instance App (l <*> r) s = ApL r (l @@ s)
+type ApL :: PParserSym a -> PReply (a ~> b) -> PReply b
+type family ApL r res where
+    ApL r ('Reply (OK  fa) s) = (fa <$> r) @@ s
+    ApL r ('Reply (Err e)  s) = 'Reply (Err e) s
 
 -- | 'liftA2' for parsers. Sequence two parsers, and combine their results with
 -- a binary type function.

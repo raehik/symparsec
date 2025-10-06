@@ -37,3 +37,8 @@ type family IsolateEnd lenOrig n res where
 type EIsolateIncomplete n = Error1
     (    "isolated parser completed without consuming all input ("
       ++ ShowNatDec n ++ " remaining)" )
+
+-- TODO testing
+type IsolateSym :: PParserSym r -> Natural ~> PParserSym r
+data IsolateSym p x
+type instance App (IsolateSym p) n = Isolate n p

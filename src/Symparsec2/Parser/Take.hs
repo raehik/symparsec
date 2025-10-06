@@ -17,3 +17,8 @@ type family Take' chs n sPrev s where
 type ETakeEnd :: Natural -> PError
 type ETakeEnd n = Error1
     ( "tried to take " ++ ShowNatDec n ++ " chars from empty string" )
+
+-- TODO testing
+type TakeSym :: Natural ~> PParserSym Symbol
+data TakeSym n
+type instance App TakeSym n = Take n
