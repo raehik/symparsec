@@ -4,7 +4,7 @@ module Symparsec2.Parser.While where
 
 import Symparsec2.Parser.Common
 
-type While :: (Char ~> Bool) -> PParser r -> PParser Natural
+type While :: (Char ~> Bool) -> PParser a -> PParser Natural
 data While chPred p s
 type instance App (While chPred p) s = While' chPred p s
 

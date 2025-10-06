@@ -60,9 +60,9 @@ import Symparsec2.Parser.While
 
 {- $type-classes
 Parsers which mirror functions from type classes (specifically 'Functor',
-'Applicative', 'Monad' and 'Alternative'. These primitive combinators are
-powerful, but can be tough to use without type-level binders or do-notation, and
-force interacting with defunctionalization.
+'Applicative', 'Monad' and 'Control.Alternative.Alternative'. These primitive
+combinators are powerful, but can be tough to use without type-level binders or
+do-notation, and force interacting with defunctionalization.
 -}
 
 {- $positional
@@ -79,10 +79,9 @@ or common.
 -}
 
 {- $missing
-Certain term-level parsers you may be used to you will _not_ see in Symparsec:
+Certain term-level parsers you may be used to you will /not/ see in Symparsec:
 
 * Parsers that rely on underlying instances
-  * e.g. Semigroup, Monoid rely on underlying `Semigroup a` instances, which we
-    would have to pass manually, which defeats the purpose (e.g. `(<>) = liftA2
-    (<>)`, so just use like `LiftA2 (++)`
+  * e.g. no @'Semigroup' a => Semigroup (parser a)@ because we'd have to pass
+    @Semigroup a@ manually, which defeats the purpose
 -}

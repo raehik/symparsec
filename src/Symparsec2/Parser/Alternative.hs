@@ -6,7 +6,7 @@ module Symparsec2.Parser.Alternative ( type (<|>), type Empty ) where
 
 import Symparsec2.Parser.Common
 
--- | '<|>' for parsers. Try the left parser; if it succeeds, return the result,
+-- | 'Control.Alternative.<|>' for parsers. Try the left parser; if it succeeds, return the result,
 -- else try the right parser with the left parser's output state.
 --
 -- Does not backtrack. Wrap parsers with 'Symparsec2.Parser.Try' as needed.
@@ -21,7 +21,7 @@ type family Plus r rep where
     Plus r ('Reply (OK   a) s) = 'Reply (OK a) s
     Plus r ('Reply (Err _e) s) = r @@ s
 
--- | 'empty' for parsers. Immediately fail with no consumption.
+-- | 'Control.Alternative.empty' for parsers. Immediately fail with no consumption.
 type Empty :: PParser a
 data Empty s
 type instance App Empty s = 'Reply (Err (Error1 "called empty parser")) s
