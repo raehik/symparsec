@@ -2,7 +2,7 @@
 
 -- | Type-level string parsers shaped like 'Alternative' functions.
 
-module Symparsec2.Parser.Alternative where
+module Symparsec2.Parser.Alternative ( type (<|>), type Empty ) where
 
 import Symparsec2.Parser.Common
 

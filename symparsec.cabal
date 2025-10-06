@@ -71,6 +71,7 @@ library
       Symparsec2.Parser.Try
       Symparsec2.Parser.While
       Symparsec2.Parser.While.Predicates
+      Symparsec2.Parsers
       Symparsec2.Run
       Symparsec2.Utils
   other-modules:

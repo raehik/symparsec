@@ -3,8 +3,9 @@
 -- | Type-level string parsers shaped like 'Applicative' functions.
 
 module Symparsec2.Parser.Applicative
-  ( type (<*>), type LiftA2, type (*>), type (<*)
-  , type Pure
+  ( type (<*>), type Pure
+  , type LiftA2
+  , type (*>), type (<*)
   ) where
 
 import Symparsec2.Parser.Common
@@ -20,6 +21,11 @@ type ApL :: PParser a -> PReply (a ~> b) -> PReply b
 type family ApL r rep where
     ApL r ('Reply (OK  fa) s) = (fa <$> r) @@ s
     ApL r ('Reply (Err e)  s) = 'Reply (Err e) s
+
+-- | 'pure' for parsers. Non-consuming parser that just returns the given value.
+type Pure :: a -> PParser a
+data Pure a s
+type instance App (Pure a) s = 'Reply (OK a) s
 
 -- | 'liftA2' for parsers. Sequence two parsers, and combine their results with
 -- a binary type function.
@@ -37,8 +43,3 @@ type l *> r = (IdSym <$ l) <*> r
 type (<*) :: PParser a -> PParser b -> PParser a
 infixl 4 <*
 type l <* r = LiftA2 ConstSym l r
-
--- | 'pure' for parsers. Non-consuming parser that just returns the given value.
-type Pure :: a -> PParser a
-data Pure a s
-type instance App (Pure a) s = 'Reply (OK a) s

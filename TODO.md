@@ -1,12 +1,7 @@
 # Symparsec to-dos
-* check Haddocks, especially for overloaded binders like `<$>`
+* I can't see the name `while` used by many parser libs? what about `satisfy`?
 * `type TakeWhile chPred = While chPred TakeRest`, but a custom parser would be
   faster (we could track output `rem`)
-* parser type binders: `res :: PResult r`? what about `UnconsState`? etc.
-* consider binary combinator names...
-  * now using infix as base, but the internals use non-infix because it's
-    easier. but they won't display properly in type errors... meh
-  * oh and the parse errors aren't superb here too. kinda meh though
 
 ## Monadic parsers require even _more_ defunctionalisation
 It kinda sucks. I'd like to provide non-defun parsers in general. I think I can
