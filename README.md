@@ -17,7 +17,8 @@ Define a type-level parser:
 
 ```haskell
 import Symparsec
-type PExample = Skip 1 *> Isolate 2 NatHex <*> (Literal "_" *> TakeRest)
+import DeFun.Core
+type PExample = Skip 1 *> Tuple (Isolate 2 NatHex) (Literal "_" *> TakeRest)
 ```
 
 Use it to parse a type-level string (in a GHCi session):

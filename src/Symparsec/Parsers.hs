@@ -38,6 +38,10 @@ module Symparsec.Parsers
   , type NatBin
   , type NatOct
 
+  -- * Derived
+  -- $derived
+  , type Tuple
+
   -- * Missing parsers
   -- $missing
   ) where
@@ -57,6 +61,7 @@ import Symparsec.Parser.Take
 import Symparsec.Parser.TakeRest
 import Symparsec.Parser.Try
 import Symparsec.Parser.While
+import DeFun.Core
 
 {- $type-classes
 Parsers which mirror functions from type classes (specifically 'Functor',
@@ -85,3 +90,8 @@ Certain term-level parsers you may be used to you will /not/ see in Symparsec:
   * e.g. no @'Semigroup' a => Semigroup (parser a)@ because we'd have to pass
     @Semigroup a@ manually, which defeats the purpose
 -}
+
+{- $derived
+Derived parsers. Should be type synonyms.
+-}
+type Tuple l r = LiftA2 (Con2 '(,)) l r
