@@ -1,10 +1,10 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec.Parser.While where
+module Symparsec.Parser.While ( type While ) where
 
 import Symparsec.Parser.Common
 
-type While :: (Char ~> Bool) -> PParser a -> PParser Natural
+type While :: (Char ~> Bool) -> PParser a -> PParser a
 data While chPred p s
 type instance App (While chPred p) s = While' chPred p s
 
