@@ -1,8 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
--- | Type-level string parsers shaped like 'Alternative' functions.
-
-module Symparsec.Parser.Try where
+module Symparsec.Parser.Try ( type Try ) where
 
 import Symparsec.Parser.Common
 

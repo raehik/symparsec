@@ -4,9 +4,10 @@
   faster (we could track output `rem`)
 
 ## Pre-2.0 release
+* check exports (should be hiding internals)
+* finish `Expr` example (I didn't finish error cases, also fill out AST more)
 * check the various `Run` functions available
 * check my uses could move easily (binrep, gtvm-hs)
-* check exports (should be hiding internals)
 
 ## Proofs (tests?)
 * `Isolate n TakeRest` is equivalent to `Take n`

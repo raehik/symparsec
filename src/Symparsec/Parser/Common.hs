@@ -25,10 +25,6 @@ module Symparsec.Parser.Common
   , type (@@), type (~>)
   ) where
 
--- $common-imports
--- TODO idk syntax
--- Not used by all parsers, but common enough that we'll export them here.
-
 import Symparsec.Parser
 import DeFun.Core
 import GHC.TypeLits ( type Symbol, type UnconsSymbol, type ConsSymbol )
@@ -39,9 +35,8 @@ import TypeLevelShow.Utils ( type ShowChar, type (++) )
 -- TODO clean up (++) stuff, probably just export my own one
 import GHC.TypeError qualified as TE
 
--- idk which order is nicer here. @s@ first means "out of the way" for error.
---type Err  s e = 'Reply (Err e) s
---type Done s a = 'Reply (OK  a) s
+-- $common-imports
+-- Not used by all parsers, but common enough that we'll export them here.
 
 -- TODO this is pre-spans
 --type EBase parserName = 'Error '[(Text parserName) ('Span 0 0) '[]

@@ -1,12 +1,12 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec.Parser.Isolate where
+module Symparsec.Parser.Isolate ( type Isolate, type IsolateSym ) where
 
 import Symparsec.Parser.Common
 import Symparsec.Utils ( type IfNatLte )
 
 -- TODO can use 'Ensure' to help define this
-type Isolate :: Natural -> PParser r -> PParser r
+type Isolate :: Natural -> PParser a -> PParser a
 data Isolate n p s
 type instance App (Isolate n p) s = Isolate' n p s
 type family Isolate' n p s where
@@ -38,7 +38,7 @@ type EIsolateIncomplete n = Error1
     (    "isolated parser completed without consuming all input ("
       ++ ShowNatDec n ++ " remaining)" )
 
--- TODO testing
-type IsolateSym :: PParser r -> Natural ~> PParser r
+-- TODO testing. args flipped because you're more likely to defun the len
+type IsolateSym :: PParser a -> Natural ~> PParser a
 data IsolateSym p x
 type instance App (IsolateSym p) n = Isolate n p

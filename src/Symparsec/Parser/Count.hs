@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec.Parser.Count where
+module Symparsec.Parser.Count ( type Count ) where
 
 import Symparsec.Parser.Common
 import qualified Singleraeh.List as List

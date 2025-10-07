@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec.Parser.TakeRest where
+module Symparsec.Parser.TakeRest ( type TakeRest ) where
 
 import Symparsec.Parser.Common
 import qualified Data.Type.Symbol as Symbol

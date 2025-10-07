@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec.Parser.Literal where
+module Symparsec.Parser.Literal ( type Literal ) where
 
 import Symparsec.Parser.Common
 import Symparsec.Utils ( type IfNatLte )
@@ -29,6 +29,8 @@ type Literal :: Symbol -> PParser ()
 data Literal lit s
 type instance App (Literal lit) s = LiteralCheckLen lit s (Symbol.Length lit)
 
+-- now, I could use 'Ensure' here. but we add context to errors here, which I
+-- quite like. perhaps I should provide an @Ensure'@ that lets you add e detail?
 type family LiteralCheckLen lit s n where
     LiteralCheckLen lit ('State rem len idx) litLen =
         IfNatLte litLen len
