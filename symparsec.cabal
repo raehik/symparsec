@@ -36,8 +36,8 @@ library
       Symparsec.Parser.Applicative
       Symparsec.Parser.Common
       Symparsec.Parser.Count
-      Symparsec.Parser.End
       Symparsec.Parser.Ensure
+      Symparsec.Parser.Eof
       Symparsec.Parser.Functor
       Symparsec.Parser.Isolate
       Symparsec.Parser.Literal

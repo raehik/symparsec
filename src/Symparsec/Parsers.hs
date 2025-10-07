@@ -19,7 +19,7 @@ module Symparsec.Parsers
   , type Take
   , type TakeRest
   , type Skip
-  , type End
+  , type Eof
 
   -- * Other combinators
   -- $comb-etc
@@ -49,8 +49,8 @@ module Symparsec.Parsers
 import Symparsec.Parser.Alternative
 import Symparsec.Parser.Applicative
 import Symparsec.Parser.Count
-import Symparsec.Parser.End
 import Symparsec.Parser.Ensure
+import Symparsec.Parser.Eof
 import Symparsec.Parser.Functor
 import Symparsec.Parser.Isolate
 import Symparsec.Parser.Literal
@@ -94,4 +94,10 @@ Certain term-level parsers you may be used to you will /not/ see in Symparsec:
 {- $derived
 Derived parsers. Should be type synonyms.
 -}
+
+-- | Parse left, then right, and return their results in a tuple.
+--
+-- Classic parser combinators often don't define this because it's trivial, and
+-- do notation is often cleaner anyway. But it's very syntactically busy on the
+-- type level, and don't have do notation. So here's a convenience definition.
 type Tuple l r = LiftA2 (Con2 '(,)) l r
