@@ -21,6 +21,7 @@ import TypeLevelShow.Natural ( type ShowNatDec )
 type Run :: PParser a -> Symbol -> Either TE.ErrorMessage (a, Symbol)
 type Run p str = RunEnd str (p @@ StateInit str)
 
+type RunEnd :: Symbol -> PReply a -> Either TE.ErrorMessage (a, Symbol)
 type family RunEnd str rep where
     RunEnd str ('Reply (OK  a) ('State  rem _len _idx)) =
         -- TODO I could return only @len@ of the remaining input @rem@, but
@@ -30,14 +31,19 @@ type family RunEnd str rep where
     RunEnd str ('Reply (Err e) ('State _rem _len  idx)) =
         Left (RenderPDoc (PrettyErrorTop idx str e))
 
--- | TODO
+-- | Run the given parser on the given 'Symbol', emitting a type error on
+--   failure.
+--
+-- This /would/ be useful for @:k!@ runs, but it doesn't work properly with
+-- 'TE.TypeError's, printing @= (TypeError ...)@ instead of the error message.
+-- Alas! Instead, do something like @> Proxy \@(RunTest ...)@.
 type RunTest :: PParser a -> Symbol -> (a, Symbol)
-type RunTest p str = RunTestEnd (Run p str)
+type RunTest p str = FromRightTypeError (Run p str)
 
-type RunTestEnd :: Either TE.ErrorMessage (a, Symbol) -> (a, Symbol)
-type family RunTestEnd res where
-    RunTestEnd (Right a) = a
-    RunTestEnd (Left  e) = TE.TypeError e
+type FromRightTypeError :: Either TE.ErrorMessage a -> a
+type family FromRightTypeError eea where
+    FromRightTypeError (Right a) = a
+    FromRightTypeError (Left  e) = TE.TypeError e
 
 -- | Initial parser state for the given 'Symbol'.
 type StateInit :: Symbol -> PState
