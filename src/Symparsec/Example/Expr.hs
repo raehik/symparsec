@@ -41,7 +41,7 @@ type family PExprELit s ops exprs ch mDigit where
         PExprELitEnd ops exprs
             (While IsDecDigitSym (NatBase1 10 ParseDigitDecSym digit) @@ s)
     PExprELit s ops exprs  ch Nothing      =
-        PExprEBOp s ops exprs ch
+        PExprEBOp s ops exprs ch (PExprEBOpOpCh ch)
 
 type family PExprELitEnd ops exprs res where
     PExprELitEnd ops exprs ('Reply (OK  n) s) =
@@ -49,11 +49,20 @@ type family PExprELitEnd ops exprs res where
     PExprELitEnd ops exprs ('Reply (Err e) s) =
         'Reply (Err e) s
 
-type family PExprEBOp s ops exprs ch where
-    PExprEBOp s ops exprs '+' =
-        PExprEBOp' s Plus (BOpPrec Plus) exprs ops
-    PExprEBOp s ops exprs '*' =
-        PExprEBOp' s Mult (BOpPrec Mult) exprs ops
+type family PExprEBOp s ops exprs ch mbop where
+    PExprEBOp s ops exprs ch (Just bop) =
+        PExprEBOp' s bop (BOpPrec bop) exprs ops
+    PExprEBOp s ops exprs ch Nothing =
+        -- TODO we're 1 char ahead here, since we've already consumed the op...
+        -- oops.
+        'Reply (Err (Error1 "bad expression, expected digit or operator")) s
+
+type family PExprEBOpOpCh ch where
+    PExprEBOpOpCh '+' = Just Add
+    PExprEBOpOpCh '-' = Just Sub
+    PExprEBOpOpCh '*' = Just Mul
+    PExprEBOpOpCh '/' = Just Div
+    PExprEBOpOpCh _   = Nothing
 
 type family PExprEBOp' s op prec exprs ops where
     PExprEBOp' s op prec exprs (opPrev:ops) =
@@ -70,16 +79,16 @@ type family PExprEBOpPop s op prec opPrev ops exprs where
 
 type BOpPrec :: BOp -> Natural
 type family BOpPrec bop where
-    BOpPrec Plus = 2
-    BOpPrec Mult = 3
+    BOpPrec Add = 2
+    BOpPrec Sub = 2
+    BOpPrec Mul = 3
+    BOpPrec Div = 3
 
 data Expr a
   = EBOp BOp (Expr a) (Expr a)
   | ELit a
 
-data BOp
-  = Plus
-  | Mult
+data BOp = Add | Sub | Mul | Div
 
 -- | 'Expr' tokens.
 data ExprTok a
