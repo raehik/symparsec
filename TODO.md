@@ -1,10 +1,8 @@
 # Symparsec to-dos
-* I can't see the name `while` used by many parser libs? what about `satisfy`?
 * `type TakeWhile chPred = While chPred TakeRest`, but a custom parser would be
   faster (we could track output `rem`)
 
 ## Pre-2.0 release
-* check exports (should be hiding internals)
 * finish `Expr` example (I didn't finish error cases, also fill out AST more)
 * check the various `Run` functions available
 * check my uses could move easily (binrep, gtvm-hs)
