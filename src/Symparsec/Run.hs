@@ -1,9 +1,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec.Run
-  ( type Run
-  , type RunTest
-  ) where
+-- | Running Symparsec parsers.
+
+module Symparsec.Run ( type Run, type RunTest ) where
 
 import Symparsec.Parser
 import Data.Type.Symbol qualified as Symbol

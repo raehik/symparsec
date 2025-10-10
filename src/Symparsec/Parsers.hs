@@ -86,18 +86,19 @@ or common.
 {- $missing
 Certain term-level parsers you may be used to you will /not/ see in Symparsec:
 
-* Parsers that rely on underlying instances
-  * e.g. no @'Semigroup' a => Semigroup (parser a)@ because we'd have to pass
-    @Semigroup a@ manually, which defeats the purpose
+* Parsers that rely on underlying instances e.g. no @'Semigroup' a => Semigroup
+  (parser a)@ because we'd have to pass @Semigroup a@ manually, which defeats
+  the purpose
 -}
 
 {- $derived
 Derived parsers. Should be type synonyms.
 -}
 
--- | Parse left, then right, and return their results in a tuple.
---
--- Classic parser combinators often don't define this because it's trivial, and
--- do notation is often cleaner anyway. But it's very syntactically busy on the
--- type level, and don't have do notation. So here's a convenience definition.
+{- | Parse left, then right, and return their results in a tuple.
+
+Classic parser combinators often don't define this because it's trivial, and do
+notation is often cleaner anyway. But it's very syntactically busy on the type
+level, and we don't have do notation. So here's a convenience definition.
+-}
 type Tuple l r = LiftA2 (Con2 '(,)) l r
