@@ -6,6 +6,8 @@ module Symparsec.Parser.Natural
   , type NatHex
   , type NatBin
   , type NatOct
+
+  , type AltNatBase
   ) where
 
 import Symparsec.Parser.Common
@@ -75,3 +77,45 @@ type family NatBaseLoop base parseDigit sCh s n chCur mDigit ms where
         -- we've consumed the next character, but digit parse failed:
         -- backtrack and return error
         'Reply (Err (EInvalidDigit chCur base)) sCh
+
+-- Alternate natural parser that shouldn't need @While@ to get the same sort of
+-- behaviour. Needs deep testing, and comparing to Megaparsec.
+type AltNatBase :: Natural -> (Char ~> Maybe Natural) -> PParser Natural
+data AltNatBase base parseDigit s
+type instance App (AltNatBase base parseDigit) s =
+    AltNatBaseStart base parseDigit s (UnconsState s)
+type family AltNatBaseStart base parseDigit sCh s where
+    AltNatBaseStart base parseDigit sCh '(Just ch, s) =
+        AltNatBaseStart2 base parseDigit sCh s ch (parseDigit @@ ch) (UnconsState s)
+    AltNatBaseStart base parseDigit sCh '(Nothing, s) = 'Reply (Err EEmpty) sCh
+
+type family AltNatBaseStart2 base parseDigit sCh s chChur mDigit ms where
+    AltNatBaseStart2 base parseDigit sCh s chCur (Just digit) '(Just ch, sNext) =
+        AltNatBaseLoop base parseDigit s sNext digit ch (parseDigit @@ ch) (UnconsState sNext)
+    AltNatBaseStart2 base parseDigit sCh s chCur (Just digit) '(Nothing, sNext) =
+        -- parsed first digit, no more input: done
+        'Reply (OK digit) sNext
+    AltNatBaseStart2 base parseDigit sCh s chCur Nothing      _ =
+        -- failed to parse first digit: backtrack and error
+        'Reply (Err (EInvalidDigit chCur base)) sCh
+
+-- Note that this parser never fails.
+type AltNatBaseLoop
+    :: Natural
+    -> (Char ~> Maybe Natural)
+    -> PState
+    -> PState
+    -> Natural
+    -> Char
+    -> Maybe Natural
+    -> (Maybe Char, PState)
+    -> PReply Natural
+type family AltNatBaseLoop base parseDigit sCh s n chCur mDigit ms where
+    -- parsed digit and have next char
+    AltNatBaseLoop base parseDigit sCh s n chCur (Just digit) '(Just ch, sNext) =
+        AltNatBaseLoop base parseDigit s sNext (n * base + digit) ch (parseDigit @@ ch) (UnconsState sNext)
+    AltNatBaseLoop base parseDigit sCh s n chCur (Just digit) '(Nothing, sNext) =
+        'Reply (OK (n * base + digit)) sNext
+    AltNatBaseLoop base parseDigit sCh s n chCur Nothing      _ =
+        -- failed to parse next digit: backtrack and finish
+        'Reply (OK n) sCh
