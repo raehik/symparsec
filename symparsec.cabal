@@ -47,6 +47,7 @@ library
       Symparsec.Parser.Skip
       Symparsec.Parser.Take
       Symparsec.Parser.TakeRest
+      Symparsec.Parser.TakeWhile
       Symparsec.Parser.Try
       Symparsec.Parser.While
       Symparsec.Parser.While.Predicates
