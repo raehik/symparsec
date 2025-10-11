@@ -29,5 +29,11 @@ type family WhileCount len rem idx chPred p n mstr res where
         WhileEnd (len-n)     (p @@ ('State rem n     idx))
 
 type family WhileEnd lenRest rep where
+    -- TODO note that we don't require that the inner parser fully consumes.
+    -- that's because we "lie" about how this parser works. you probably want a
+    -- sort of char-by-char parser, but we measure a chunk and pass that.
+    -- but by not requiring full consumption, we recover char-by-char behaviour!
+    -- and we can still get full consumption by combining with Isolate.
+    -- the inner parser should generally fully consume though, as a design point
     WhileEnd lenRest ('Reply res ('State rem len idx)) =
         'Reply res ('State rem (lenRest+len) idx)
