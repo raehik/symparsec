@@ -1,9 +1,4 @@
 # Symparsec to-dos
-## Pre-2.0 release
-* finish `Expr` example (brackets)
-* check the various `Run` functions available
-* check my uses could move easily (binrep, gtvm-hs)
-
 ## Proofs (tests?)
 * `Isolate n TakeRest` is equivalent to `Take n`
 
