@@ -1,9 +1,10 @@
-## 2.0 (Unreleased)
+## 2.0.0 (2025-10-11)
 Full rewrite.
 
 * parsers are now much more general: mutually-recursive parsers are game
   * added an example parser for a simple expression AST
 * added parsers matching `Functor`, `Applicative`, `Monad` type class methods
+* temporarily removed singling (will be lots of work)
 
 Simple parsers written with the provided combinators should still function the
 same, or with minimal changes.
