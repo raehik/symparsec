@@ -12,6 +12,14 @@ import Symparsec.Parser.While ( type While )
 import Symparsec.Parser.While.Predicates ( type IsDecDigitSym )
 import GHC.TypeNats qualified as TypeNats
 
+{- TODO
+* empty paren pairs are permitted in many cases e.g. @()1() -> ELit 1@
+  * probably I should assert that >=1 thing gets parsed inside parens
+  * well, I solved it. but I think in the wrong way. surely I should not be
+    parsing parens in certain places. like I can't parse parens immediately
+    after a number. or if I do, I need to implicitly parse a Mult.
+-}
+
 -- | A basic expression tree, polymorphic over a single literal type.
 data Expr a
   = EBOp BOp (Expr a) (Expr a)
@@ -35,17 +43,17 @@ type family EvalBOp bop l r where
     EvalBOp Mul l r = l * r
     EvalBOp Div l r = l `TypeNats.Div` r
 
--- | 'Expr' tokens.
-data ExprTok a
+data ExprTok
   = TokBOp BOp
-  | TokLit a
+  | TokParenL
+  | TokParenR
 
 type PExpr :: PParser (Expr Natural)
 data PExpr s
 type instance App PExpr s = PExprNext s '[] '[] (UnconsState s)
 type PExprNext
     :: PState
-    -> [BOp]
+    -> [ExprTok]
     -> [Expr Natural]
     -> (Maybe Char, PState)
     -> PReply (Expr Natural)
@@ -55,7 +63,8 @@ type family PExprNext sPrev ops exprs s where
     PExprNext sPrev ops exprs '(Nothing, s) = PExprEnd sPrev s ops exprs
 
 type family PExprEnd sPrev s ops exprs where
-    PExprEnd sPrev s (op:ops) exprs      = PExprEndPopOp sPrev s ops exprs op
+    PExprEnd sPrev s (TokBOp op:ops) exprs      = PExprEndPopOp sPrev s ops exprs op
+    -- TODO what about parens
     PExprEnd sPrev s '[]      (expr:'[]) = 'Reply (OK expr) s
     PExprEnd sPrev s '[]      _          =
         'Reply (Err (Error1 "badly formed expression")) sPrev
@@ -86,25 +95,61 @@ type family PExprELitEnd ops exprs res where
         Impossible
 
 type family PExprEBOp sPrev s ops exprs ch mbop where
-    PExprEBOp sPrev s ops exprs ch (Just bop) =
+    PExprEBOp sPrev s ops exprs ch (Just (TokBOp bop)) =
         PExprEBOp' sPrev s bop (BOpPrec bop) exprs ops
+    PExprEBOp sPrev s ops exprs ch (Just TokParenL) =
+        PExprNext sPrev (TokParenL:ops) exprs (UnconsState s)
+    PExprEBOp sPrev s ops exprs ch (Just TokParenR) =
+        PExprParenRStart sPrev s exprs ops
     PExprEBOp sPrev s ops exprs ch Nothing =
         'Reply (Err (Error1 "bad expression, expected digit or operator")) sPrev
 
+type family PExprParenRStart sPrev s exprs ops where
+    PExprParenRStart sPrev s exprs (TokParenL : ops) =
+        'Reply (Err (Error1 "invalid bracket syntax (empty brackets, or otherwise bad)")) sPrev
+    PExprParenRStart sPrev s exprs ops =
+        PExprParenR sPrev s exprs ops
+
+type family PExprParenR sPrev s exprs ops where
+    PExprParenR sPrev s exprs (TokBOp bop : ops) =
+        PExprParenRPopBOp sPrev s bop ops exprs
+    PExprParenR sPrev s exprs (TokParenL : ops) =
+        PExprNext sPrev ops exprs (UnconsState s)
+    PExprParenR sPrev s exprs ops =
+        'Reply (Err (Error1 "badly formed expression")) sPrev
+
+type family PExprParenRPopBOp sPrev s bop ops exprs where
+    PExprParenRPopBOp sPrev s bop ops (r:l:exprs) =
+        PExprParenR sPrev s (EBOp bop l r : exprs) ops
+    PExprParenRPopBOp sPrev s bop ops      exprs  =
+        'Reply (Err (Error1 "badly formed expression")) sPrev
+
 type family PExprEBOpOpCh ch where
-    PExprEBOpOpCh '+' = Just Add
-    PExprEBOpOpCh '-' = Just Sub
-    PExprEBOpOpCh '*' = Just Mul
-    PExprEBOpOpCh '/' = Just Div
+    PExprEBOpOpCh '+' = Just (TokBOp Add)
+    PExprEBOpOpCh '-' = Just (TokBOp Sub)
+    PExprEBOpOpCh '*' = Just (TokBOp Mul)
+    PExprEBOpOpCh '/' = Just (TokBOp Div)
+    PExprEBOpOpCh '(' = Just TokParenL
+    PExprEBOpOpCh ')' = Just TokParenR
     PExprEBOpOpCh _   = Nothing
 
+type PExprEBOp'
+    :: PState -> PState -> BOp -> Natural -> [Expr Natural] -> [ExprTok]
+    -> PReply (Expr Natural)
 type family PExprEBOp' sPrev s op prec exprs ops where
-    PExprEBOp' sPrev s op prec exprs (opPrev:ops) =
+    PExprEBOp' sPrev s op prec exprs (TokBOp opPrev : ops) =
         IfNatLte prec (BOpPrec opPrev)
             (PExprEBOpPop sPrev s op prec opPrev ops exprs)
-            (PExprNext sPrev (op:opPrev:ops) exprs (UnconsState s))
+            (PExprNext sPrev (TokBOp op : TokBOp opPrev : ops) exprs (UnconsState s))
     PExprEBOp' sPrev s op prec exprs '[]          =
-        PExprNext s '[op] exprs (UnconsState s)
+        PExprNext s '[TokBOp op] exprs (UnconsState s)
+
+    -- both parens treated same as LTE prec
+    -- (how could I better design this?)
+    PExprEBOp' sPrev s op prec exprs (TokParenL : ops) =
+        PExprNext sPrev (TokBOp op : TokParenL : ops) exprs (UnconsState s)
+    PExprEBOp' sPrev s op prec exprs (TokParenR : ops) =
+        PExprNext sPrev (TokBOp op : TokParenR : ops) exprs (UnconsState s)
 
 type family PExprEBOpPop sPrev s op prec opPrev ops exprs where
     PExprEBOpPop sPrev s op prec opPrev ops (r:l:exprs) =
