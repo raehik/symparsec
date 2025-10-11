@@ -71,10 +71,10 @@ library
       MagicHash
   ghc-options: -fhide-source-paths -Wall
   build-depends:
-      base
-    , defun-core
-    , singleraeh
-    , type-level-show
+      base >=4.18 && <5
+    , defun-core ==0.1.*
+    , singleraeh >=0.4.0 && <0.5
+    , type-level-show >=0.3.0 && <0.4
   default-language: GHC2021
 
 test-suite spec
@@ -97,10 +97,10 @@ test-suite spec
       MagicHash
   ghc-options: -fhide-source-paths -Wall
   build-depends:
-      base
-    , defun-core
-    , singleraeh
+      base >=4.18 && <5
+    , defun-core ==0.1.*
+    , singleraeh >=0.4.0 && <0.5
     , symparsec
-    , type-level-show
-    , type-spec
+    , type-level-show >=0.3.0 && <0.4
+    , type-spec >=0.4.0.0 && <0.5
   default-language: GHC2021

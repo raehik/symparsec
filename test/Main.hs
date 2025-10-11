@@ -1,7 +1,7 @@
 module Main where
 
 import Test.TypeSpec
-import Symparsec2
+import Symparsec
 import DeFun.Core ( type Con2 )
 
 main :: IO ()
