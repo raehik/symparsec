@@ -25,6 +25,7 @@ module Symparsec.Parsers
   -- $comb-etc
   , type Try
   , type While
+  , type TakeWhile
   , type Count
 
   -- * Common non-combinator
@@ -59,6 +60,7 @@ import Symparsec.Parser.Natural
 import Symparsec.Parser.Skip
 import Symparsec.Parser.Take
 import Symparsec.Parser.TakeRest
+import Symparsec.Parser.TakeWhile
 import Symparsec.Parser.Try
 import Symparsec.Parser.While
 import DeFun.Core

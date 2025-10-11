@@ -1,9 +1,6 @@
 # Symparsec to-dos
-* `type TakeWhile chPred = While chPred TakeRest`, but a custom parser would be
-  faster (we could track output `rem`)
-
 ## Pre-2.0 release
-* finish `Expr` example (I didn't finish error cases, also fill out AST more)
+* finish `Expr` example (brackets)
 * check the various `Run` functions available
 * check my uses could move easily (binrep, gtvm-hs)
 
