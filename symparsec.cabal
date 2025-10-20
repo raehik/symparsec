@@ -31,6 +31,7 @@ library
       Data.Type.Symbol
       Symparsec
       Symparsec.Example.Expr
+      Symparsec.Example.Printf
       Symparsec.Parser
       Symparsec.Parser.Alternative
       Symparsec.Parser.Applicative
