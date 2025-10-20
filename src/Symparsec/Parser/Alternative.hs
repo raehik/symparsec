@@ -5,12 +5,14 @@
 module Symparsec.Parser.Alternative
   ( type (<|>), type Empty
   , type Optional
+  , type Many, type Some
   ) where
 
 import Symparsec.Parser.Functor
 import Symparsec.Parser.Applicative
 import Symparsec.Parser.Common
 import DeFun.Core
+import qualified Singleraeh.List as List
 
 -- | 'Control.Alternative.<|>' for parsers. Try the left parser; if it succeeds, return the result,
 -- else try the right parser with the left parser's output state.
@@ -44,3 +46,19 @@ type family OptionalEnd rep where
     OptionalEnd ('Reply (OK   a) s) = 'Reply (OK (Just a)) s
     OptionalEnd ('Reply (Err _e) s) = 'Reply (OK Nothing)  s
 -}
+
+-- | 'Control.Alternative.many' for parsers.
+--
+-- Does not backtrack. Wrap parsers with 'Symparsec.Parser.Try' as needed.
+type Many :: PParser a -> PParser [a]
+data Many p s
+type instance App (Many p) s = Many' p '[] (p @@ s)
+type family Many' p as rep where
+    Many' p as ('Reply (OK   a) s) = Many' p (a:as) (p @@ s)
+    Many' p as ('Reply (Err _e) s) = 'Reply (OK (List.Reverse as)) s
+
+-- | 'Control.Alternative.some' for parsers.
+--
+-- Does not backtrack. Wrap parsers with 'Symparsec.Parser.Try' as needed.
+type Some :: PParser a -> PParser [a]
+type Some p = LiftA2 (Con2 '(:)) p (Many p)
