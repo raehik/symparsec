@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec.Parser.Take ( type Take, type TakeSym ) where
+module Symparsec.Parser.Take ( type Take, type TakeSym, type Take1 ) where
 
 import Symparsec.Parser.Common
 import Singleraeh.Symbol ( type RevCharsToSymbol )
@@ -22,3 +22,11 @@ type ETakeEnd n = Error1
 type TakeSym :: Natural ~> PParser Symbol
 data TakeSym n
 type instance App TakeSym n = Take n
+
+-- | Return the next character.
+type Take1 :: PParser Char
+data Take1 s
+type instance App Take1 s = Take1' s (UnconsState s)
+type family Take1' sPrev s where
+    Take1' sPrev '(Just ch, s) = 'Reply (OK ch) s
+    Take1' sPrev '(Nothing, s) = 'Reply (Err (ETakeEnd 1)) sPrev

@@ -17,6 +17,7 @@ module Symparsec.Parsers
   , type Ensure
   , type Isolate
   , type Take
+  , type Take1
   , type TakeRest
   , type Skip
   , type Eof
