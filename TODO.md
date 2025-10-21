@@ -1,4 +1,6 @@
 # Symparsec to-dos
+* custom state necessitates `TypeAbstractions` (GHC 9.8) sometimes: clarify
+
 ## Proofs (tests?)
 * `Isolate n TakeRest` is equivalent to `Take n`
 
