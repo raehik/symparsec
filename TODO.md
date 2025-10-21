@@ -7,9 +7,6 @@
 * various from parser-combinators, megaparsec (e.g. `sepBy`)
 
 ## Example uses of Symparsec to write, present
-### This StackOverflow one from 2022-06
-https://stackoverflow.com/questions/72762890/simplest-way-to-do-type-level-symbol-formatting-in-haskell
-
 ### generic-data-functions
 Fiddly and awfully abstract. WIP.
 
