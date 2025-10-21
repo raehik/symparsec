@@ -5,10 +5,10 @@ module Symparsec.Parser.Try ( type Try ) where
 import Symparsec.Parser.Common
 
 -- | Run the given parser, backtracking on error.
-type Try :: PParser a -> PParser a
-data Try p s
-type instance App (Try p) s = Try' s (p @@ s)
-type Try' :: PState -> PReply a -> PReply a
-type family Try' sPrev rep where
-    Try' sPrev ('Reply (OK  a) s) = 'Reply (OK  a) s
-    Try' sPrev ('Reply (Err e) s) = 'Reply (Err e) sPrev
+type Try :: PParser s a -> PParser s a
+data Try p ps
+type instance App (Try p) ps = Try' ps (p @@ ps)
+type Try' :: PState s -> PReply s a -> PReply s a
+type family Try' psPrev rep where
+    Try' psPrev ('Reply (OK  a) ps) = 'Reply (OK  a) ps
+    Try' psPrev ('Reply (Err e) ps) = 'Reply (Err e) psPrev

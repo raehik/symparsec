@@ -8,12 +8,12 @@ import qualified Data.Type.Symbol as Symbol
 -- | Consume and return the rest of the input string.
 --
 -- Never fails. May return the empty string.
-type TakeRest :: PParser Symbol
-data TakeRest s
-type instance App TakeRest s = TakeRest' s
-type family TakeRest' s where
-    TakeRest' ('State rem len idx) =
-        'Reply (OK (Symbol.Take len rem)) ('State (Symbol.Drop len rem) 0 (idx+len))
+type TakeRest :: PParser s Symbol
+data TakeRest ps
+type instance App TakeRest ps = TakeRest' ps
+type family TakeRest' ps where
+    TakeRest' ('State s rem len idx) =
+        'Reply (OK (Symbol.Take len rem)) ('State s (Symbol.Drop len rem) 0 (idx+len))
 
 {-
 import GHC.TypeLits

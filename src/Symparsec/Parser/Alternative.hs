@@ -20,22 +20,22 @@ import qualified Singleraeh.List as List
 -- Does not backtrack. Wrap parsers with 'Symparsec.Parser.Try' as needed.
 --
 -- TODO shitty errors
-type (<|>) :: PParser a -> PParser a -> PParser a
+type (<|>) :: PParser s a -> PParser s a -> PParser s a
 infixl 3 <|>
-data (<|>) l r s
-type instance App (l <|> r) s = Plus r (l @@ s)
-type Plus :: PParser a -> PReply a -> PReply a
+data (<|>) l r ps
+type instance App (l <|> r) ps = Plus r (l @@ ps)
+type Plus :: PParser s a -> PReply s a -> PReply s a
 type family Plus r rep where
-    Plus r ('Reply (OK   a) s) = 'Reply (OK a) s
-    Plus r ('Reply (Err _e) s) = r @@ s
+    Plus r ('Reply (OK   a) ps) = 'Reply (OK a) ps
+    Plus r ('Reply (Err _e) ps) = r @@ ps
 
 -- | 'Control.Alternative.empty' for parsers. Immediately fail with no consumption.
-type Empty :: PParser a
-data Empty s
-type instance App Empty s = 'Reply (Err (Error1 "called empty parser")) s
+type Empty :: PParser s a
+data Empty ps
+type instance App Empty ps = 'Reply (Err (Error1 "called empty parser")) ps
 
 -- | 'Control.Alternative.optional' for parsers.
-type Optional :: PParser a -> PParser (Maybe a)
+type Optional :: PParser s a -> PParser s (Maybe a)
 type Optional p = Con1 Just <$> p <|> Pure Nothing
 
 {- Wow, I guess that works. But also, the manual version:
@@ -50,15 +50,15 @@ type family OptionalEnd rep where
 -- | 'Control.Alternative.many' for parsers.
 --
 -- Does not backtrack. Wrap parsers with 'Symparsec.Parser.Try' as needed.
-type Many :: PParser a -> PParser [a]
-data Many p s
-type instance App (Many p) s = Many' p '[] (p @@ s)
+type Many :: PParser s a -> PParser s [a]
+data Many p ps
+type instance App (Many p) ps = Many' p '[] (p @@ ps)
 type family Many' p as rep where
-    Many' p as ('Reply (OK   a) s) = Many' p (a:as) (p @@ s)
-    Many' p as ('Reply (Err _e) s) = 'Reply (OK (List.Reverse as)) s
+    Many' p as ('Reply (OK   a) ps) = Many' p (a:as) (p @@ ps)
+    Many' p as ('Reply (Err _e) ps) = 'Reply (OK (List.Reverse as)) ps
 
 -- | 'Control.Alternative.some' for parsers.
 --
 -- Does not backtrack. Wrap parsers with 'Symparsec.Parser.Try' as needed.
-type Some :: PParser a -> PParser [a]
+type Some :: PParser s a -> PParser s [a]
 type Some p = LiftA2 (Con2 '(:)) p (Many p)

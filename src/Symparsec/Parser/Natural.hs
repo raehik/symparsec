@@ -39,27 +39,27 @@ type NatHex = NatBase 16 ParseDigitHexSym
 --
 -- Returns an error if it parses zero digits, or if any character fails to
 -- parse.
-type NatBase :: Natural -> (Char ~> Maybe Natural) -> PParser Natural
-data NatBase base parseDigit s
-type instance App (NatBase base parseDigit) s =
-    NatBaseStart base parseDigit s (UnconsState s)
-type family NatBaseStart base parseDigit sCh s where
-    NatBaseStart base parseDigit sCh '(Just ch, s) =
-        NatBaseLoop base parseDigit sCh s 0 ch (parseDigit @@ ch) (UnconsState s)
-    NatBaseStart base parseDigit sCh '(Nothing, s) = 'Reply (Err EEmpty) sCh
+type NatBase :: Natural -> (Char ~> Maybe Natural) -> PParser s Natural
+data NatBase base parseDigit ps
+type instance App (NatBase base parseDigit) ps =
+    NatBaseStart base parseDigit ps (UnconsState ps)
+type family NatBaseStart base parseDigit psCh ps where
+    NatBaseStart base parseDigit psCh '(Just ch, ps) =
+        NatBaseLoop base parseDigit psCh ps 0 ch (parseDigit @@ ch) (UnconsState ps)
+    NatBaseStart base parseDigit psCh '(Nothing, ps) = 'Reply (Err EEmpty) psCh
 
 -- | Parse a 'Natural' with the given starting value.
 --
 -- Skips some extra work. May be handy for hand-written parsers.
-type NatBase1 :: Natural -> (Char ~> Maybe Natural) -> Natural -> PParser Natural
-data NatBase1 base parseDigit digit s
-type instance App (NatBase1 base parseDigit digit) s =
-    NatBase1' base parseDigit s digit (UnconsState s)
-type family NatBase1' base parseDigit sCh digit s where
-    NatBase1' base parseDigit sCh digit '(Just ch, s) =
-        NatBaseLoop base parseDigit sCh s digit ch (parseDigit @@ ch) (UnconsState s)
-    NatBase1' base parseDigit sCh digit '(Nothing, s) =
-        'Reply (OK digit) s
+type NatBase1 :: Natural -> (Char ~> Maybe Natural) -> Natural -> PParser s Natural
+data NatBase1 base parseDigit digit ps
+type instance App (NatBase1 base parseDigit digit) ps =
+    NatBase1' base parseDigit ps digit (UnconsState ps)
+type family NatBase1' base parseDigit psCh digit ps where
+    NatBase1' base parseDigit psCh digit '(Just ch, ps) =
+        NatBaseLoop base parseDigit psCh ps digit ch (parseDigit @@ ch) (UnconsState ps)
+    NatBase1' base parseDigit psCh digit '(Nothing, ps) =
+        'Reply (OK digit) ps
 
 type EEmpty = Error1 "no digits parsed" -- TODO not great eh
 type EInvalidDigit ch base =
@@ -68,23 +68,23 @@ type EInvalidDigit ch base =
 type NatBaseLoop
     :: Natural
     -> (Char ~> Maybe Natural)
-    -> PState
-    -> PState
+    -> PState s
+    -> PState s
     -> Natural
     -> Char
     -> Maybe Natural
-    -> (Maybe Char, PState)
-    -> PReply Natural
-type family NatBaseLoop base parseDigit sCh s n chCur mDigit ms where
+    -> (Maybe Char, PState s)
+    -> PReply s Natural
+type family NatBaseLoop base parseDigit psCh ps n chCur mDigit mps where
     -- parsed digit and have next char
-    NatBaseLoop base parseDigit sCh s n chCur (Just digit) '(Just ch, sNext) =
-        NatBaseLoop base parseDigit s sNext (n * base + digit) ch (parseDigit @@ ch) (UnconsState sNext)
-    NatBaseLoop base parseDigit sCh s n chCur (Just digit) '(Nothing, sNext) =
-        'Reply (OK (n * base + digit)) sNext
-    NatBaseLoop base parseDigit sCh s n chCur Nothing      '(_, sNext) =
+    NatBaseLoop base parseDigit psCh ps n chCur (Just digit) '(Just ch, psNext) =
+        NatBaseLoop base parseDigit ps psNext (n * base + digit) ch (parseDigit @@ ch) (UnconsState psNext)
+    NatBaseLoop base parseDigit psCh ps n chCur (Just digit) '(Nothing, psNext) =
+        'Reply (OK (n * base + digit)) psNext
+    NatBaseLoop base parseDigit psCh ps n chCur Nothing      '(_, psNext) =
         -- we've consumed the next character, but digit parse failed:
         -- backtrack and return error
-        'Reply (Err (EInvalidDigit chCur base)) sCh
+        'Reply (Err (EInvalidDigit chCur base)) psCh
 
 -- | Parse a non-empty 'Natural' using the given base and digit parser.
 --
@@ -93,44 +93,44 @@ type family NatBaseLoop base parseDigit sCh s n chCur mDigit ms where
 -- Returns an error if it parses zero digits, or if the first digit fails to
 -- parse. Returns success on parsing up to EOF, or just before the first failed
 -- character parse. (Should match the behaviour of Megaparsec's number parsers.)
-type NatBaseWhile :: Natural -> (Char ~> Maybe Natural) -> PParser Natural
-data NatBaseWhile base parseDigit s
-type instance App (NatBaseWhile base parseDigit) s =
-    NatBaseWhileStart base parseDigit s (UnconsState s)
-type family NatBaseWhileStart base parseDigit sCh s where
-    NatBaseWhileStart base parseDigit sCh '(Just ch, s) =
-        NatBaseWhileStart2 base parseDigit sCh s ch (parseDigit @@ ch) (UnconsState s)
-    NatBaseWhileStart base parseDigit sCh '(Nothing, s) = 'Reply (Err EEmpty) sCh
+type NatBaseWhile :: Natural -> (Char ~> Maybe Natural) -> PParser s Natural
+data NatBaseWhile base parseDigit ps
+type instance App (NatBaseWhile base parseDigit) ps =
+    NatBaseWhileStart base parseDigit ps (UnconsState ps)
+type family NatBaseWhileStart base parseDigit psCh mps where
+    NatBaseWhileStart base parseDigit psCh '(Just ch, ps) =
+        NatBaseWhileStart2 base parseDigit psCh ps ch (parseDigit @@ ch) (UnconsState ps)
+    NatBaseWhileStart base parseDigit psCh '(Nothing, ps) = 'Reply (Err EEmpty) psCh
 
 -- TODO While1
 
-type family NatBaseWhileStart2 base parseDigit sCh s chChur mDigit ms where
-    NatBaseWhileStart2 base parseDigit sCh s chCur (Just digit) '(Just ch, sNext) =
-        NatBaseWhileLoop base parseDigit s sNext digit ch (parseDigit @@ ch) (UnconsState sNext)
-    NatBaseWhileStart2 base parseDigit sCh s chCur (Just digit) '(Nothing, sNext) =
+type family NatBaseWhileStart2 base parseDigit psCh ps chChur mDigit mps where
+    NatBaseWhileStart2 base parseDigit psCh ps chCur (Just digit) '(Just ch, psNext) =
+        NatBaseWhileLoop base parseDigit ps psNext digit ch (parseDigit @@ ch) (UnconsState psNext)
+    NatBaseWhileStart2 base parseDigit psCh ps chCur (Just digit) '(Nothing, psNext) =
         -- parsed first digit, no more input: done
-        'Reply (OK digit) sNext
-    NatBaseWhileStart2 base parseDigit sCh s chCur Nothing      _ =
+        'Reply (OK digit) psNext
+    NatBaseWhileStart2 base parseDigit psCh ps chCur Nothing      _ =
         -- failed to parse first digit: backtrack and error
-        'Reply (Err (EInvalidDigit chCur base)) sCh
+        'Reply (Err (EInvalidDigit chCur base)) psCh
 
 -- Note that this parser never fails.
 type NatBaseWhileLoop
     :: Natural
     -> (Char ~> Maybe Natural)
-    -> PState
-    -> PState
+    -> PState s
+    -> PState s
     -> Natural
     -> Char
     -> Maybe Natural
-    -> (Maybe Char, PState)
-    -> PReply Natural
-type family NatBaseWhileLoop base parseDigit sCh s n chCur mDigit ms where
+    -> (Maybe Char, PState s)
+    -> PReply s Natural
+type family NatBaseWhileLoop base parseDigit psCh ps n chCur mDigit mps where
     -- parsed digit and have next char
-    NatBaseWhileLoop base parseDigit sCh s n chCur (Just digit) '(Just ch, sNext) =
-        NatBaseWhileLoop base parseDigit s sNext (n * base + digit) ch (parseDigit @@ ch) (UnconsState sNext)
-    NatBaseWhileLoop base parseDigit sCh s n chCur (Just digit) '(Nothing, sNext) =
-        'Reply (OK (n * base + digit)) sNext
-    NatBaseWhileLoop base parseDigit sCh s n chCur Nothing      _ =
+    NatBaseWhileLoop base parseDigit psCh ps n chCur (Just digit) '(Just ch, psNext) =
+        NatBaseWhileLoop base parseDigit ps psNext (n * base + digit) ch (parseDigit @@ ch) (UnconsState psNext)
+    NatBaseWhileLoop base parseDigit psCh ps n chCur (Just digit) '(Nothing, psNext) =
+        'Reply (OK (n * base + digit)) psNext
+    NatBaseWhileLoop base parseDigit psCh ps n chCur Nothing      _ =
         -- failed to parse next digit: backtrack and finish
-        'Reply (OK n) sCh
+        'Reply (OK n) psCh

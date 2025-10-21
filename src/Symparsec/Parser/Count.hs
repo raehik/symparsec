@@ -8,17 +8,17 @@ import qualified Singleraeh.List as List
 -- TODO Could possibly make more efficient.
 
 -- | @'Count' n p@ parses @n@ occurrences of @p@.
-type Count :: Natural -> PParser a -> PParser [a]
-data Count n p s
-type instance App (Count n p) s = CountLoop p '[] n s
+type Count :: Natural -> PParser s a -> PParser s [a]
+data Count n p ps
+type instance App (Count n p) ps = CountLoop p '[] n ps
 
-type family CountLoop p as n s where
-    CountLoop p as 0 s = 'Reply (OK (List.Reverse as)) s
-    CountLoop p as n s = CountLoopWrap p as n (p @@ s)
+type family CountLoop p as n ps where
+    CountLoop p as 0 ps = 'Reply (OK (List.Reverse as)) ps
+    CountLoop p as n ps = CountLoopWrap p as n (p @@ ps)
 
 type family CountLoopWrap p as n rep where
-    CountLoopWrap p as n ('Reply (OK  a) s) =
-        CountLoop p (a:as) (n-1) s
-    CountLoopWrap p as n ('Reply (Err e) s) =
+    CountLoopWrap p as n ('Reply (OK  a) ps) =
+        CountLoop p (a:as) (n-1) ps
+    CountLoopWrap p as n ('Reply (Err e) ps) =
         -- TODO am I passing the wrong state back here?
-        'Reply (Err e) s
+        'Reply (Err e) ps
