@@ -126,6 +126,7 @@ type FFParser = Con5 FF
 -- tweaked:
 -- * added Pure because my 'AsChar' parser is different (imo better)
 -- * had to add Try in a specific location, left-right
+-- * removed Cat (could probably add back)
 type FmtStrParser =
   Many
     ( (Con1 Left <$> ((Some (NotChar '%' <|> Try (AsChar '%' *> AsChar '%' *> Pure '%')))))
