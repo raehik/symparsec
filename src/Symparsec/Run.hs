@@ -2,7 +2,7 @@
 
 -- | Running Symparsec parsers.
 
-module Symparsec.Run ( type Run, type RunTest ) where
+module Symparsec.Run ( type Run, type Run', type RunTest, type RunTest' ) where
 
 import Symparsec.Parser
 import Data.Type.Symbol qualified as Symbol
@@ -19,6 +19,13 @@ import TypeLevelShow.Natural ( type ShowNatDec )
 -- * On failure, returns an 'TE.ErrorMessage'.
 type Run :: PParser s a -> s -> Symbol -> Either TE.ErrorMessage (a, Symbol)
 type Run p s str = RunEnd str (p @@ StateInit s str)
+
+-- | Run a parser on a 'Symbol'. The parser must not use custom state.
+--
+-- * On success, returns a tuple of @(result :: a, remaining :: 'Symbol')@.
+-- * On failure, returns an 'TE.ErrorMessage'.
+type Run' :: PParser () a -> Symbol -> Either TE.ErrorMessage (a, Symbol)
+type Run' p str = Run p '() str
 
 type RunEnd :: Symbol -> PReply s a -> Either TE.ErrorMessage (a, Symbol)
 type family RunEnd str rep where
@@ -38,6 +45,15 @@ type family RunEnd str rep where
 -- Alas! Instead, do something like @> Proxy \@(RunTest ...)@.
 type RunTest :: PParser s a -> s -> Symbol -> (a, Symbol)
 type RunTest p s str = FromRightTypeError (Run p s str)
+
+-- | Run a parser on a 'Symbol', emitting a type error on failure.
+--   The parser must not use custom state
+--
+-- This /would/ be useful for @:k!@ runs, but it doesn't work properly with
+-- 'TE.TypeError's, printing @= (TypeError ...)@ instead of the error message.
+-- Alas! Instead, do something like @> Proxy \@(RunTest ...)@.
+type RunTest' :: PParser () a -> Symbol -> (a, Symbol)
+type RunTest' p str = RunTest p '() str
 
 type FromRightTypeError :: Either TE.ErrorMessage a -> a
 type family FromRightTypeError eea where
