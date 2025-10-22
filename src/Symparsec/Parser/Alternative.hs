@@ -6,6 +6,8 @@ module Symparsec.Parser.Alternative
   ( type (<|>), type Empty
   , type Optional
   , type Many, type Some
+  , type SepBy, type SepBy1
+  , type Choice
   ) where
 
 import Symparsec.Parser.Functor
@@ -62,3 +64,27 @@ type family Many' p as rep where
 -- Does not backtrack. Wrap parsers with 'Symparsec.Parser.Try' as needed.
 type Some :: PParser s a -> PParser s [a]
 type Some p = LiftA2 (Con2 '(:)) p (Many p)
+
+-- | @'SepBy' p sep@ parses zero or more occurrences of @p@, separated by @sep@.
+--   Returns a list of values parsed by @p@.
+type SepBy :: PParser s a -> PParser s sep -> PParser s [a]
+type SepBy p sep = SepBy1 p sep <|> Pure '[]
+
+-- | @'SepBy1' p sep@ parses one or more occurrences of @p@, separated by @sep@.
+--   Returns a list of values parsed by @p@.
+type SepBy1 :: PParser s a -> PParser s sep -> PParser s [a]
+type SepBy1 p sep = LiftA2 (Con2 '(:)) p (Many (sep *> p))
+
+-- TODO doesn't backtrack, matching megaparsec.
+type Choice :: [PParser s a] -> PParser s a
+data Choice pList ps
+type instance App (Choice pList) ps = ChoiceStart pList ps
+
+type family ChoiceStart pList ps where
+    ChoiceStart '[]       ps = Empty @@ ps
+    ChoiceStart (p:pList) ps = ChoiceLoop pList (p @@ ps)
+
+type family ChoiceLoop pList rep where
+    ChoiceLoop _         ('Reply (OK  a) ps) = 'Reply (OK a) ps
+    ChoiceLoop (p:pList) ('Reply (Err e) ps) = ChoiceLoop pList (p @@ ps)
+    ChoiceLoop '[]       rep                 = rep -- TODO meh, not the best error
