@@ -11,6 +11,8 @@ module Symparsec.Parsers
   , type (<*>), type Pure, type LiftA2, type (*>), type (<*)
   , type (>>=)
   , type (<|>), type Empty, type Optional, type Many, type Some
+  , type SepBy, type SepBy1
+  , type Choice
 
   -- * Positional
   -- $positional

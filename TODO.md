@@ -5,8 +5,7 @@
 * `Isolate n TakeRest` is equivalent to `Take n`
 
 ## Combinators
-* `Choice :: [PParser a] -> PParser a`
-* various from parser-combinators, megaparsec (e.g. `sepBy`)
+* various from parser-combinators, megaparsec. find out the most common/used
 
 ## Example uses of Symparsec to write, present
 ### generic-data-functions
