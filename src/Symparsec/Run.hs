@@ -18,7 +18,7 @@ import TypeLevelShow.Natural ( type ShowNatDec )
 -- * On success, returns a tuple of @(result :: a, remaining :: 'Symbol')@.
 -- * On failure, returns an 'TE.ErrorMessage'.
 type Run :: PParser s a -> s -> Symbol -> Either TE.ErrorMessage (a, Symbol)
-type Run p s str = RunEnd str (p @@ StateInit s str)
+type Run p custom str = RunEnd str (p @@ StateInit custom str)
 
 -- | Run a parser on a 'Symbol'. The parser must not use custom state.
 --
@@ -44,10 +44,10 @@ type family RunEnd str rep where
 -- 'TE.TypeError's, printing @= (TypeError ...)@ instead of the error message.
 -- Alas! Instead, do something like @> Proxy \@(RunTest ...)@.
 type RunTest :: PParser s a -> s -> Symbol -> (a, Symbol)
-type RunTest p s str = FromRightTypeError (Run p s str)
+type RunTest p custom str = FromRightTypeError (Run p custom str)
 
 -- | Run a parser on a 'Symbol', emitting a type error on failure.
---   The parser must not use custom state
+--   The parser must not use custom. state
 --
 -- This /would/ be useful for @:k!@ runs, but it doesn't work properly with
 -- 'TE.TypeError's, printing @= (TypeError ...)@ instead of the error message.

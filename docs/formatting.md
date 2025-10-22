@@ -26,6 +26,9 @@ the term-level type directly. That's fine.
     `representation` but that's it, so I consider it fairly unambiguous
 * parser state: `ps`
 * parser state custom state: `s`
+  * TODO. term/type s/s is fine because separate namespaces, but type/kind s/s
+    doesn't work, so I need to use type/kind custom/s. I should do the same for
+    all uses. TODO annoying refactor. maybe use `cst` if you want shorter?
 * parser state index: `idx`
   * simple, obvious
 * parser error: `e`
