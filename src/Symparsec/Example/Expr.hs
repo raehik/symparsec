@@ -48,26 +48,26 @@ data ExprTok
   | TokParenL
   | TokParenR
 
-type PExpr :: PParser (Expr Natural)
-data PExpr s
-type instance App PExpr s = PExprNext s '[] '[] (UnconsState s)
+type PExpr :: PParser s (Expr Natural)
+data PExpr ps
+type instance App PExpr ps = PExprNext ps '[] '[] (UnconsState ps)
 type PExprNext
-    :: PState
+    :: PState s
     -> [ExprTok]
     -> [Expr Natural]
-    -> (Maybe Char, PState)
-    -> PReply (Expr Natural)
-type family PExprNext sPrev ops exprs s where
-    PExprNext sPrev ops exprs '(Just ch, s) =
-        PExprCh sPrev s ops exprs ch
-    PExprNext sPrev ops exprs '(Nothing, s) = PExprEnd sPrev s ops exprs
+    -> (Maybe Char, PState s)
+    -> PReply s (Expr Natural)
+type family PExprNext psPrev ops exprs mps where
+    PExprNext psPrev ops exprs '(Just ch, ps) =
+        PExprCh psPrev ps ops exprs ch
+    PExprNext psPrev ops exprs '(Nothing, ps) = PExprEnd psPrev ps ops exprs
 
-type family PExprEnd sPrev s ops exprs where
-    PExprEnd sPrev s (TokBOp op:ops) exprs      = PExprEndPopOp sPrev s ops exprs op
+type family PExprEnd psPrev ps ops exprs where
+    PExprEnd psPrev ps (TokBOp op:ops) exprs      = PExprEndPopOp psPrev ps ops exprs op
     -- TODO what about parens
-    PExprEnd sPrev s '[]      (expr:'[]) = 'Reply (OK expr) s
-    PExprEnd sPrev s '[]      _          =
-        'Reply (Err (Error1 "badly formed expression")) sPrev
+    PExprEnd psPrev ps '[]      (expr:'[]) = 'Reply (OK expr) ps
+    PExprEnd psPrev ps '[]      _          =
+        'Reply (Err (Error1 "badly formed expression")) psPrev
 
 type family PExprEndPopOp sPrev s ops exprs op where
     PExprEndPopOp sPrev s ops (r:l:exprs) bop =
@@ -94,35 +94,35 @@ type family PExprELitEnd ops exprs res where
         -- 'While' works, and that we've already handled the 0-length case.
         Impossible
 
-type family PExprEBOp sPrev s ops exprs ch mbop where
-    PExprEBOp sPrev s ops exprs ch (Just (TokBOp bop)) =
-        PExprEBOp' sPrev s bop (BOpPrec bop) exprs ops
-    PExprEBOp sPrev s ops exprs ch (Just TokParenL) =
-        PExprNext sPrev (TokParenL:ops) exprs (UnconsState s)
-    PExprEBOp sPrev s ops exprs ch (Just TokParenR) =
-        PExprParenRStart sPrev s exprs ops
-    PExprEBOp sPrev s ops exprs ch Nothing =
-        'Reply (Err (Error1 "bad expression, expected digit or operator")) sPrev
+type family PExprEBOp psPrev ps ops exprs ch mbop where
+    PExprEBOp psPrev ps ops exprs ch (Just (TokBOp bop)) =
+        PExprEBOp' psPrev ps bop (BOpPrec bop) exprs ops
+    PExprEBOp psPrev ps ops exprs ch (Just TokParenL) =
+        PExprNext psPrev (TokParenL:ops) exprs (UnconsState ps)
+    PExprEBOp psPrev ps ops exprs ch (Just TokParenR) =
+        PExprParenRStart psPrev ps exprs ops
+    PExprEBOp psPrev ps ops exprs ch Nothing =
+        'Reply (Err (Error1 "bad expression, expected digit or operator")) psPrev
 
-type family PExprParenRStart sPrev s exprs ops where
-    PExprParenRStart sPrev s exprs (TokParenL : ops) =
-        'Reply (Err (Error1 "invalid bracket syntax (empty brackets, or otherwise bad)")) sPrev
-    PExprParenRStart sPrev s exprs ops =
-        PExprParenR sPrev s exprs ops
+type family PExprParenRStart psPrev ps exprs ops where
+    PExprParenRStart psPrev ps exprs (TokParenL : ops) =
+        'Reply (Err (Error1 "invalid bracket syntax (empty brackets, or otherwise bad)")) psPrev
+    PExprParenRStart psPrev ps exprs ops =
+        PExprParenR psPrev ps exprs ops
 
-type family PExprParenR sPrev s exprs ops where
-    PExprParenR sPrev s exprs (TokBOp bop : ops) =
-        PExprParenRPopBOp sPrev s bop ops exprs
-    PExprParenR sPrev s exprs (TokParenL : ops) =
-        PExprNext sPrev ops exprs (UnconsState s)
-    PExprParenR sPrev s exprs ops =
-        'Reply (Err (Error1 "badly formed expression")) sPrev
+type family PExprParenR psPrev ps exprs ops where
+    PExprParenR psPrev ps exprs (TokBOp bop : ops) =
+        PExprParenRPopBOp psPrev ps bop ops exprs
+    PExprParenR psPrev ps exprs (TokParenL : ops) =
+        PExprNext psPrev ops exprs (UnconsState ps)
+    PExprParenR psPrev ps exprs ops =
+        'Reply (Err (Error1 "badly formed expression")) psPrev
 
-type family PExprParenRPopBOp sPrev s bop ops exprs where
-    PExprParenRPopBOp sPrev s bop ops (r:l:exprs) =
-        PExprParenR sPrev s (EBOp bop l r : exprs) ops
-    PExprParenRPopBOp sPrev s bop ops      exprs  =
-        'Reply (Err (Error1 "badly formed expression")) sPrev
+type family PExprParenRPopBOp psPrev ps bop ops exprs where
+    PExprParenRPopBOp psPrev ps bop ops (r:l:exprs) =
+        PExprParenR psPrev ps (EBOp bop l r : exprs) ops
+    PExprParenRPopBOp psPrev ps bop ops      exprs  =
+        'Reply (Err (Error1 "badly formed expression")) psPrev
 
 type family PExprEBOpOpCh ch where
     PExprEBOpOpCh '+' = Just (TokBOp Add)
@@ -134,28 +134,28 @@ type family PExprEBOpOpCh ch where
     PExprEBOpOpCh _   = Nothing
 
 type PExprEBOp'
-    :: PState -> PState -> BOp -> Natural -> [Expr Natural] -> [ExprTok]
-    -> PReply (Expr Natural)
-type family PExprEBOp' sPrev s op prec exprs ops where
-    PExprEBOp' sPrev s op prec exprs (TokBOp opPrev : ops) =
+    :: PState s -> PState s -> BOp -> Natural -> [Expr Natural] -> [ExprTok]
+    -> PReply s (Expr Natural)
+type family PExprEBOp' psPrev ps op prec exprs ops where
+    PExprEBOp' psPrev ps op prec exprs (TokBOp opPrev : ops) =
         IfNatLte prec (BOpPrec opPrev)
-            (PExprEBOpPop sPrev s op prec opPrev ops exprs)
-            (PExprNext sPrev (TokBOp op : TokBOp opPrev : ops) exprs (UnconsState s))
-    PExprEBOp' sPrev s op prec exprs '[]          =
-        PExprNext s '[TokBOp op] exprs (UnconsState s)
+            (PExprEBOpPop psPrev ps op prec opPrev ops exprs)
+            (PExprNext psPrev (TokBOp op : TokBOp opPrev : ops) exprs (UnconsState ps))
+    PExprEBOp' psPrev ps op prec exprs '[]          =
+        PExprNext ps '[TokBOp op] exprs (UnconsState ps)
 
     -- both parens treated same as LTE prec
     -- (how could I better design this?)
-    PExprEBOp' sPrev s op prec exprs (TokParenL : ops) =
-        PExprNext sPrev (TokBOp op : TokParenL : ops) exprs (UnconsState s)
-    PExprEBOp' sPrev s op prec exprs (TokParenR : ops) =
-        PExprNext sPrev (TokBOp op : TokParenR : ops) exprs (UnconsState s)
+    PExprEBOp' psPrev ps op prec exprs (TokParenL : ops) =
+        PExprNext psPrev (TokBOp op : TokParenL : ops) exprs (UnconsState ps)
+    PExprEBOp' psPrev ps op prec exprs (TokParenR : ops) =
+        PExprNext psPrev (TokBOp op : TokParenR : ops) exprs (UnconsState ps)
 
-type family PExprEBOpPop sPrev s op prec opPrev ops exprs where
-    PExprEBOpPop sPrev s op prec opPrev ops (r:l:exprs) =
-        PExprEBOp' sPrev s op prec (EBOp opPrev l r : exprs) ops
-    PExprEBOpPop sPrev s op prec opPrev ops exprs =
-        'Reply (Err (Error1 "badly formed expression")) sPrev
+type family PExprEBOpPop psPrev ps op prec opPrev ops exprs where
+    PExprEBOpPop psPrev ps op prec opPrev ops (r:l:exprs) =
+        PExprEBOp' psPrev ps op prec (EBOp opPrev l r : exprs) ops
+    PExprEBOpPop psPrev ps op prec opPrev ops exprs =
+        'Reply (Err (Error1 "badly formed expression")) psPrev
 
 type BOpPrec :: BOp -> Natural
 type family BOpPrec bop where

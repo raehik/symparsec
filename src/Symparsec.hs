@@ -5,7 +5,7 @@ I suggest importing this module qualified. Or, consider the following imports:
 @
 import "Symparsec.Run" qualified as Symparsec
 import "Symparsec.Parsers" qualified as P
--- > :k! Symparsec.Run (P.Take 1) "hello"
+-- > :k! Symparsec.'Run'' (P.Take 1) "hello"
 @
 -}
 
@@ -13,7 +13,9 @@ module Symparsec
   (
   -- * Base definitions
     type Run
+  , type Run'
   , type RunTest
+  , type RunTest'
 
   -- * Parsers
   , module Symparsec.Parsers

@@ -1,4 +1,5 @@
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE TypeAbstractions #-}
 
 {- | The typelits-printf format string parser.
 
@@ -25,20 +26,28 @@ import Symparsec.Parser.Try
 
 -- typelits-printf compatibility layer
 -- typelits-printf actually does @<* Pure c@ after. but I prefer not to
+type AsChar :: Char -> PParser s ()
 type AsChar c = Literal (ConsSymbol c "")
+type AnyChar :: PParser s Char
 type AnyChar = Take1
+-- TODO: adding the following kind signature makes GHC type error, it
+-- initialises an inner s0 and doesn't see s ~ s0. omitting it has GHC
+-- understand the kind polymorphism just fine.
+-- doesn't happen for other parsers e.g. Literal. why?
+-- TODO: looks like it happens with type synonyms. oh dear
+--type Number :: PParser s Natural
 type Number = NatBaseWhile 10 ParseDigitDecSym
 
 -- special parser that I probably don't want (surely can just combine)
 -- backtracks!!
-type NotChar :: Char -> PParser Char
-data NotChar c s
-type instance App (NotChar c) s = NotChar' c s (UnconsState s)
-type family NotChar' cNo sPrev s where
-    NotChar' cNo sPrev '(Just  c, s) = If (c == cNo)
-        ('Reply (Err (Error1 "got the char we didn't want")) sPrev)
-        ('Reply (OK c) s)
-    NotChar' cNo sPrev '(Nothing, s) = 'Reply (Err (Error1 "empty string")) sPrev
+type NotChar :: Char -> PParser s Char
+data NotChar c ps
+type instance App (NotChar c) ps = NotChar' c ps (UnconsState ps)
+type family NotChar' cNo psPrev ps where
+    NotChar' cNo psPrev '(Just  c, ps) = If (c == cNo)
+        ('Reply (Err (Error1 "got the char we didn't want")) psPrev)
+        ('Reply (OK c) ps)
+    NotChar' cNo psPrev '(Nothing, ps) = 'Reply (Err (Error1 "empty string")) psPrev
 
 -- extras missing from defun-core
 type Con4 :: (a -> b -> c -> d -> e) -> a ~> b ~> c ~> d ~> e
@@ -71,26 +80,26 @@ data Flags = Flags
   , fAlternate :: Bool
   }
 
-type FlagParser :: PParser Flags
-data FlagParser s
-type instance App FlagParser s = PFlags' EmptyFlags s (UnconsState s)
+type FlagParser :: PParser s Flags
+data FlagParser ps
+type instance App FlagParser ps = PFlags' EmptyFlags ps (UnconsState ps)
 
 type EmptyFlags = 'Flags Nothing Nothing False
 
-type PFlags' :: Flags -> PState -> (Maybe Char, PState) -> PReply Flags
-type family PFlags' flags sPrev s where
-  PFlags' ('Flags d i l) sPrev '(Just '-', s) =
-    PFlags' ('Flags (Just (UpdateAdjust d LeftAdjust)) i l) s (UnconsState s)
-  PFlags' ('Flags d i l) sPrev '(Just '0', s) =
-    PFlags' ('Flags (Just (UpdateAdjust d ZeroPad))    i l) s (UnconsState s)
-  PFlags' ('Flags d i l) sPrev '(Just '+', s) =
-    PFlags' ('Flags d (Just (UpdateSign i SignPlus))     l) s (UnconsState s)
-  PFlags' ('Flags d i l) sPrev '(Just ' ', s) =
-    PFlags' ('Flags d (Just (UpdateSign i SignSpace))    l) s (UnconsState s)
-  PFlags' ('Flags d i l) sPrev '(Just '#', s) =
-    PFlags' ('Flags d i True)                               s (UnconsState s)
-  PFlags' flags sPrev '(_, s) =
-    'Reply (OK flags) sPrev
+type PFlags' :: Flags -> PState s -> (Maybe Char, PState s) -> PReply s Flags
+type family PFlags' flags psPrev mps where
+  PFlags' ('Flags d i l) psPrev '(Just '-', ps) =
+    PFlags' ('Flags (Just (UpdateAdjust d LeftAdjust)) i l) ps (UnconsState ps)
+  PFlags' ('Flags d i l) psPrev '(Just '0', ps) =
+    PFlags' ('Flags (Just (UpdateAdjust d ZeroPad))    i l) ps (UnconsState ps)
+  PFlags' ('Flags d i l) psPrev '(Just '+', ps) =
+    PFlags' ('Flags d (Just (UpdateSign i SignPlus))     l) ps (UnconsState ps)
+  PFlags' ('Flags d i l) psPrev '(Just ' ', ps) =
+    PFlags' ('Flags d (Just (UpdateSign i SignSpace))    l) ps (UnconsState ps)
+  PFlags' ('Flags d i l) psPrev '(Just '#', ps) =
+    PFlags' ('Flags d i True)                               ps (UnconsState ps)
+  PFlags' flags psPrev '(_, ps) =
+    'Reply (OK flags) psPrev
 
 type family UpdateAdjust d1 d2 where
   UpdateAdjust Nothing d2 = d2
@@ -113,7 +122,6 @@ data FieldFormat = FF
   }
 
 -- copied as-is except for 'Con5'
-type FFParser :: PParser FieldFormat
 type FFParser = Con5 FF
     <$> FlagParser
     <*> Optional Number
@@ -132,3 +140,28 @@ type FmtStrParser =
     ( (Con1 Left <$> ((Some (NotChar '%' <|> Try (AsChar '%' *> AsChar '%' *> Pure '%')))))
         <|> (Con1 Right <$> (AsChar '%' *> FFParser))
     )
+
+type Test1 :: PParser s Char
+type Test1 = Take1
+
+type Test2 :: PParser s Char
+type Test2 = Test1
+
+type Test3 :: PParser s Char
+type Test3 = AnyChar
+
+-- This one works with or without the visible kind argument.
+type Test4 :: Char -> PParser s Char
+type Test4 c = Pure c
+
+-- Standalone kind signature causes type error.
+-- Adding type abstraction syntax fixes.
+type Test5 :: PParser s Char
+type Test5 @s = Pure @s 'c'
+
+type Test6 :: PParser s a
+type Test6 = Empty
+
+-- Kind signature causes type error.
+--type Test7 :: PParser s ()
+type Test7 = Literal "asd"

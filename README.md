@@ -17,15 +17,14 @@ Define a type-level parser:
 
 ```haskell
 import Symparsec
-import DeFun.Core
 type PExample = Skip 1 *> Tuple (Isolate 2 NatHex) (Literal "_" *> TakeRest)
 ```
 
 Use it to parse a type-level string (in a GHCi session):
 
 ```haskell
-ghci> :k! Run PExample "xFF_etc"
-Run ...
+ghci> :k! Run' PExample "xFF_etc"
+Run' ...
 = Right '( '(255, "etc"), "")
 ```
 
