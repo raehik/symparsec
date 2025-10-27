@@ -5,7 +5,7 @@ module Symparsec.Parser.Token ( type Token ) where
 import Symparsec.Parser.Common
 
 -- | Should match @token@ from megaparsec. Backtracks.
-type Token :: (Char ~> Maybe a) -> PParser a
+type Token :: (Char ~> Maybe a) -> PParser s a
 data Token chParse ps
 type instance App (Token chParse) ps = TokenStart chParse ps (UnconsState ps)
 type family TokenStart chParse psPrev mps where
