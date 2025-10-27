@@ -28,6 +28,7 @@ module Symparsec.Parsers
   , type While
   , type TakeWhile
   , type Count
+  , type Token
 
   -- * Common non-combinator
   -- $noncomb-common
@@ -62,6 +63,7 @@ import Symparsec.Parser.Skip
 import Symparsec.Parser.Take
 import Symparsec.Parser.TakeRest
 import Symparsec.Parser.TakeWhile
+import Symparsec.Parser.Token
 import Symparsec.Parser.Try
 import Symparsec.Parser.While
 import DeFun.Core
