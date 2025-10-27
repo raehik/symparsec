@@ -1,69 +1,52 @@
 {-# LANGUAGE UndecidableInstances #-}
-
--- | An example Symparsec parser for a basic expression tree.
+{-# LANGUAGE TypeAbstractions #-}
+{-# LANGUAGE MultilineStrings #-} -- GHC 9.12, for TestProg
 
 module Symparsec.Example.Expr where
 
 import Symparsec.Parser.Common
 import Symparsec.Utils ( type IfNatLte )
-import Symparsec.Parser.Natural
+import Symparsec.Parsers
 import Symparsec.Parser.Natural.Digits
-import Symparsec.Parser.While ( type While )
-import Symparsec.Parser.While.Predicates ( type IsDecDigitSym )
-import GHC.TypeNats qualified as TypeNats
+import Symparsec.Parser.While.Predicates ( type IsDecDigitSym, type IsAlphaSym, type IsChar )
+--import GHC.TypeNats qualified as TypeNats
+import DeFun.Core
 
-{- TODO
-* empty paren pairs are permitted in many cases e.g. @()1() -> ELit 1@
-  * probably I should assert that >=1 thing gets parsed inside parens
-  * well, I solved it. but I think in the wrong way. surely I should not be
-    parsing parens in certain places. like I can't parse parens immediately
-    after a number. or if I do, I need to implicitly parse a Mult.
--}
-
--- | A basic expression tree, polymorphic over a single literal type.
-data Expr a
-  = EBOp BOp (Expr a) (Expr a)
-  | ELit a
+-- SAKS necessitates TypeAbstractions
+type VarParser :: PParser s Symbol
+type VarParser @s = TakeWhile1 @s IsAlphaSym
 
 -- | A binary operator.
 data BOp = Add | Sub | Mul | Div
 
--- | Evaluate an 'Expr' of 'Natural's on the type level.
---
--- Naive, doesn't attempt to tail-call recurse.
-type Eval :: Expr Natural -> Natural
-type family Eval expr where
-    Eval (EBOp bop l r) = EvalBOp bop (Eval l) (Eval r)
-    Eval (ELit n) = n
-
-type EvalBOp :: BOp -> Natural -> Natural -> Natural
-type family EvalBOp bop l r where
-    EvalBOp Add l r = l + r
-    EvalBOp Sub l r = l - r
-    EvalBOp Mul l r = l * r
-    EvalBOp Div l r = l `TypeNats.Div` r
+data Expr str a
+  = EBOp BOp (Expr str a) (Expr str a)
+  | ELit a
+  | EVar str
+--  | ELet str (Expr str a) (Expr str a)
+type PExpr = Expr Symbol Natural
 
 data ExprTok
   = TokBOp BOp
   | TokParenL
   | TokParenR
 
-type PExpr :: PParser s (Expr Natural)
-data PExpr ps
-type instance App PExpr ps = PExprNext ps '[] '[] (UnconsState ps)
+type ExprParser :: PParser s PExpr
+data ExprParser ps
+type instance App ExprParser ps = PExprNext ps '[] '[] (UnconsState ps)
 type PExprNext
     :: PState s
     -> [ExprTok]
-    -> [Expr Natural]
+    -> [PExpr]
     -> (Maybe Char, PState s)
-    -> PReply s (Expr Natural)
+    -> PReply s PExpr
 type family PExprNext psPrev ops exprs mps where
     PExprNext psPrev ops exprs '(Just ch, ps) =
         PExprCh psPrev ps ops exprs ch
     PExprNext psPrev ops exprs '(Nothing, ps) = PExprEnd psPrev ps ops exprs
 
 type family PExprEnd psPrev ps ops exprs where
-    PExprEnd psPrev ps (TokBOp op:ops) exprs      = PExprEndPopOp psPrev ps ops exprs op
+    PExprEnd psPrev ps (TokBOp op:ops) exprs = PExprEndPopOp psPrev ps ops exprs op
     -- TODO what about parens
     PExprEnd psPrev ps '[]      (expr:'[]) = 'Reply (OK expr) ps
     PExprEnd psPrev ps '[]      _          =
@@ -79,20 +62,29 @@ type family PExprCh sPrev s ops exprs ch where
     PExprCh sPrev s ops exprs ' ' = PExprNext s ops exprs (UnconsState s)
     PExprCh sPrev s ops exprs ch  = PExprELit sPrev s ops exprs ch (ParseDigitDecSym @@ ch)
 
-type family PExprELit sPrev s ops exprs ch mDigit where
-    PExprELit sPrev s ops exprs _ch (Just digit) =
+type family PExprELit psPrev ps ops exprs ch mDigit where
+    PExprELit psPrev ps ops exprs _ch (Just digit) =
         PExprELitEnd ops exprs
-            (While IsDecDigitSym (NatBase1 10 ParseDigitDecSym digit) @@ s)
-    PExprELit sPrev s ops exprs  ch Nothing      =
-        PExprEBOp sPrev s ops exprs ch (PExprEBOpOpCh ch)
+            (While IsDecDigitSym (NatBase1 10 ParseDigitDecSym digit) @@ ps)
+    PExprELit psPrev ps ops exprs  ch Nothing      =
+        PExprEVarEnd ps ch ops exprs (VarParser @@ psPrev)
 
 type family PExprELitEnd ops exprs res where
-    PExprELitEnd ops exprs ('Reply (OK  n) s) =
-        PExprNext s ops (ELit n : exprs) (UnconsState s)
-    PExprELitEnd ops exprs ('Reply (Err e) s) =
+    PExprELitEnd ops exprs ('Reply (OK  n) ps) =
+        PExprNext ps ops (ELit n : exprs) (UnconsState ps)
+    PExprELitEnd ops exprs ('Reply (Err e) ps) =
         -- The digit parser we're wrapping shouldn't ever fail, due to how
         -- 'While' works, and that we've already handled the 0-length case.
         Impossible
+
+-- TODO weird state parsing here. usually we're looking ahead by 1 char, but my
+-- VarParser is better and doesn't need to. BUT, we need to keep our lookahead
+-- state for the BOp parser. lol
+type family PExprEVarEnd ps ch ops exprs rep where
+    PExprEVarEnd ps ch ops exprs ('Reply (OK  v) ps') =
+        PExprNext ps' ops (EVar v : exprs) (UnconsState ps')
+    PExprEVarEnd ps ch ops exprs ('Reply (Err e) psPrev) =
+        PExprEBOp psPrev ps ops exprs ch (PExprEBOpOpCh ch)
 
 type family PExprEBOp psPrev ps ops exprs ch mbop where
     PExprEBOp psPrev ps ops exprs ch (Just (TokBOp bop)) =
@@ -102,7 +94,9 @@ type family PExprEBOp psPrev ps ops exprs ch mbop where
     PExprEBOp psPrev ps ops exprs ch (Just TokParenR) =
         PExprParenRStart psPrev ps exprs ops
     PExprEBOp psPrev ps ops exprs ch Nothing =
-        'Reply (Err (Error1 "bad expression, expected digit or operator")) psPrev
+        -- TODO erroring here means PExpr must consume WHOLE string lol.
+        -- 'Reply (Err (Error1 "bad expression, expected digit or operator")) psPrev
+        PExprEnd psPrev psPrev ops exprs
 
 type family PExprParenRStart psPrev ps exprs ops where
     PExprParenRStart psPrev ps exprs (TokParenL : ops) =
@@ -134,8 +128,8 @@ type family PExprEBOpOpCh ch where
     PExprEBOpOpCh _   = Nothing
 
 type PExprEBOp'
-    :: PState s -> PState s -> BOp -> Natural -> [Expr Natural] -> [ExprTok]
-    -> PReply s (Expr Natural)
+    :: PState s -> PState s -> BOp -> Natural -> [PExpr] -> [ExprTok]
+    -> PReply s PExpr
 type family PExprEBOp' psPrev ps op prec exprs ops where
     PExprEBOp' psPrev ps op prec exprs (TokBOp opPrev : ops) =
         IfNatLte prec (BOpPrec opPrev)
@@ -165,24 +159,35 @@ type family BOpPrec bop where
     BOpPrec Div = 3
 
 {-
-import GHC.TypeError qualified as TE
-
--- | Build an 'Expr' from a postfix stack (RPN style).
+-- | Evaluate an 'Expr' of 'Natural's on the type level.
 --
--- The stack must be a valid 'Expr'. It will type error if not.
-type FromRpn:: [ExprTok a] -> Expr a
-type FromRpn toks = FromRpnEnd (FromRpn' '[] toks)
+-- Naive, doesn't attempt to tail-call recurse.
+type Eval :: Expr Natural -> Natural
+type family Eval expr where
+    Eval (EBOp bop l r) = EvalBOp bop (Eval l) (Eval r)
+    Eval (ELit n) = n
 
-type FromRpn' :: [Expr a] -> [ExprTok a] -> [Expr a]
-type family FromRpn' es toks where
-    FromRpn' es       (TokLit a   : toks) =
-        FromRpn' (ELit a       : es) toks
-    FromRpn' (r:l:es) (TokBOp bop : toks) =
-        FromRpn' (EBOp bop l r : es) toks
-    FromRpn' es       '[]                 = es
-
-type family FromRpnEnd res where
-    FromRpnEnd    '[]  = TE.TypeError (TE.Text "bad RPN: empty")
-    FromRpnEnd (e:'[]) = e
-    FromRpnEnd _       = TE.TypeError (TE.Text "bad RPN: unused operands")
+type EvalBOp :: BOp -> Natural -> Natural -> Natural
+type family EvalBOp bop l r where
+    EvalBOp Add l r = l + r
+    EvalBOp Sub l r = l - r
+    EvalBOp Mul l r = l * r
+    EvalBOp Div l r = l `TypeNats.Div` r
 -}
+
+data Decl str a = Decl
+  { name :: str
+  , expr :: Expr str a
+  }
+type PDecl = Decl Symbol Natural
+
+type DeclParser :: PParser s PDecl
+type DeclParser @s = LiftA2 @s (Con2 'Decl) (VarParser @s <* TakeWhile (IsChar ' ')) (Literal @s ":=" *> ExprParser @s)
+
+type DeclListParser :: PParser s [PDecl]
+type DeclListParser @s = SepBy DeclParser (TakeWhile1 (IsChar '\n')) <* Eof
+
+type TestProg = """
+abc := 1+2+3
+xyz := abc / 2
+"""
