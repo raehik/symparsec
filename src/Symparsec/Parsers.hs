@@ -29,6 +29,7 @@ module Symparsec.Parsers
   , type Try
   , type While
   , type TakeWhile
+  , type TakeWhile1
   , type Count
   , type Token
   , type Satisfy
@@ -40,7 +41,7 @@ module Symparsec.Parsers
   , type Literal
 
   -- ** Naturals
-  , type NatBase
+  , type NatBase, type NatBase1, type NatBase1Sym
   , type NatDec
   , type NatHex
   , type NatBin

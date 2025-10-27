@@ -1,7 +1,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 module Symparsec.Parser.Natural
-  ( type NatBase, type NatBase1
+  ( type NatBase, type NatBase1, type NatBase1Sym
   , type NatDec
   , type NatHex
   , type NatBin
@@ -134,3 +134,7 @@ type family NatBaseWhileLoop base parseDigit psCh ps n chCur mDigit mps where
     NatBaseWhileLoop base parseDigit psCh ps n chCur Nothing      _ =
         -- failed to parse next digit: backtrack and finish
         'Reply (OK n) psCh
+
+type NatBase1Sym :: Natural -> (Char ~> Maybe Natural) -> Natural ~> PParser s Natural
+data NatBase1Sym base parseDigit x
+type instance App (NatBase1Sym base parseDigit) x = NatBase1 base parseDigit x

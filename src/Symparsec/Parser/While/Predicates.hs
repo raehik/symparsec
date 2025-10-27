@@ -4,6 +4,7 @@
 
 module Symparsec.Parser.While.Predicates where
 
+import Data.Type.Equality ( type (==) )
 import DeFun.Core
 
 -- | @A-Za-z@
@@ -116,3 +117,7 @@ type family IsDecDigit ch where
 type IsDecDigitSym :: Char ~> Bool
 data IsDecDigitSym ch
 type instance App IsDecDigitSym ch = IsDecDigit ch
+
+type IsChar :: Char -> Char ~> Bool
+data IsChar chTest ch
+type instance App (IsChar chTest) ch = ch == chTest
