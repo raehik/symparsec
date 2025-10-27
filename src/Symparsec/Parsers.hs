@@ -29,14 +29,16 @@ module Symparsec.Parsers
   , type Try
   , type While
   , type TakeWhile
+  , type TakeWhile1
   , type Count
+  , type Token
 
   -- * Common non-combinator
   -- $noncomb-common
   , type Literal
 
   -- ** Naturals
-  , type NatBase
+  , type NatBase, type NatBase1, type NatBase1Sym
   , type NatDec
   , type NatHex
   , type NatBin
@@ -64,6 +66,7 @@ import Symparsec.Parser.Skip
 import Symparsec.Parser.Take
 import Symparsec.Parser.TakeRest
 import Symparsec.Parser.TakeWhile
+import Symparsec.Parser.Token
 import Symparsec.Parser.Try
 import Symparsec.Parser.While
 import DeFun.Core
