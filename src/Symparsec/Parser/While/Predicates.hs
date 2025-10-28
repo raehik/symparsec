@@ -116,3 +116,11 @@ type family IsDecDigit ch where
 type IsDecDigitSym :: Char ~> Bool
 data IsDecDigitSym ch
 type instance App IsDecDigitSym ch = IsDecDigit ch
+
+type Elem :: [a] -> a -> Bool 
+type family Elem where 
+  Elem (_:xs) x = Elem xs x
+  Elem '[] _ = 'False
+  Elem (x':_) x = 'True
+data ElemSym lst ch
+type instance (App (ElemSym lst)) a = Elem lst a
