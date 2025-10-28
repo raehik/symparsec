@@ -45,6 +45,7 @@ library
       Symparsec.Parser.Monad
       Symparsec.Parser.Natural
       Symparsec.Parser.Natural.Digits
+      Symparsec.Parser.Satisfy
       Symparsec.Parser.Skip
       Symparsec.Parser.Take
       Symparsec.Parser.TakeRest

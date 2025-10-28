@@ -29,6 +29,8 @@ module Symparsec.Parsers
   , type TakeWhile
   , type Count
   , type Token
+  , type Satisfy
+  , type OneOf
 
   -- * Common non-combinator
   -- $noncomb-common
@@ -59,6 +61,7 @@ import Symparsec.Parser.Isolate
 import Symparsec.Parser.Literal
 import Symparsec.Parser.Monad
 import Symparsec.Parser.Natural
+import Symparsec.Parser.Satisfy
 import Symparsec.Parser.Skip
 import Symparsec.Parser.Take
 import Symparsec.Parser.TakeRest
