@@ -1,6 +1,6 @@
 {-# LANGUAGE UndecidableInstances #-}
 
-module Symparsec.Parser.Satisfy ( type Satisfy, type OneOf ) where
+module Symparsec.Parser.Satisfy ( type Satisfy, type OneOf, type NoneOf ) where
 
 import Symparsec.Parser.Common
 
@@ -33,3 +33,19 @@ type family Elem a as where
 type ElemSym :: [a] -> a ~> Bool
 data ElemSym as a
 type instance App (ElemSym as) a = Elem a as
+
+-- may also be defined using @CompSym2 NotSym (ElemSym chs)@
+type NoneOf :: [Char] -> PParser Char
+--type NoneOf chs = Satisfy (CompSym2 NotSym (ElemSym chs))
+type NoneOf chs = Satisfy (NotElemSym chs)
+
+type NotElem :: a -> [a] -> Bool
+type family NotElem a as where
+    NotElem _ '[]    = True
+    NotElem a (a:_)  = False
+    NotElem a (_:as) = NotElem a as
+
+-- NOTE: flipped from "normal" Elem
+type NotElemSym :: [a] -> a ~> Bool
+data NotElemSym as a
+type instance App (NotElemSym as) a = NotElem a as
