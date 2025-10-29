@@ -31,6 +31,7 @@ module Symparsec.Parsers
   , type Token
   , type Satisfy
   , type OneOf
+  , type NoneOf
 
   -- * Common non-combinator
   -- $noncomb-common
