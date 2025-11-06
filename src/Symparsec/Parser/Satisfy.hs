@@ -5,7 +5,7 @@ module Symparsec.Parser.Satisfy ( type Satisfy, type OneOf, type NoneOf ) where
 import Symparsec.Parser.Common
 
 -- may also be defined using @Token@
-type Satisfy :: (Char ~> Bool) -> PParser Char
+type Satisfy :: (Char ~> Bool) -> PParser s Char
 data Satisfy chPred ps
 type instance App (Satisfy chPred) ps = SatisfyStart chPred ps (UnconsState ps)
 
@@ -19,7 +19,7 @@ type family SatisfyValidate psPrev ps ch res where
     SatisfyValidate psPrev ps ch False =
         'Reply (Err (Error1 "satisfy: char failed predicate")) psPrev
 
-type OneOf :: [Char] -> PParser Char
+type OneOf :: [Char] -> PParser s Char
 type OneOf chs = Satisfy (ElemSym chs)
 
 -- TODO put in singleraeh
@@ -35,7 +35,7 @@ data ElemSym as a
 type instance App (ElemSym as) a = Elem a as
 
 -- may also be defined using @CompSym2 NotSym (ElemSym chs)@
-type NoneOf :: [Char] -> PParser Char
+type NoneOf :: [Char] -> PParser s Char
 --type NoneOf chs = Satisfy (CompSym2 NotSym (ElemSym chs))
 type NoneOf chs = Satisfy (NotElemSym chs)
 
