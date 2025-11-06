@@ -11,6 +11,8 @@ module Symparsec.Parsers
   , type (<*>), type Pure, type LiftA2, type (*>), type (<*)
   , type (>>=)
   , type (<|>), type Empty, type Optional, type Many, type Some
+  , type SepBy, type SepBy1
+  , type Choice
 
   -- * Positional
   -- $positional
@@ -27,6 +29,7 @@ module Symparsec.Parsers
   , type Try
   , type While
   , type TakeWhile
+  , type TakeWhile1
   , type Count
   , type Token
   , type Satisfy
@@ -38,7 +41,7 @@ module Symparsec.Parsers
   , type Literal
 
   -- ** Naturals
-  , type NatBase
+  , type NatBase, type NatBase1, type NatBase1Sym
   , type NatDec
   , type NatHex
   , type NatBin

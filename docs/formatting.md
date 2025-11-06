@@ -16,15 +16,19 @@ defunctionalized arrow. This means some promoted types might not actually use
 the term-level type directly. That's fine.
 
 ## Binders
-* parser string type binder: `str`
+* parser state string type: `str`
   * don't use `sym`.
-* parser return type binder: `a`
-* parser reply type binder: `rep`
+* parser state numeric type: `n`
+  * slightly preferred over `i` because it's a `Natural`
+* parser return type: `a`
+* parser reply: `rep`
   * ? `r` is fine, but it's often used for continuations. `rep` sounds like
     `representation` but that's it, so I consider it fairly unambiguous
-* parser state type binder: `s`
-* parser state index type binder: `idx`
+* parser state: `ps`
+* parser state custom state: `s`
+  * TODO. term/type s/s is fine because separate namespaces, but type/kind s/s
+    doesn't work, so I need to use type/kind custom/s. I should do the same for
+    all uses. TODO annoying refactor. maybe use `cst` if you want shorter?
+* parser state index: `idx`
   * simple, obvious
-* parser state number kind binder: `n`
-  * slightly preferred over `i` because it's a `Natural`
-* parser error type binder: `e`
+* parser error: `e`
