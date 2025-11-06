@@ -14,9 +14,6 @@
 * aeson: super real world! do constructor & field name parsing, instead of
   `constructorTagModifier` and such. pretty daunting though (nasty generics)
 
-### Something that uses multi-line `Symbol`s
-`MultinelineStrings` in GHC 9.12 works for `Symbol`s too. Think of a nice usage.
-
 ### JSON parser
 Big, real world, funny. Roll it by hand (Aeson's parsing is very complex).
 
@@ -29,3 +26,6 @@ Not very well-written, mind you, but it works. I could probably write a
 
 ### Format string parser
 Directly from typelits-printf, minimal changes.
+
+### Something that uses multi-line `Symbol`s
+Threw into the expression parser. 9.12 exclusive due to `MultinelineStrings`.
