@@ -27,6 +27,7 @@ module Symparsec.Parsers
   , type Try
   , type While
   , type TakeWhile
+  , type TakeWhile1
   , type Count
   , type Token
   , type Satisfy
