@@ -10,7 +10,7 @@ import Singleraeh.Symbol ( type RevCharsToSymbol )
 -- May also be defined via
 -- @'Symparsec.Parser.While.While' chPred 'Symparsec.Parser.TakeRest.TakeRest'@,
 -- but a custom implementation is more efficient.
-type TakeWhile :: (Char ~> Bool) -> PParser Symbol
+type TakeWhile :: (Char ~> Bool) -> PParser u Symbol
 data TakeWhile chPred s
 type instance App (TakeWhile chPred) s = TakeWhileStart chPred s (UnconsState s)
 
@@ -36,7 +36,7 @@ type family TakeWhileLoop chPred sPrev sCh ch taken res ms where
 -- | Take one or more 'Char's for which the supplied predicate holds.
 --
 -- Backtracks on failure. Same as megaparsec.
-type TakeWhile1 :: (Char ~> Bool) -> PParser Symbol
+type TakeWhile1 :: (Char ~> Bool) -> PParser u Symbol
 data TakeWhile1 chPred ps
 type instance App (TakeWhile1 chPred) ps = TakeWhile1Start chPred ps (UnconsState ps)
 

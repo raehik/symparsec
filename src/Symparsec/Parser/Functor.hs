@@ -10,7 +10,7 @@ import Symparsec.Parser.Common
 import DeFun.Function ( type ConstSym1 )
 
 -- | '<$>' for parsers. Apply the given type function to the result.
-type (<$>) :: (a ~> b) -> PParser a -> PParser b
+type (<$>) :: (a ~> b) -> PParser u a -> PParser u b
 infixl 4 <$>
 data (<$>) f p s
 type instance App (f <$> p) s = FmapEnd f (p @@ s)
@@ -20,11 +20,11 @@ type family FmapEnd f rep where
     FmapEnd f ('Reply (Err e) s) = 'Reply (Err e)        s
 
 -- | '<$' for parsers. Replace the parser result with the given value.
-type (<$) :: a -> PParser b -> PParser a
+type (<$) :: a -> PParser u b -> PParser u a
 infixl 4 <$
 type a <$ p = ConstSym1 a <$> p
 
 -- | 'Data.Functor.$>' for parsers. Flipped t'Symparsec.Parser.Functor.<$'.
-type ($>) :: PParser a -> b -> PParser b
+type ($>) :: PParser u a -> b -> PParser u b
 infixl 4 $>
 type p $> a = ConstSym1 a <$> p

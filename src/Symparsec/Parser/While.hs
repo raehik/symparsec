@@ -5,28 +5,28 @@ module Symparsec.Parser.While ( type While ) where
 import Symparsec.Parser.Common
 
 -- | Run the given parser while the given character predicate succeeds.
-type While :: (Char ~> Bool) -> PParser a -> PParser a
+type While :: (Char ~> Bool) -> PParser u a -> PParser u a
 data While chPred p s
 type instance App (While chPred p) s = While' chPred p s
 
 type family While' chPred p s where
-    While' chPred p ('State rem len idx) =
-        WhileCountStart len rem idx chPred p (UnconsSymbol rem)
+    While' chPred p ('State rem len idx user) =
+        WhileCountStart len rem idx user chPred p (UnconsSymbol rem)
 
-type family WhileCountStart len rem idx chPred p mstr where
-    WhileCountStart len rem idx chPred p (Just '(ch, str)) =
-        WhileCount len rem idx chPred p 0 (UnconsSymbol str) (chPred @@ ch)
-    WhileCountStart len rem idx chPred p Nothing           = p @@ ('State rem 0 idx)
+type family WhileCountStart len rem idx user chPred p mstr where
+    WhileCountStart len rem idx user chPred p (Just '(ch, str)) =
+        WhileCount len rem idx user chPred p 0 (UnconsSymbol str) (chPred @@ ch)
+    WhileCountStart len rem idx user chPred p Nothing           = p @@ ('State rem 0 idx user)
 
-type family WhileCount len rem idx chPred p n mstr res where
-    WhileCount len rem idx chPred p n (Just '(ch, str)) True  =
-        WhileCount len rem idx chPred p (n+1) (UnconsSymbol str) (chPred @@ ch)
-    WhileCount len rem idx chPred p n (Just '(ch, str)) False =
-        WhileEnd (len-n)     (p @@ ('State rem n     idx))
-    WhileCount len rem idx chPred p n Nothing           True  =
-        WhileEnd (len-(n+1)) (p @@ ('State rem (n+1) idx))
-    WhileCount len rem idx chPred p n Nothing           False =
-        WhileEnd (len-n)     (p @@ ('State rem n     idx))
+type family WhileCount len rem idx user chPred p n mstr res where
+    WhileCount len rem idx user chPred p n (Just '(ch, str)) True  =
+        WhileCount len rem idx user chPred p (n+1) (UnconsSymbol str) (chPred @@ ch)
+    WhileCount len rem idx user chPred p n (Just '(ch, str)) False =
+        WhileEnd (len-n)     (p @@ ('State rem n     idx user))
+    WhileCount len rem idx user chPred p n Nothing           True  =
+        WhileEnd (len-(n+1)) (p @@ ('State rem (n+1) idx user))
+    WhileCount len rem idx user chPred p n Nothing           False =
+        WhileEnd (len-n)     (p @@ ('State rem n     idx user))
 
 type family WhileEnd lenRest rep where
     -- TODO note that we don't require that the inner parser fully consumes.
@@ -35,5 +35,5 @@ type family WhileEnd lenRest rep where
     -- but by not requiring full consumption, we recover char-by-char behaviour!
     -- and we can still get full consumption by combining with Isolate.
     -- the inner parser should generally fully consume though, as a design point
-    WhileEnd lenRest ('Reply res ('State rem len idx)) =
-        'Reply res ('State rem (lenRest+len) idx)
+    WhileEnd lenRest ('Reply res ('State rem len idx user)) =
+        'Reply res ('State rem (lenRest+len) idx user)

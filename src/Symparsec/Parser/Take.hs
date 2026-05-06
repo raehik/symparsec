@@ -6,7 +6,7 @@ import Symparsec.Parser.Common
 import Singleraeh.Symbol ( type RevCharsToSymbol )
 
 -- | Return the next @n@ characters.
-type Take :: Natural -> PParser Symbol
+type Take :: Natural -> PParser u Symbol
 data Take n s
 type instance App (Take n) s = Take' '[] n s (UnconsState s)
 type family Take' chs n sPrev s where
@@ -19,12 +19,12 @@ type ETakeEnd n = Error1
     ( "tried to take " ++ ShowNatDec n ++ " chars from empty string" )
 
 -- | 'Take' defunctionalization symbol.
-type TakeSym :: Natural ~> PParser Symbol
+type TakeSym :: Natural ~> PParser u Symbol
 data TakeSym n
 type instance App TakeSym n = Take n
 
 -- | Return the next character.
-type Take1 :: PParser Char
+type Take1 :: PParser u Char
 data Take1 s
 type instance App Take1 s = Take1' s (UnconsState s)
 type family Take1' sPrev s where
