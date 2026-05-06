@@ -31,7 +31,7 @@ type Number = NatBaseWhile 10 ParseDigitDecSym
 
 -- special parser that I probably don't want (surely can just combine)
 -- backtracks!!
-type NotChar :: Char -> PParser Char
+type NotChar :: Char -> PParser u Char
 data NotChar c s
 type instance App (NotChar c) s = NotChar' c s (UnconsState s)
 type family NotChar' cNo sPrev s where
@@ -71,13 +71,13 @@ data Flags = Flags
   , fAlternate :: Bool
   }
 
-type FlagParser :: PParser Flags
+type FlagParser :: PParser u Flags
 data FlagParser s
 type instance App FlagParser s = PFlags' EmptyFlags s (UnconsState s)
 
 type EmptyFlags = 'Flags Nothing Nothing False
 
-type PFlags' :: Flags -> PState -> (Maybe Char, PState) -> PReply Flags
+type PFlags' :: Flags -> PState u -> (Maybe Char, PState u) -> PReply u Flags
 type family PFlags' flags sPrev s where
   PFlags' ('Flags d i l) sPrev '(Just '-', s) =
     PFlags' ('Flags (Just (UpdateAdjust d LeftAdjust)) i l) s (UnconsState s)
@@ -113,7 +113,10 @@ data FieldFormat = FF
   }
 
 -- copied as-is except for 'Con5'
-type FFParser :: PParser FieldFormat
+-- TODO with user state introduced, adding a standalone kind signature results
+-- in a type error. GHC initialises an inner u0 and doesn't see u ~ u0.
+-- Can be fixed by using type abstraction syntax, I think.
+--type FFParser :: PParser u FieldFormat
 type FFParser = Con5 FF
     <$> FlagParser
     <*> Optional Number
