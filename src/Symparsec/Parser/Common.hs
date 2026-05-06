@@ -45,17 +45,17 @@ import GHC.TypeError qualified as TE
 --
 -- If at end of the string, the state is returned untouched, and @len@ is
 -- guaranteed to be 0.
-type UnconsState :: PState -> (Maybe Char, PState)
+type UnconsState :: PState u -> (Maybe Char, PState u)
 type family UnconsState s where
-    UnconsState ('State rem 0   idx) = '(Nothing, 'State rem 0 idx)
-    UnconsState ('State rem len idx) = UnconsState' (UnconsSymbol rem) len idx
+    UnconsState ('State rem 0   idx user) = '(Nothing, 'State rem 0 idx user)
+    UnconsState ('State rem len idx user) = UnconsState' (UnconsSymbol rem) len idx user
 
 type UnconsState'
-    :: Maybe (Char, Symbol) -> Natural -> Natural -> (Maybe Char, PState)
-type family UnconsState' mstr len idx where
-    UnconsState' (Just '(ch, rem)) len idx =
-        '(Just ch, 'State rem (len-1) (idx+1))
-    UnconsState' Nothing           len idx =
+    :: Maybe (Char, Symbol) -> Natural -> Natural -> u -> (Maybe Char, PState u)
+type family UnconsState' mstr len idx user where
+    UnconsState' (Just '(ch, rem)) len idx user =
+        '(Just ch, 'State rem (len-1) (idx+1) user)
+    UnconsState' Nothing           len idx user =
         -- TODO could I change this to a regular parser error? should I?
         TE.TypeError (TE.Text "unrecoverable parser error: got to end of input string before len=0")
 
