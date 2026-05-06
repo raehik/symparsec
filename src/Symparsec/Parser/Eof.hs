@@ -5,7 +5,7 @@ module Symparsec.Parser.Eof ( type Eof ) where
 import Symparsec.Parser.Common
 
 -- | Assert end of input, or fail.
-type Eof :: PParser ()
+type Eof :: PParser u ()
 data Eof s
 type instance App Eof s = Eof' (UnconsState s)
 type family Eof' ms where

@@ -39,7 +39,7 @@ type NatHex = NatBase 16 ParseDigitHexSym
 --
 -- Returns an error if it parses zero digits, or if any character fails to
 -- parse.
-type NatBase :: Natural -> (Char ~> Maybe Natural) -> PParser Natural
+type NatBase :: Natural -> (Char ~> Maybe Natural) -> PParser u Natural
 data NatBase base parseDigit s
 type instance App (NatBase base parseDigit) s =
     NatBaseStart base parseDigit s (UnconsState s)
@@ -51,7 +51,7 @@ type family NatBaseStart base parseDigit sCh s where
 -- | Parse a 'Natural' with the given starting value.
 --
 -- Skips some extra work. May be handy for hand-written parsers.
-type NatBase1 :: Natural -> (Char ~> Maybe Natural) -> Natural -> PParser Natural
+type NatBase1 :: Natural -> (Char ~> Maybe Natural) -> Natural -> PParser u Natural
 data NatBase1 base parseDigit digit s
 type instance App (NatBase1 base parseDigit digit) s =
     NatBase1' base parseDigit s digit (UnconsState s)
@@ -68,13 +68,13 @@ type EInvalidDigit ch base =
 type NatBaseLoop
     :: Natural
     -> (Char ~> Maybe Natural)
-    -> PState
-    -> PState
+    -> PState u
+    -> PState u
     -> Natural
     -> Char
     -> Maybe Natural
-    -> (Maybe Char, PState)
-    -> PReply Natural
+    -> (Maybe Char, PState u)
+    -> PReply u Natural
 type family NatBaseLoop base parseDigit sCh s n chCur mDigit ms where
     -- parsed digit and have next char
     NatBaseLoop base parseDigit sCh s n chCur (Just digit) '(Just ch, sNext) =
@@ -93,7 +93,7 @@ type family NatBaseLoop base parseDigit sCh s n chCur mDigit ms where
 -- Returns an error if it parses zero digits, or if the first digit fails to
 -- parse. Returns success on parsing up to EOF, or just before the first failed
 -- character parse. (Should match the behaviour of Megaparsec's number parsers.)
-type NatBaseWhile :: Natural -> (Char ~> Maybe Natural) -> PParser Natural
+type NatBaseWhile :: Natural -> (Char ~> Maybe Natural) -> PParser u Natural
 data NatBaseWhile base parseDigit s
 type instance App (NatBaseWhile base parseDigit) s =
     NatBaseWhileStart base parseDigit s (UnconsState s)
@@ -118,13 +118,13 @@ type family NatBaseWhileStart2 base parseDigit sCh s chChur mDigit ms where
 type NatBaseWhileLoop
     :: Natural
     -> (Char ~> Maybe Natural)
-    -> PState
-    -> PState
+    -> PState u
+    -> PState u
     -> Natural
     -> Char
     -> Maybe Natural
-    -> (Maybe Char, PState)
-    -> PReply Natural
+    -> (Maybe Char, PState u)
+    -> PReply u Natural
 type family NatBaseWhileLoop base parseDigit sCh s n chCur mDigit ms where
     -- parsed digit and have next char
     NatBaseWhileLoop base parseDigit sCh s n chCur (Just digit) '(Just ch, sNext) =

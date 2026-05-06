@@ -6,39 +6,39 @@ import Symparsec.Parser.Common
 import Symparsec.Utils ( type IfNatLte )
 
 -- TODO can use 'Ensure' to help define this
-type Isolate :: Natural -> PParser a -> PParser a
+type Isolate :: Natural -> PParser u a -> PParser u a
 data Isolate n p s
 type instance App (Isolate n p) s = Isolate' n p s
 type family Isolate' n p s where
-    Isolate' n p ('State rem len idx) =
+    Isolate' n p ('State rem len idx user) =
         -- Could perhaps improve this, since 'OrdCond' probably does similar
         -- work to @len-n@.
         IfNatLte n len
-            (IsolateEnd len n (p @@ ('State rem n idx)))
-            ('Reply (Err (Error1 (EStrInputTooShort n len))) ('State rem len idx))
+            (IsolateEnd len n (p @@ ('State rem n idx user)))
+            ('Reply (Err (Error1 (EStrInputTooShort n len))) ('State rem len idx user))
 
 --type IsolateEnd :: Natural -> ? -> ?
 -- TODO are lenRem/lenConsumed actually good names?
 type family IsolateEnd lenOrig n rep where
     -- isolated parser succeeded and consumed all input:
     -- return success with state updated to have actual remaining length
-    IsolateEnd lenOrig n ('Reply (OK  a) ('State rem 0   idx)) =
-        'Reply (OK  a) ('State rem (lenOrig-n)     idx)
+    IsolateEnd lenOrig n ('Reply (OK  a) ('State rem 0   idx user)) =
+        'Reply (OK  a) ('State rem (lenOrig-n)     idx user)
 
     -- isolated parser failed
-    IsolateEnd lenOrig n ('Reply (Err e) ('State rem len idx)) =
+    IsolateEnd lenOrig n ('Reply (Err e) ('State rem len idx user)) =
         -- TODO add some isolate meta
-        'Reply (Err e) ('State rem (lenOrig-n+len) idx)
+        'Reply (Err e) ('State rem (lenOrig-n+len) idx user)
 
     -- isolated parser succeeded but didn't consume all input
-    IsolateEnd lenOrig n ('Reply (OK _a) ('State rem len idx)) =
-        'Reply (Err (EIsolateIncomplete len)) ('State rem (lenOrig-n+len) idx)
+    IsolateEnd lenOrig n ('Reply (OK _a) ('State rem len idx user)) =
+        'Reply (Err (EIsolateIncomplete len)) ('State rem (lenOrig-n+len) idx user)
 
 type EIsolateIncomplete n = Error1
     (    "isolated parser completed without consuming all input ("
       ++ ShowNatDec n ++ " remaining)" )
 
 -- TODO testing. args flipped because you're more likely to defun the len
-type IsolateSym :: PParser a -> Natural ~> PParser a
+type IsolateSym :: PParser u a -> Natural ~> PParser u a
 data IsolateSym p x
 type instance App (IsolateSym p) n = Isolate n p

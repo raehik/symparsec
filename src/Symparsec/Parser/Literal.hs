@@ -25,17 +25,17 @@ type EWrongChar lit chExpect chGot =
 
 type EEof lit = EDuringLit lit "EOF while still parsing literal"
 
-type Literal :: Symbol -> PParser ()
+type Literal :: Symbol -> PParser u ()
 data Literal lit s
 type instance App (Literal lit) s = LiteralCheckLen lit s (Symbol.Length lit)
 
 -- now, I could use 'Ensure' here. but we add context to errors here, which I
 -- quite like. perhaps I should provide an @Ensure'@ that lets you add e detail?
 type family LiteralCheckLen lit s n where
-    LiteralCheckLen lit ('State rem len idx) litLen =
+    LiteralCheckLen lit ('State rem len idx user) litLen =
         IfNatLte litLen len
-            (LiteralStep lit ('State rem len idx))
-            ('Reply (Err (ETooShort lit litLen len)) ('State rem len idx))
+            (LiteralStep lit ('State rem len idx user))
+            ('Reply (Err (ETooShort lit litLen len)) ('State rem len idx user))
 
 type LiteralStep lit s = Literal' lit s (UnconsSymbol lit) (UnconsState s)
 type family Literal' lit sPrev ch ms where
