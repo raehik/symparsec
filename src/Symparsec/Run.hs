@@ -2,7 +2,7 @@
 
 -- | Running Symparsec parsers.
 
-module Symparsec.Run ( type Run, type RunTest ) where
+module Symparsec.Run ( type Run, type Run', type RunTest, type RunTest' ) where
 
 import Symparsec.Parser
 import Data.Type.Symbol qualified as Symbol
@@ -17,17 +17,21 @@ import TypeLevelShow.Natural ( type ShowNatDec )
 --
 -- * On success, returns a tuple of @(result :: a, remaining :: 'Symbol')@.
 -- * On failure, returns an 'TE.ErrorMessage'.
-type Run :: PParser a -> Symbol -> Either TE.ErrorMessage (a, Symbol)
-type Run p str = RunEnd str (p @@ StateInit str)
+type Run :: PParser u a -> u -> Symbol -> Either TE.ErrorMessage (a, Symbol)
+type Run p user str = RunEnd str (p @@ StateInit user str)
 
-type RunEnd :: Symbol -> PReply a -> Either TE.ErrorMessage (a, Symbol)
+-- | Run a parser on a 'Symbol'. The parser must have empty '()' user state.
+type Run' :: PParser () a -> Symbol -> Either TE.ErrorMessage (a, Symbol)
+type Run' p str = Run p '() str
+
+type RunEnd :: Symbol -> PReply u a -> Either TE.ErrorMessage (a, Symbol)
 type family RunEnd str rep where
-    RunEnd str ('Reply (OK  a) ('State  rem _len _idx)) =
+    RunEnd str ('Reply (OK  a) ('State  rem _len _idx _user)) =
         -- TODO I could return only @len@ of the remaining input @rem@, but
         -- that's more work than just returning @rem@, and I don't see a way
         -- this would matter for correct parsers.
         Right '(a, rem)
-    RunEnd str ('Reply (Err e) ('State _rem _len  idx)) =
+    RunEnd str ('Reply (Err e) ('State _rem _len  idx _user)) =
         Left (RenderPDoc (PrettyErrorTop idx str e))
 
 -- | Run the given parser on the given 'Symbol', emitting a type error on
@@ -36,8 +40,13 @@ type family RunEnd str rep where
 -- This /would/ be useful for @:k!@ runs, but it doesn't work properly with
 -- 'TE.TypeError's, printing @= (TypeError ...)@ instead of the error message.
 -- Alas! Instead, do something like @> Proxy \@(RunTest ...)@.
-type RunTest :: PParser a -> Symbol -> (a, Symbol)
-type RunTest p str = FromRightTypeError (Run p str)
+type RunTest :: PParser u a -> u -> Symbol -> (a, Symbol)
+type RunTest p user str = FromRightTypeError (Run p user str)
+
+-- | Run the given parser on the given 'Symbol', emitting a type error on
+--   failure. The parser must have empty '()' user state.
+type RunTest' :: PParser () a -> Symbol -> (a, Symbol)
+type RunTest' p str = RunTest p '() str
 
 type FromRightTypeError :: Either TE.ErrorMessage a -> a
 type family FromRightTypeError eea where
@@ -45,8 +54,8 @@ type family FromRightTypeError eea where
     FromRightTypeError (Left  e) = TE.TypeError e
 
 -- | Initial parser state for the given 'Symbol'.
-type StateInit :: Symbol -> PState
-type StateInit str = 'State str (Symbol.Length str) 0
+type StateInit :: u -> Symbol -> PState u
+type StateInit user str = 'State str (Symbol.Length str) 0 user
 
 -- | Pretty print a top-level parser error.
 --

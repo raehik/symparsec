@@ -14,7 +14,7 @@ import Singleraeh.List
 --import Singleraeh.Symbol
 
 -- | Parser state.
-data State str n = State
+data State str n u = State
   -- | Remaining input.
   { remaining :: str
 
@@ -34,23 +34,32 @@ data State str n = State
   --
   -- Overall index. Used for nicer error reporting after parse completion.
   , index :: n
+
+  -- | User state.
+  , user :: u
   } deriving stock Show
 
 -- | Promoted 'State'.
 type PState = State Symbol Natural
 
 -- | Singled 'State'.
-data SState (s :: PState) where
-    SState :: SSymbol rem -> SNat len -> SNat idx -> SState ('State rem len idx)
+data SState (su :: u -> Type) (pu :: PState u) where
+    SState :: SSymbol rem -> SNat len -> SNat idx -> su u -> SState su ('State rem len idx user)
+
+-- | Demoted 'State'.
+type DState = State String Natural
 
 -- | Demote an 'SState'.
-demoteSState :: SState s -> State String Natural
-demoteSState (SState srem slen sidx) =
-    State (fromSSymbol srem) (fromSNat slen) (fromSNat sidx)
+demoteSState
+    :: (forall u. su u -> du)
+    -> SState su pu
+    -> DState du
+demoteSState demoteSU (SState srem slen sidx suser) =
+    State (fromSSymbol srem) (fromSNat slen) (fromSNat sidx) (demoteSU suser)
 
-instance Demotable SState where
-    type Demote SState = State String Natural
-    demote = demoteSState
+instance Demotable su => Demotable (SState su) where
+    type Demote (SState su) = DState (Demote su)
+    demote = demoteSState demote
 
 {-
 data Span n = Span
@@ -82,29 +91,33 @@ instance Demotable SError where
 --
 -- TODO: megaparsec also returns a bool indicating if any input was consumed.
 -- Unsure what it's used for.
-data Reply str n a = Reply
+data Reply str n u a = Reply
   { result :: Result str n a -- ^ Parse result.
-  , state  :: State str n    -- ^ Final parser state.
+  , state  ::  State str n u -- ^ Final parser state.
   } deriving stock Show
 
 -- | Promoted 'Reply'.
 type PReply = Reply Symbol Natural
 
 -- | Singled 'Reply'.
-data SReply (sa :: a -> Type) (rep :: PReply a) where
-    SReply :: SResult sa result -> SState state -> SReply sa ('Reply result state)
+data SReply (su :: u -> Type) (sa :: a -> Type) (rep :: PReply u a) where
+    SReply :: SResult sa result -> SState su state -> SReply su sa ('Reply result state)
+
+-- | Demoted 'Reply'.
+type DReply = Reply String Natural
 
 -- | Demote an 'SReply.
 demoteSReply
-    :: (forall a. sa a -> da)
-    -> SReply sa rep
-    -> Reply String Natural da
-demoteSReply demoteSA (SReply sresult sstate) =
-    Reply (demoteSResult demoteSA sresult) (demoteSState sstate)
+    :: (forall u. su u -> du)
+    -> (forall a. sa a -> da)
+    -> SReply su sa rep
+    -> DReply du da
+demoteSReply demoteSU demoteSA (SReply sresult sstate) =
+    Reply (demoteSResult demoteSA sresult) (demoteSState demoteSU sstate)
 
-instance Demotable sa => Demotable (SReply sa) where
-    type Demote (SReply sa) = Reply String Natural (Demote sa)
-    demote = demoteSReply demote
+instance (Demotable su, Demotable sa) => Demotable (SReply su sa) where
+    type Demote (SReply su sa) = DReply (Demote su) (Demote sa)
+    demote = demoteSReply demote demote
 
 -- | Parse result: a value, or an error.
 data Result str n a = OK a            -- ^ Parser succeeded.
@@ -114,20 +127,19 @@ data Result str n a = OK a            -- ^ Parser succeeded.
 -- | Promoted 'Result'.
 type PResult = Result Symbol Natural
 
---type SState = State 
---type SResult :: _ -> Type
--- TODO ^ how to do explicit kind signature for GADT?
-
 -- | Singled 'Result'.
 data SResult (sa :: a -> Type) (res :: PResult a) where
     SOK  :: sa a     -> SResult sa (OK a)
     SErr :: SError e -> SResult sa (Err e)
 
+-- | Demoted 'Result'.
+type DResult = Result String Natural
+
 -- | Demote an 'SResult'.
 demoteSResult
     :: (forall a. sa a -> da)
     -> SResult sa res
-    -> Result String Natural da
+    -> DResult da
 demoteSResult demoteSA = \case
   SOK  sa -> OK  $ demoteSA sa
   SErr se -> Err $ demoteSError se
@@ -137,14 +149,14 @@ instance Demotable sa => Demotable (SResult sa) where
     demote = demoteSResult demote
 
 -- | A parser is a function on parser state.
-type Parser str n a = State str n -> Reply str n a
+type Parser str n u a = State str n u -> Reply str n u a
 
 -- | Promoted 'Parser': a defunctionalization symbol to a function on promoted
 --   parser state.
-type PParser a = PState ~> PReply a
+type PParser u a = PState u ~> PReply u a
 
 -- | Singled 'Parser'.
-type SParser sa p = Lam SState (SReply sa) p
+type SParser su sa p = Lam (SState su) (SReply su sa) p
 --data SParser (sa :: a -> Type) (p :: PParser a) where
  --   SParser :: Lam SState (SReply sa) (PParser a)
 
