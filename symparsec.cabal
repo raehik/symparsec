@@ -72,7 +72,7 @@ library
       TypeFamilies
       DataKinds
       MagicHash
-  ghc-options: -fhide-source-paths -Wall
+  ghc-options: -fhide-source-paths -Wall -Winvalid-haddock
   build-depends:
       base >=4.18 && <5
     , defun-core ==0.1.*
@@ -98,7 +98,7 @@ test-suite spec
       TypeFamilies
       DataKinds
       MagicHash
-  ghc-options: -fhide-source-paths -Wall
+  ghc-options: -fhide-source-paths -Wall -Winvalid-haddock
   build-depends:
       base >=4.18 && <5
     , defun-core ==0.1.*
