@@ -48,15 +48,15 @@ data ExprTok
   | TokParenL
   | TokParenR
 
-type PExpr :: PParser (Expr Natural)
+type PExpr :: PParser u (Expr Natural)
 data PExpr s
 type instance App PExpr s = PExprNext s '[] '[] (UnconsState s)
 type PExprNext
-    :: PState
+    :: PState u
     -> [ExprTok]
     -> [Expr Natural]
-    -> (Maybe Char, PState)
-    -> PReply (Expr Natural)
+    -> (Maybe Char, PState u)
+    -> PReply u (Expr Natural)
 type family PExprNext sPrev ops exprs s where
     PExprNext sPrev ops exprs '(Just ch, s) =
         PExprCh sPrev s ops exprs ch
@@ -134,8 +134,8 @@ type family PExprEBOpOpCh ch where
     PExprEBOpOpCh _   = Nothing
 
 type PExprEBOp'
-    :: PState -> PState -> BOp -> Natural -> [Expr Natural] -> [ExprTok]
-    -> PReply (Expr Natural)
+    :: PState u -> PState u -> BOp -> Natural -> [Expr Natural] -> [ExprTok]
+    -> PReply u (Expr Natural)
 type family PExprEBOp' sPrev s op prec exprs ops where
     PExprEBOp' sPrev s op prec exprs (TokBOp opPrev : ops) =
         IfNatLte prec (BOpPrec opPrev)
