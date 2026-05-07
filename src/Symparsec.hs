@@ -13,7 +13,9 @@ module Symparsec
   (
   -- * Base definitions
     type Run
+  , type Run'
   , type RunTest
+  , type RunTest'
 
   -- * Parsers
   , module Symparsec.Parsers
