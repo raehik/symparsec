@@ -21,8 +21,27 @@
       systems = inputs.nixpkgs.lib.systems.flakeExposed;
       imports = [ inputs.haskell-flake.flakeModule ];
       perSystem = { self', pkgs, config, ... }: {
-        packages.default  = self'.packages.ghc912-symparsec;
-        devShells.default = self'.devShells.ghc912;
+        packages.default  = self'.packages.ghc914-symparsec;
+        devShells.default = self'.devShells.ghc914;
+        haskellProjects.ghc914 = {
+          basePackages = pkgs.haskell.packages.ghc914;
+          devShell = {
+            mkShellArgs.name = "ghc14";
+            hoogle = false;
+            tools = _: {
+              haskell-language-server = null;
+              hlint = null;
+              ghcid = null;
+              cabal-install = pkgs.cabal-install; # 2026-06-06: need override
+            };
+          };
+
+          # 2026-06-06: not yet in nixpkgs master
+          settings.defun-core.jailbreak = true;
+
+          # 2026-06-06: bug in tests (due to path length, maybe darwin-specific)
+          settings.network.check = false;
+        };
         haskellProjects.ghc912 = {
           basePackages = pkgs.haskell.packages.ghc912;
           devShell = defDevShell "ghc912";
