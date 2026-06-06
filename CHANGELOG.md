@@ -1,3 +1,7 @@
+## 2.1.0 (unreleased)
+- Parsers now take user state.
+  Use `Run'`, `RunTest'` to ignore (run with the empty state `'()`).
+
 ## 2.0.0 (2025-10-11)
 Full rewrite.
 
