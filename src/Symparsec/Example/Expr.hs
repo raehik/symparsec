@@ -2,6 +2,9 @@
 
 -- | An example Symparsec parser for a basic expression tree.
 
+-- Starts chugging for me starting from 7 non-bracketed binops.
+-- Bracket to avoid.
+
 module Symparsec.Example.Expr where
 
 import Symparsec.Parser.Common
