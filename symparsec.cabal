@@ -31,6 +31,7 @@ library
       Data.Type.Symbol
       Symparsec
       Symparsec.Example.Expr
+      Symparsec.Example.Generic
       Symparsec.Example.Printf
       Symparsec.Parser
       Symparsec.Parser.Alternative
@@ -56,6 +57,7 @@ library
       Symparsec.Parser.While.Predicates
       Symparsec.Parsers
       Symparsec.Run
+      Symparsec.Run.Generic
       Symparsec.Utils
   other-modules:
       Paths_symparsec
