@@ -19,6 +19,7 @@ import GHC.TypeError qualified as TE
 import GHC.TypeError
 import GHC.TypeLits
 import GHC.Generics
+import Raehik.Experiment.GenericK
 
 {- 2026-06-11T09:16:55+0100
 Wait, TODO. There's no reason to squish this inside other generics, since we
@@ -139,5 +140,13 @@ data XYZ a = XYZ1 deriving stock Generic
 vfgk :: forall cls -> forall a -> VFGK cls a => ()
 vfgk _cls _a = ()
 
+-- You might have to quote k with @type@ if your constructor & type names equal.
+-- (RequiredTypeArguments has different implicit assumptions regarding punning.)
+validateGeneric
+    :: forall cls
+    -> forall k
+    -> (GenericK k, cls (RepK k))
+    => ()
+validateGeneric _cls _k = ()
+
 -- OK, so this kinda works LMAO
---

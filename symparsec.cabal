@@ -29,6 +29,7 @@ source-repository head
 library
   exposed-modules:
       Data.Type.Symbol
+      Raehik.Experiment.GenericK
       Symparsec
       Symparsec.Example.Expr
       Symparsec.Example.Generic

@@ -15,7 +15,7 @@ import Data.Proxy
 -- | A product type with field names prefixed with the type name (often done to
 --   avoid clobbering existing definitions).
 data Person = Person
-  { personName :: String
+  { personName :: Natural -- Symbol
   , personAge :: Natural
   } deriving stock Generic
 
